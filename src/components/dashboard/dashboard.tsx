@@ -6,6 +6,7 @@ import { LeftSidebar } from "./left-sidebar";
 import { CenterPanel } from "./center-panel";
 import { RightPanel } from "./right-panel";
 import { BoroughDetailDialog } from "./borough-detail-dialog";
+import { DemoModeBadge } from "./demo-mode-badge";
 import { useInterventionStream } from "@/lib/hooks/use-intervention-stream";
 
 export function Dashboard() {
@@ -32,6 +33,7 @@ export function Dashboard() {
         gridTemplateRows: "minmax(0, 1fr)",
       }}
     >
+      <DemoModeBadge />
       <LeftSidebar
         city={city}
         onCityChange={(c) => {

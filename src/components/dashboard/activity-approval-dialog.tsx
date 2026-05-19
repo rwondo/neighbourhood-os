@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { approvalForActivity, resolveDemoSnapshot } from "@/lib/demo-data";
 import type {
   Channel,
   CityKey,
@@ -170,6 +171,23 @@ export function ActivityApprovalDialog({
     if (!activity) return;
     setSubmitting(true);
     setError(null);
+
+    // Demo-mode fast path: bypass /api/activities/approve entirely and return
+    // a preset approval result so the live pitch never depends on Ideogram or
+    // Pipeboard MCP being reachable.
+    const demoSnapshot = resolveDemoSnapshot(borough, city);
+    if (demoSnapshot) {
+      try {
+        await new Promise((r) => setTimeout(r, 1400));
+        const approval = approvalForActivity(demoSnapshot, activity.name);
+        setResult(approval);
+        onApproved(approval);
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     try {
       const includedMessages = messages
         .filter((m) => targetIds.size === 0 || targetIds.has(m.clusterId))

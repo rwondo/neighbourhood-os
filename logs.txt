@@ -1,0 +1,49 @@
+ GET / 200 in 627ms (next.js: 214ms, application-code: 414ms)
+[03:46:16.766] [INFO] [together] Together AI client init  {"orchestratorModel":"moonshotai/Kimi-K2.6","agentModel":"moonshotai/Kimi-K2.6","hasKey":true}
+[03:46:16.836] [INFO] [api:simulate] POST /api/simulate  {"borough":"Hoek van Holland","city":"rotterdam"}
+[03:46:21.866] [INFO] [api:simulate] resolved buurt by borough (worst CDI)  {"borough":"Hoek van Holland","city":"rotterdam","chosen":{"id":"BU05991703","name":"Rijnpoort","buurtCode":"BU05991703","cdi":69.2062}}
+[03:46:21.870] [INFO] [agent:orchestrator] pipeline start  {"buurt":"Rijnpoort","buurtCode":"BU05991703","city":"rotterdam","score":31}
+[03:46:21.872] [INFO] [api:simulate] SSE step s1 active  {"label":"Retrieving Supermemory context"}
+[03:46:21.965] [INFO] [memory] queryNeighbourhood  {"buurtCode":"BU05991703","containerTag":"buurt_BU05991703","state":"populated","query":"demographic profile and risk factors"}
+[03:46:21.967] [INFO] [memory:retriever] search  {"containerTag":"buurt_BU05991703","query":"demographic profile and risk factors","k":4,"graphExpand":true}
+[03:46:23.213] [INFO] [memory] queryNeighbourhood  {"buurtCode":"BU05991703","containerTag":"buurt_BU05991703","state":"populated","query":"past intervention outcomes and attendance"}
+[03:46:23.217] [INFO] [memory:retriever] search  {"containerTag":"buurt_BU05991703","query":"past intervention outcomes and attendance","k":4,"graphExpand":true}
+[03:46:23.241] [DEBUG] [memory:embedder] embed ok  {"count":1,"dims":1536,"ms":1272}
+[03:46:23.610] [DEBUG] [memory:embedder] embed ok  {"count":1,"dims":1536,"ms":386}
+[03:46:24.167] [INFO] [memory:retriever] search result  {"containerTag":"buurt_BU05991703","ms":2200,"rawHits":4,"deduped":4,"vector":4,"lexical":0,"bySource":{"vector":4}}
+[03:46:24.240] [INFO] [memory:retriever] search result  {"containerTag":"buurt_BU05991703","ms":1023,"rawHits":4,"deduped":4,"vector":4,"lexical":0,"bySource":{"vector":4}}
+[03:46:24.241] [INFO] [agent:orchestrator] supermemory hits  {"buurtCode":"BU05991703","profileHits":4,"outcomeHits":4,"sources":["vector","vector","vector","vector","vector","vector","vector","vector"],"ms":2367}
+[03:46:24.245] [INFO] [api:simulate] SSE step s1 completed  {"label":"Retrieving Supermemory context","detail":"8 memory hits"}
+[03:46:24.248] [INFO] [api:simulate] SSE step s2 active  {"label":"Searching local activities on the web"}
+[03:46:24.251] [INFO] [agent:web-search] searching local activities  {"buurt":"Rijnpoort","code":"BU05991703","city":"rotterdam"}
+[03:46:24.254] [INFO] [together] web-search → POST /chat/completions  {"model":"moonshotai/Kimi-K2.6","style":"kimi-k2.6","temperature":1,"maxTokens":4096,"thinking":"disabled","reasoning_effort":null,"userChars":883,"systemChars":524}
+[03:46:50.333] [INFO] [together] web-search ← ok  {"ms":26079,"model":"moonshotai/Kimi-K2.6","finishReason":"length","usage":{"prompt_tokens":369,"total_tokens":4465,"completion_tokens":4096,"prompt_tokens_details":{"cached_tokens":320},"reasoning_tokens":4096},"responseChars":0}
+[03:46:50.336] [ERROR] [together] web-search ← empty content  {"reason":"model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort","usage":{"prompt_tokens":369,"total_tokens":4465,"completion_tokens":4096,"prompt_tokens_details":{"cached_tokens":320},"reasoning_tokens":4096}}
+[03:46:50.346] [ERROR] [together] web-search ← failed  {"ms":26092,"model":"moonshotai/Kimi-K2.6","kind":"Error","message":"model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort"}
+[03:46:50.349] [ERROR] [agent:web-search] web search failed — falling back to template activities
+  Error: model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort
+  Error: model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort
+    at jsonAgentCall (C:\Users\39392\OneDrive\Desktop\neighbourhood-os\.next\dev\server\chunks\[root-of-the-server]__0u-fkff._.js:528:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async searchLocalActivities (C:\Users\39392\OneDrive\Desktop\neighbourhood-os\.next\dev\server\chunks\[root-of-the-server]__0u-fkff._.js:1196:21)
+    at async runOrchestrator (C:\Users\39392\OneDrive\Desktop\neighbourhood-os\.next\dev\server\chunks\[root-of-the-server]__0u-fkff._.js:1543:20)
+    at async C:\Users\39392\OneDrive\Desktop\neighbourhood-os\.next\dev\server\chunks\[root-of-the-server]__0u-fkff._.js:2084:26
+[03:46:50.354] [INFO] [agent:orchestrator] web search result  {"source":"fallback","count":4}
+[03:46:50.356] [INFO] [api:simulate] SSE step s2 skipped  {"label":"Searching local activities on the web","detail":"4 candidates · fallback list"}
+[03:46:50.372] [INFO] [api:simulate] SSE step s3 active  {"label":"Identifying resident clusters"}
+[03:46:50.382] [INFO] [agent:orchestrator] clusters identified  {"count":3,"clusters":[{"id":"cluster_young_adults","profile":"Young adults 18–35","channel":"tiktok","size":2036},{"id":"cluster_elderly","profile":"Elderly 65+, low digital literacy","channel":"leaflet","size":1909},{"id":"cluster_general","profile":"Mixed adult residents","channel":"whatsapp","size":840}]}
+[03:46:50.387] [INFO] [api:simulate] SSE step s3 completed  {"label":"Identifying resident clusters","detail":"Young adults 18–35 · Elderly 65+ · Mixed adult residents"}
+[03:46:50.391] [INFO] [api:simulate] SSE step s4 active  {"label":"Generating bespoke intervention strategy"}
+[03:46:50.399] [INFO] [together] strategy-gen → POST /chat/completions  {"model":"moonshotai/Kimi-K2.6","style":"kimi-k2.6","temperature":1,"maxTokens":4096,"thinking":"disabled","reasoning_effort":null,"userChars":4703,"systemChars":737}
+[03:47:24.734] [INFO] [together] strategy-gen ← ok  {"ms":34335,"model":"moonshotai/Kimi-K2.6","finishReason":"length","usage":{"prompt_tokens":1597,"total_tokens":5693,"completion_tokens":4096,"prompt_tokens_details":{"cached_tokens":1536},"reasoning_tokens":4096},"responseChars":0}
+[03:47:24.738] [ERROR] [together] strategy-gen ← empty content  {"reason":"model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort","usage":{"prompt_tokens":1597,"total_tokens":5693,"completion_tokens":4096,"prompt_tokens_details":{"cached_tokens":1536},"reasoning_tokens":4096}}
+[03:47:24.747] [ERROR] [together] strategy-gen ← failed  {"ms":34348,"model":"moonshotai/Kimi-K2.6","kind":"Error","message":"model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort"}
+[03:47:24.750] [ERROR] [agent:orchestrator] strategy generation failed — using deterministic fallback  {"message":"model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort"}
+[03:47:24.753] [INFO] [api:simulate] SSE step s4 skipped  {"label":"Generating bespoke intervention strategy","detail":"LLM unavailable — using deterministic fallback (model returned empty body and hit max_tokens=4096 — likely consumed budget on hidden reasoning; raise maxTokens or lower reasoning_effort)"}
+[03:47:24.763] [INFO] [api:simulate] SSE step s5 active  {"label":"Personalising messages per cluster"}
+[03:47:24.781] [INFO] [agent:personalisation] personalising cluster  {"cluster":"cluster_young_adults","channel":"tiktok","activity":"Schaakmiddag — Rijnpoort","buurt":"Rijnpoort"}
+[03:47:24.783] [INFO] [together] personalise:cluster_young_adults → POST /chat/completions  {"model":"moonshotai/Kimi-K2.6","style":"kimi-k2.6","temperature":1,"maxTokens":4096,"thinking":"disabled","reasoning_effort":null,"userChars":911,"systemChars":557}
+[03:47:24.787] [INFO] [agent:personalisation] personalising cluster  {"cluster":"cluster_elderly","channel":"leaflet","activity":"Wandelgroep Rijnpoort","buurt":"Rijnpoort"}
+[03:47:24.796] [INFO] [together] personalise:cluster_elderly → POST /chat/completions  {"model":"moonshotai/Kimi-K2.6","style":"kimi-k2.6","temperature":1,"maxTokens":4096,"thinking":"disabled","reasoning_effort":null,"userChars":938,"systemChars":557}
+[03:47:24.800] [INFO] [agent:personalisation] personalising cluster  {"cluster":"cluster_general","channel":"whatsapp","activity":"Buurtkookworkshop","buurt":"Rijnpoort"}
+[03:47:24.803] [INFO] [together] personalise:cluster_general → POST /chat/completions  {"model":"moonshotai/Kimi-K2.6","style":"kimi-k2.6","temperature":1,"maxTokens":4096,"thinking":"disabled","reasoning_effort":null,"userChars":897,"systemChars":557}

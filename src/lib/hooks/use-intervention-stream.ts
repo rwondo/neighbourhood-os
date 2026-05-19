@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
+import { resolveDemoSnapshot } from "@/lib/demo-data";
+import type { DemoSnapshot } from "@/lib/demo-data";
 import type {
   AgentTraceEvent,
   CityKey,
@@ -118,6 +120,23 @@ export function useInterventionStream() {
 
       const setters = { setSteps, setStrategy, setMessages, setInfo, setError };
 
+      // Demo-mode fast path: if `?demo=1` (or `?demo=<borough>`) is in the URL
+      // and the target borough has a registered snapshot, replay it with
+      // realistic per-step delays instead of hitting /api/simulate. This makes
+      // the whole pipeline deterministic and offline-able for the live pitch.
+      const demoBorough = "borough" in target ? target.borough : null;
+      const demoCity = "city" in target ? target.city : null;
+      const snapshot: DemoSnapshot | null = resolveDemoSnapshot(demoBorough, demoCity);
+      if (snapshot) {
+        try {
+          await replaySnapshot(snapshot, controller.signal, runIdRef, myRunId, setters);
+        } finally {
+          clearTimeout(wallClock);
+          if (runIdRef.current === myRunId) setRunning(false);
+        }
+        return;
+      }
+
       try {
         const res = await fetch("/api/simulate", {
           method: "POST",
@@ -186,4 +205,47 @@ export function useInterventionStream() {
   );
 
   return { steps, messages, strategy, info, error, running, start, reset };
+}
+
+async function replaySnapshot(
+  snapshot: DemoSnapshot,
+  signal: AbortSignal,
+  runIdRef: React.RefObject<number>,
+  myRunId: number,
+  setters: {
+    setSteps: React.Dispatch<React.SetStateAction<TraceStep[]>>;
+    setStrategy: React.Dispatch<React.SetStateAction<InterventionStrategy | null>>;
+    setMessages: React.Dispatch<React.SetStateAction<ClusterMessage[]>>;
+    setInfo: React.Dispatch<React.SetStateAction<Record<string, string | number>>>;
+    setError: React.Dispatch<React.SetStateAction<string | null>>;
+  },
+): Promise<void> {
+  for (const step of snapshot.stream) {
+    if (signal.aborted || runIdRef.current !== myRunId) return;
+    await sleepAbortable(step.delayMs, signal);
+    if (signal.aborted || runIdRef.current !== myRunId) return;
+    // `done` events are emitted by the real backend at end-of-stream and are
+    // ignored by the reducer; preserve the same behaviour here.
+    if (step.event.type === "done") continue;
+    applyEventToFrame(step.event, setters);
+  }
+}
+
+function sleepAbortable(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+    const t = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(t);
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
