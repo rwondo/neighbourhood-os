@@ -1,0 +1,160 @@
+Use a Connection Desert Index (CDI). The goal is not to predict “who is lonely,” but to identify neighbourhoods where the built environment + demographics + access to activities make social connection harder.
+
+Your unit should be buurt or wijk level for Rotterdam, Den Haag, and Amsterdam.
+
+Core idea
+
+For each neighbourhood:
+
+Connection Desert Index = Vulnerability Risk + Access Barriers − Social Infrastructure
+
+Higher score = more likely to be a “connection desert.”
+
+CDI_i = 0.4V_i + 0.35A_i - 0.25S_i
+
+Where:
+
+V_i = demographic vulnerability score
+A_i = accessibility barrier score
+S_i = social infrastructure score
+i = neighbourhood
+
+A higher CDI_i means the neighbourhood should be prioritized.
+
+Step 1: Normalize every variable
+
+Because your variables have different units, convert everything to a 0–100 score.
+
+Use min-max normalization:
+
+X'_i = 100 × (X_i - min(X)) / (max(X) - min(X))
+
+Example: if elderly share ranges from 5% to 30%, a neighbourhood with 20% elderly residents gets:
+
+100 × (20 - 5) / (30 - 5) = 60
+
+So the elderly-risk score is 60/100.
+
+For “good” variables, like number of libraries or cafés, reverse the interpretation when calculating risk. More social infrastructure should reduce the final CDI.
+
+Step 2: Build the vulnerability score
+
+This measures whether the population has characteristics associated with higher risk of social isolation.
+
+A simple formula:
+
+V_i = 0.35E_i + 0.30H_i + 0.20T_i + 0.15M_i
+
+Where:
+
+E_i = share of residents aged 65+
+H_i = share of single-person households
+T_i = housing turnover / recent movers
+M_i = migrant or non-Dutch-background share, used carefully as a language/accessibility barrier, not as “risk by ethnicity”
+
+For a student-heavy version, add student density:
+
+V_i = 0.25E_i + 0.25H_i + 0.20T_i + 0.15M_i + 0.15ST_i
+
+Where ST_i is student density. This helps detect areas with international students or transient student populations.
+
+Step 3: Build the accessibility barrier score
+
+This captures how difficult it is to reach places where connection can happen.
+
+A_i = 0.35PT_i + 0.30W_i + 0.20D_i + 0.15R_i
+
+Where:
+
+PT_i = poor public transport access
+W_i = poor walkability
+D_i = average distance to nearest community centre/library/cultural space
+R_i = rain/cold/seasonality penalty, especially relevant if outdoor social infrastructure is high but indoor places are low
+
+For transport access, calculate something like:
+
+PT_i = 100 - normalized number of transit stops within 500m
+
+So if an area has many nearby stops, the barrier score is low.
+
+For distance:
+
+D_i = normalized average distance to nearest social facility
+
+Longer distance = higher barrier.
+
+Step 4: Build the social infrastructure score
+
+This measures how many low-pressure connection opportunities exist nearby.
+
+S_i = 0.30C_i + 0.25L_i + 0.20P_i + 0.15B_i + 0.10EV_i
+
+Where:
+
+C_i = cafés, community centres, sports clubs, cultural venues
+L_i = libraries and municipal/community facilities
+P_i = parks and green spaces
+B_i = benches and informal public sitting areas
+EV_i = number of relevant events nearby
+
+Important: weight free or low-cost spaces more than commercial spaces. A café is useful, but a library or community centre is more inclusive.
+
+So you can create weighted infrastructure points:
+
+S_i = 3(community centres) + 3(libraries) + 2(parks) + 1(cafés) + 1(benches) + 2(free events)
+
+Then normalize the final S_i to 0–100.
+
+Final formula for your prototype
+
+Use this:
+
+CDI_i = 0.40V_i + 0.35A_i + 0.25(100 - S_i)
+
+This version is easier to explain because all three components increase loneliness risk:
+
+high vulnerability increases CDI
+poor accessibility increases CDI
+lack of social infrastructure increases CDI
+
+So:
+
+100 - S_i
+
+means “social infrastructure shortage.”
+
+Example interpretation
+
+Suppose a neighbourhood has:
+
+Vulnerability score = 75
+Accessibility barrier score = 60
+Social infrastructure score = 30
+
+Then:
+
+CDI = 0.40(75) + 0.35(60) + 0.25(100 - 30)
+
+CDI = 30 + 21 + 17.5 = 68.5
+
+So that neighbourhood gets a Connection Desert Index of 68.5/100, meaning it is a high-priority area.
+
+Classification
+
+Use simple categories for the map:
+
+CDI score	Label	Colour
+0–30	Low connection risk	Green
+30–50	Moderate risk	Yellow
+50–70	High risk	Orange
+70–100	Severe connection desert	Red
+
+This makes the output easy for judges and municipalities to understand.
+
+Add a “why this area?” explanation
+
+For each neighbourhood, your AI should produce an explanation like:
+
+“This neighbourhood scores high because it has a high share of single-person households and elderly residents, weak public transport access, and few free indoor meeting spaces within 15 minutes. Recommended interventions: weekly library coffee table, mobile community van, and volunteer walking group.”
+
+This is what makes the model feel intelligent, not just mathematical.
