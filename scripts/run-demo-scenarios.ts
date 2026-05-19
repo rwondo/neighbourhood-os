@@ -19,7 +19,10 @@ async function main() {
     const log: AgentTraceEvent[] = [];
     const emit = (e: AgentTraceEvent) => log.push(e);
     console.log(`[demo] running ${buurt.name}`);
-    const strategy = await runOrchestrator(buurt as unknown as BuurtRecord, emit);
+    const { strategy, clusters, activities } = await runOrchestrator(
+      buurt as unknown as BuurtRecord,
+      emit,
+    );
     const interventionId = `int_demo_${buurt.buurtCode}`;
     await db
       .insert(interventions)
@@ -37,8 +40,8 @@ async function main() {
         target: interventions.id,
         set: { strategy, weeks: strategy.weeks },
       });
-    for (const cluster of strategy.clusters) {
-      const activity = strategy.activities[0];
+    for (const cluster of clusters) {
+      const activity = activities[0];
       const msg = await personaliseCluster({ cluster, activity, neighbourhood: buurt as unknown as BuurtRecord }).catch(() => null);
       if (!msg) continue;
       const id = `cmsg_demo_${buurt.buurtCode}_${cluster.id}`;

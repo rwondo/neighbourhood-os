@@ -2,12 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import type { CityKey } from "@/lib/types";
-import { CITY_BY_KEY } from "@/lib/mock-data";
 import { Logo } from "./logo";
 import { CityTabs } from "./city-tabs";
 import { ScoreBadge } from "./score-badge";
-import { ChannelBadge } from "./channel-icon";
 import { useBoroughs } from "@/lib/hooks/use-boroughs";
+import { useRecentInterventions } from "@/lib/hooks/use-recent-interventions";
 
 const RISK_DOT: Record<"low" | "moderate" | "high" | "severe", string> = {
   severe: "bg-risk-red ring-2 ring-risk-red/20",
@@ -15,6 +14,19 @@ const RISK_DOT: Record<"low" | "moderate" | "high" | "severe", string> = {
   moderate: "bg-risk-amber ring-2 ring-risk-amber/20",
   low: "bg-risk-green ring-2 ring-risk-green/20",
 };
+
+function relativeTime(iso: string): string {
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return iso.slice(0, 10);
+  const diff = Date.now() - then;
+  const min = Math.round(diff / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const days = Math.round(hr / 24);
+  return `${days}d ago`;
+}
 
 export function LeftSidebar({
   city,
@@ -25,9 +37,9 @@ export function LeftSidebar({
   onCityChange: (c: CityKey) => void;
   onSelect: (selection: { id: string; name: string }) => void;
 }) {
-  const profile = CITY_BY_KEY[city];
   const { ordered, loading } = useBoroughs(city);
-  // Sidebar shows priority boroughs — top half by CDI (severe + high quartiles).
+  const { interventions, loading: interventionsLoading } = useRecentInterventions(city);
+
   const totalBoroughs = ordered.length;
   const priorityCount = Math.max(1, Math.round(totalBoroughs / 2));
   const alerts = ordered.slice(0, priorityCount);
@@ -54,6 +66,10 @@ export function LeftSidebar({
         <div className="scroll-fade-y scrollbar-thin min-h-0 flex-1 overflow-y-auto px-3 pb-2">
           {loading ? (
             <p className="px-1 text-[11px] text-muted-foreground">Loading boroughs…</p>
+          ) : alerts.length === 0 ? (
+            <p className="px-1 text-[11px] text-muted-foreground">
+              No borough aggregates yet. Seed data, then refresh.
+            </p>
           ) : (
             <ul className="space-y-1.5">
               {alerts.map((a) => (
@@ -96,38 +112,50 @@ export function LeftSidebar({
         <div className="shrink-0 border-t border-hairline">
           <div className="flex items-center justify-between gap-2 px-4 pb-2 pt-3">
             <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              Active Campaigns
+              Recent Interventions
             </h2>
             <span className="font-mono tabular text-[10px] text-muted-foreground">
-              {profile.campaigns.length}
+              {interventions.length}
             </span>
           </div>
-          <ul className="space-y-1 px-3 pb-3">
-            {profile.campaigns.map((c) => (
-              <li key={c.id}>
-                <div className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1.5 transition-colors hover:bg-muted/30">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className={cn(
-                        "size-1.5 shrink-0 rounded-full",
-                        c.status === "active"
-                          ? "bg-risk-green ring-2 ring-risk-green/20"
-                          : "bg-risk-amber ring-2 ring-risk-amber/20"
-                      )}
-                    />
-                    <span className="truncate text-[12px] font-medium tracking-tight text-foreground">
-                      {c.neighbourhood}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {c.channels.map((ch) => (
-                      <ChannelBadge key={ch} channel={ch} size="xs" />
-                    ))}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="scrollbar-thin max-h-[180px] overflow-y-auto px-3 pb-3">
+            {interventionsLoading ? (
+              <p className="px-1 text-[11px] text-muted-foreground">Loading…</p>
+            ) : interventions.length === 0 ? (
+              <p className="px-1 text-[11px] leading-snug text-muted-foreground">
+                No interventions generated yet for this city.
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {interventions.map((i) => (
+                  <li key={i.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect({ id: i.borough, name: i.borough })}
+                      className="group flex w-full items-center justify-between gap-2 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-muted/30"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-[12px] font-medium tracking-tight text-foreground">
+                            {i.borough}
+                          </span>
+                          <span className="font-mono tabular text-[9.5px] text-muted-foreground/80">
+                            +{i.predictedScoreGain}
+                          </span>
+                        </div>
+                        <p className="truncate text-[10px] text-muted-foreground/80">
+                          {i.buurtName} · {relativeTime(i.createdAt)}
+                        </p>
+                      </div>
+                      <span className="font-mono tabular text-[10px] text-muted-foreground">
+                        {i.predictedConnections}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </aside>

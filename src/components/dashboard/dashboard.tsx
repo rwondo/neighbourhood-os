@@ -5,17 +5,32 @@ import type { CityKey } from "@/lib/types";
 import { LeftSidebar } from "./left-sidebar";
 import { CenterPanel } from "./center-panel";
 import { RightPanel } from "./right-panel";
+import { BoroughDetailDialog } from "./borough-detail-dialog";
 import { useInterventionStream } from "@/lib/hooks/use-intervention-stream";
 
 export function Dashboard() {
   const [city, setCity] = useState<CityKey>("rotterdam");
-  const [selected, setSelected] = useState<{ id: string; name: string } | null>(null);
+  const [selected, setSelected] = useState<{ borough: string; city: CityKey } | null>(null);
+  const [detailBorough, setDetailBorough] = useState<string | null>(null);
   const stream = useInterventionStream();
+
+  const runForBorough = (borough: string, cityKey: CityKey) => {
+    setSelected({ borough, city: cityKey });
+    stream.start({ borough, city: cityKey });
+  };
 
   return (
     <div
-      className="grid h-screen w-screen overflow-hidden bg-canvas"
-      style={{ gridTemplateColumns: "22% 50% 28%" }}
+      className="grid w-screen overflow-hidden bg-canvas"
+      style={{
+        height: "100vh",
+        gridTemplateColumns: "22% 50% 28%",
+        // minmax(0, 1fr) is the standard fix for grid children that want to
+        // shrink and trigger their own overflow-y-auto. Without this, the row
+        // track grows to fit content and the right panel extends past the
+        // viewport with no scroll.
+        gridTemplateRows: "minmax(0, 1fr)",
+      }}
     >
       <LeftSidebar
         city={city}
@@ -24,19 +39,33 @@ export function Dashboard() {
           setSelected(null);
           stream.reset();
         }}
-        onSelect={(n) => {
-          setSelected({ id: n.id, name: n.name });
-          stream.start(n.id);
-        }}
+        onSelect={(n) => runForBorough(n.id, city)}
       />
-      <CenterPanel city={city} onCityChange={setCity} />
+      <CenterPanel
+        city={city}
+        onCityChange={setCity}
+        onBoroughClick={(b) => setDetailBorough(b)}
+      />
       <RightPanel
-        selectedName={selected?.name ?? null}
+        city={city}
+        selectedName={selected?.borough ?? null}
+        focusedBuurt={typeof stream.info.buurt === "string" ? stream.info.buurt : null}
         running={stream.running}
         steps={stream.steps}
         messages={stream.messages}
         strategy={stream.strategy}
-        onRun={() => selected && stream.start(selected.id)}
+        error={stream.error}
+      />
+      <BoroughDetailDialog
+        open={detailBorough !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailBorough(null);
+        }}
+        borough={detailBorough}
+        city={city}
+        onGenerate={() => {
+          if (detailBorough) runForBorough(detailBorough, city);
+        }}
       />
     </div>
   );

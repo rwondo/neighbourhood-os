@@ -6,6 +6,11 @@ import type { BoroughAggregate, CityKey } from "@/lib/types";
 
 const VALID_CITIES = ["rotterdam", "amsterdam", "denhaag"] as const;
 
+// Boroughs we exclude from CDI aggregates because they don't represent a
+// residential population (port, industrial zones, etc.). The map still renders
+// their polygons in grey via the legacy fallback in `mock-data.ts`.
+const INDUSTRIAL_BOROUGHS = ["Haven"];
+
 type AggregateRow = {
   borough: string | null;
   buurt_count: string | number;
@@ -55,6 +60,7 @@ export async function GET(req: NextRequest) {
       WHERE city = ${city}
         AND borough IS NOT NULL
         AND borough <> ''
+        AND borough NOT IN ${sql.raw(`('${INDUSTRIAL_BOROUGHS.join("','")}')`)}
       GROUP BY borough
       ORDER BY AVG(COALESCE(cdi, 0)) DESC
     `)) as unknown as AggregateRow[];

@@ -12,13 +12,23 @@ export function AgentTrace({ steps }: { steps: TraceStep[] }) {
               "relative z-10 mt-[3px] flex size-[15px] shrink-0 items-center justify-center rounded-full border bg-panel",
               step.status === "completed" && "border-teal bg-teal",
               step.status === "active" && "border-teal animate-pulse",
-              step.status === "pending" && "border-hairline-strong"
+              step.status === "skipped" && "border-risk-amber bg-risk-amber-soft",
+              step.status === "error" && "border-risk-red bg-risk-red-soft",
+              step.status === "pending" && "border-hairline-strong",
             )}
           >
             <span
               className={cn(
                 "size-1 rounded-full",
-                step.status === "completed" ? "bg-white" : step.status === "active" ? "bg-teal" : "bg-hairline-strong"
+                step.status === "completed"
+                  ? "bg-white"
+                  : step.status === "active"
+                    ? "bg-teal"
+                    : step.status === "skipped"
+                      ? "bg-risk-amber"
+                      : step.status === "error"
+                        ? "bg-risk-red"
+                        : "bg-hairline-strong",
               )}
             />
           </span>
@@ -30,12 +40,21 @@ export function AgentTrace({ steps }: { steps: TraceStep[] }) {
               <span
                 className={cn(
                   "text-[11.5px] leading-tight",
-                  step.status === "active" ? "text-foreground" : "text-muted-foreground"
+                  step.status === "active" || step.status === "completed"
+                    ? "text-foreground"
+                    : step.status === "error"
+                      ? "text-risk-red"
+                      : "text-muted-foreground",
                 )}
               >
                 {step.label}
               </span>
             </div>
+            {step.detail ? (
+              <p className="mt-0.5 truncate text-[10.5px] leading-snug text-muted-foreground/80">
+                {step.detail}
+              </p>
+            ) : null}
           </div>
         </li>
       ))}

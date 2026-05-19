@@ -1,10 +1,18 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { IMPACT_PROJECTION } from "@/lib/mock-data";
 
 export function ImpactChart({ weeks }: { weeks: { week: number; score: number }[] | null }) {
-  const data = weeks && weeks.length ? weeks : IMPACT_PROJECTION;
+  if (!weeks || weeks.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-hairline-strong bg-panel p-3">
+        <p className="text-[11px] leading-snug text-muted-foreground">
+          Run the orchestrator on a borough to project the 6-week social-fabric trajectory.
+        </p>
+      </div>
+    );
+  }
+  const data = weeks;
   const start = data[0];
   const end = data[data.length - 1];
   return (

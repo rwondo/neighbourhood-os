@@ -10,6 +10,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx scripts/seed-neighbourhoods.ts",
+    "seed:memory": "tsx scripts/seed-memory.ts",
     "demo": "tsx scripts/run-demo-scenarios.ts",
     "populate:osm": "tsx scripts/populate-osm.ts",
     "populate:transit": "tsx scripts/populate-transit.ts",

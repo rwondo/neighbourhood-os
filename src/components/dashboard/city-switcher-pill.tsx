@@ -98,8 +98,8 @@ export function CitySwitcherPill({
                   />
                   <span className="font-medium tracking-tight">{c.label}</span>
                 </span>
-                <span className="font-mono text-[10px] tabular text-muted-foreground">
-                  {c.totalBuurten}
+                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+                  {c.shortLabel}
                 </span>
               </button>
             );

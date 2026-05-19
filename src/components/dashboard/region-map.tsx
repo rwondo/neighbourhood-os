@@ -66,7 +66,13 @@ const WATER_STYLE = {
   pressed: { outline: "none", pointerEvents: "none" as const },
 } as const;
 
-export function RegionMap({ city }: { city: CityKey }) {
+export function RegionMap({
+  city,
+  onBoroughClick,
+}: {
+  city: CityKey;
+  onBoroughClick?: (borough: string) => void;
+}) {
   const profile = CITY_BY_KEY[city];
   const { scores: boroughScores, loading: boroughsLoading } = useBoroughs(city);
   const [boroughs, setBoroughs] = useState<FeatureCollection<Geometry, BoroughProps> | null>(null);
@@ -214,6 +220,7 @@ export function RegionMap({ city }: { city: CityKey }) {
               onHoverEnter={onHoverEnter}
               onHoverMove={onHoverMove}
               onHoverLeave={onHoverLeave}
+              onClick={onBoroughClick}
             />
             <WaterLayer collection={cityWater!} />
           </ZoomableGroup>
@@ -310,6 +317,7 @@ type BoroughCallbacks = {
   ) => void;
   onHoverMove: (clientX: number, clientY: number) => void;
   onHoverLeave: () => void;
+  onClick?: (borough: string) => void;
 };
 
 const BoroughLayer = memo(function BoroughLayer({
@@ -319,6 +327,7 @@ const BoroughLayer = memo(function BoroughLayer({
   onHoverEnter,
   onHoverMove,
   onHoverLeave,
+  onClick,
 }: {
   collection: FeatureCollection<Geometry, BoroughProps>;
   city: CityKey;
@@ -336,6 +345,7 @@ const BoroughLayer = memo(function BoroughLayer({
             onHoverEnter={onHoverEnter}
             onHoverMove={onHoverMove}
             onHoverLeave={onHoverLeave}
+            onClick={onClick}
           />
         ))
       }
@@ -350,6 +360,7 @@ const BoroughPath = memo(function BoroughPath({
   onHoverEnter,
   onHoverMove,
   onHoverLeave,
+  onClick,
 }: {
   geography: Feature<Geometry, BoroughProps>;
   city: CityKey;
@@ -357,6 +368,7 @@ const BoroughPath = memo(function BoroughPath({
   onHoverEnter: BoroughCallbacks["onHoverEnter"];
   onHoverMove: BoroughCallbacks["onHoverMove"];
   onHoverLeave: BoroughCallbacks["onHoverLeave"];
+  onClick?: BoroughCallbacks["onClick"];
 }) {
   const { borough } = geography.properties;
   const live = boroughScores.get(borough);
@@ -405,6 +417,11 @@ const BoroughPath = memo(function BoroughPath({
     [onHoverMove, isIndustrial]
   );
 
+  const handleClick = useCallback(() => {
+    if (isIndustrial || !onClick) return;
+    onClick(borough);
+  }, [onClick, borough, isIndustrial]);
+
   return (
     <Geography
       geography={geography}
@@ -414,6 +431,7 @@ const BoroughPath = memo(function BoroughPath({
       onMouseEnter={handleEnter}
       onMouseMove={handleMove}
       onMouseLeave={onHoverLeave}
+      onClick={handleClick}
       style={styles}
     />
   );
@@ -475,6 +493,10 @@ function NeighborLegend() {
       <div className="flex items-center gap-1.5">
         <span className="size-2 rounded-[2px] border border-hairline-strong bg-[oklch(0.93_0.005_220)]" />
         <span>Neighbouring gemeente</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="size-2 rounded-[2px] bg-[oklch(0.88_0.012_220)]" />
+        <span>Industrial · no CDI</span>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="size-2 rounded-[2px] bg-[oklch(0.88_0.05_220)]" />

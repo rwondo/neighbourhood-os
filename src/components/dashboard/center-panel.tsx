@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { CITY_BY_KEY, type CityKey } from "@/lib/mock-data";
+import { useBoroughs } from "@/lib/hooks/use-boroughs";
 import { CitySwitcherPill } from "./city-switcher-pill";
 import { RegionMap } from "./region-map";
 import { StatCard } from "./stat-card";
@@ -8,11 +10,33 @@ import { StatCard } from "./stat-card";
 export function CenterPanel({
   city,
   onCityChange,
+  onBoroughClick,
 }: {
   city: CityKey;
   onCityChange: (c: CityKey) => void;
+  onBoroughClick?: (borough: string) => void;
 }) {
   const profile = CITY_BY_KEY[city];
+  const { ordered: boroughs, loading } = useBoroughs(city);
+
+  const stats = useMemo(() => {
+    if (!boroughs.length) {
+      return { total: 0, severe: 0, high: 0, medianCdi: 0 };
+    }
+    const severe = boroughs.filter((b) => b.riskLevel === "severe").length;
+    const high = boroughs.filter((b) => b.riskLevel === "high").length;
+    const sorted = [...boroughs].map((b) => b.avgCdi).sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    const median =
+      sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    return {
+      total: boroughs.length,
+      severe,
+      high,
+      medianCdi: Math.round(median),
+    };
+  }, [boroughs]);
+
   return (
     <section className="flex h-full min-w-0 flex-col bg-canvas">
       <header className="relative z-20 flex shrink-0 items-center justify-between gap-4 border-b border-hairline bg-panel/60 px-5 py-3 backdrop-blur">
@@ -22,7 +46,7 @@ export function CenterPanel({
           <h1 className="truncate text-[13px] font-semibold tracking-tight text-foreground">
             <span className="text-foreground">{profile.label}</span>
             <span className="mx-1.5 text-muted-foreground/60">—</span>
-            <span className="font-normal text-muted-foreground">Social Fabric Map</span>
+            <span className="font-normal text-muted-foreground">Connection Desert Index</span>
           </h1>
         </div>
         <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -40,40 +64,42 @@ export function CenterPanel({
           </span>
           <span className="text-muted-foreground/40">·</span>
           <span className="font-mono normal-case tracking-normal">
-            <span className="text-foreground/70 tabular">{profile.totalBuurten}</span>{" "}
-            <span>buurten monitored</span>
+            <span className="text-foreground/70 tabular">
+              {loading ? "…" : stats.total}
+            </span>{" "}
+            <span>boroughs scored</span>
           </span>
         </div>
       </header>
 
       <div className="min-h-0 flex-1 px-5 pb-3 pt-4">
-        <RegionMap city={city} />
+        <RegionMap city={city} onBoroughClick={onBoroughClick} />
       </div>
 
       <div className="shrink-0 px-5 pb-4">
         <div className="grid grid-cols-4 gap-2.5">
           <StatCard
-            label="Buurten Monitored"
-            value={profile.stats.buurtenMonitored}
-            hint="total"
+            label="Boroughs Scored"
+            value={loading ? "—" : stats.total}
+            hint="this city"
           />
           <StatCard
-            label="At Risk"
-            value={profile.stats.atRisk}
-            tone="amber"
-            hint="60–79"
-          />
-          <StatCard
-            label="High Isolation"
-            value={profile.stats.highIsolation}
+            label="Severe CDI"
+            value={loading ? "—" : stats.severe}
             tone="red"
-            hint="<60"
+            hint="70–100"
           />
           <StatCard
-            label="Active Interventions"
-            value={profile.stats.activeInterventions}
+            label="High CDI"
+            value={loading ? "—" : stats.high}
+            tone="amber"
+            hint="50–70"
+          />
+          <StatCard
+            label="Median CDI"
+            value={loading ? "—" : stats.medianCdi}
             tone="teal"
-            hint="now"
+            hint="0 best · 100 worst"
           />
         </div>
       </div>

@@ -26,6 +26,8 @@
   --color-channel-tiktok: var(--channel-tiktok);
   --color-channel-sms: var(--channel-sms);
   --color-channel-leaflet: var(--channel-leaflet);
+  --color-channel-facebook: var(--channel-facebook);
+  --color-channel-instagram: var(--channel-instagram);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -108,6 +110,8 @@
   --channel-tiktok: oklch(0.15 0 0);
   --channel-sms: oklch(0.55 0.01 250);
   --channel-leaflet: oklch(0.68 0.16 65);
+  --channel-facebook: oklch(0.5 0.18 260);
+  --channel-instagram: oklch(0.6 0.2 20);
 
   --chart-1: oklch(0.855 0.138 181.071);
   --chart-2: oklch(0.704 0.14 182.503);

@@ -1,5 +1,22 @@
 import { jsonAgentCall } from "@/lib/together";
+import { makeLogger } from "@/lib/log";
 import type { Entity, Edge } from "./types";
+
+const log = makeLogger("memory:extractor");
+
+// Hard timeout so a hung extractor call cannot pause ingestion for a minute.
+// Graph extraction is a "nice to have" enrichment — failure degrades retrieval
+// from vector+lexical+graph to vector+lexical only, which is still useful.
+const EXTRACTOR_TIMEOUT_MS = 15_000;
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, rj) =>
+      setTimeout(() => rj(new Error(`extractor timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
 
 const SYSTEM = `You are a knowledge-graph extractor for a Dutch municipal cohesion platform.
 You read a short memory document about a neighbourhood (demographic profile, intervention outcome, or activity note) and emit structured entities and edges.
@@ -32,10 +49,26 @@ export async function extractGraph({
   memoryId: string;
   content: string;
 }): Promise<{ entities: Entity[]; edges: Edge[] }> {
-  const out = await jsonAgentCall<ExtractorOut>({
-    system: SYSTEM,
-    user: `Container: ${containerTag}\nMemory id: ${memoryId}\nContent:\n${content}`,
-  }).catch(() => ({ entities: [], edges: [] }) as ExtractorOut);
+  // Reasoning is disabled here: V4-Pro at reasoning_effort=high spends the
+  // entire 2048-token budget on hidden reasoning and returns an empty body
+  // (seen in logs.txt:5 — finish_reason=length, responseChars=0, ms=53k).
+  // Entity/edge extraction is a flat structured task — no reasoning needed.
+  const out = await withTimeout(
+    jsonAgentCall<ExtractorOut>({
+      system: SYSTEM,
+      user: `Container: ${containerTag}\nMemory id: ${memoryId}\nContent:\n${content}`,
+      reasoning: null,
+      maxTokens: 4096,
+      label: "graph-extract",
+    }),
+    EXTRACTOR_TIMEOUT_MS,
+  ).catch((err) => {
+    log.warn("extraction skipped — graph expansion will be unavailable for this doc", {
+      memoryId,
+      reason: err instanceof Error ? err.message : String(err),
+    });
+    return { entities: [], edges: [] } as ExtractorOut;
+  });
 
   const entities: Entity[] = (out.entities ?? []).map((e) => ({
     id: `ent_${containerTag}_${e.type}_${slug(e.normalized_name)}`,

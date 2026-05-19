@@ -33,6 +33,20 @@ const META: Record<
     fg: "text-channel-leaflet",
     ring: "ring-channel-leaflet/20",
   },
+  facebook: {
+    label: "Facebook",
+    short: "FB",
+    bg: "bg-channel-facebook/12",
+    fg: "text-channel-facebook",
+    ring: "ring-channel-facebook/20",
+  },
+  instagram: {
+    label: "Instagram",
+    short: "IG",
+    bg: "bg-channel-instagram/12",
+    fg: "text-channel-instagram",
+    ring: "ring-channel-instagram/20",
+  },
 };
 
 export function ChannelBadge({

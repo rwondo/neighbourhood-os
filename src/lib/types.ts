@@ -24,6 +24,7 @@ export type RecommendedActivity = {
   whenISO: string;
   source?: string;
   url?: string;
+  targetClusters?: string[];
 };
 
 export type InterventionStrategy = {
@@ -46,9 +47,12 @@ export type ClusterMessage = {
   pdfUrl?: string;
 };
 
+export type StepStatus = "active" | "completed" | "skipped" | "error";
+
 export type AgentTraceEvent =
-  | { type: "step"; id: string; label: string; status: "active" | "completed" }
+  | { type: "step"; id: string; label: string; status: StepStatus; detail?: string }
   | { type: "log"; message: string }
+  | { type: "info"; key: string; value: string | number }
   | { type: "strategy"; strategy: InterventionStrategy }
   | { type: "cluster_message"; message: ClusterMessage }
   | { type: "done" }
@@ -59,6 +63,7 @@ export type BuurtRecord = {
   city: CityKey;
   buurtCode: string;
   name: string;
+  borough: string | null;
   centroidLng: number;
   centroidLat: number;
   pctLivingAlone: number;

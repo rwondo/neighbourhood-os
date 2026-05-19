@@ -1,7 +1,10 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { makeLogger } from "@/lib/log";
 import { embedTexts, vectorLiteral } from "./embedder";
 import type { RetrievalHit } from "./types";
+
+const log = makeLogger("memory:retriever");
 
 type SearchOptions = {
   containerTag: string;
@@ -11,8 +14,15 @@ type SearchOptions = {
 };
 
 export async function searchMemory({ containerTag, query, k = 4, graphExpand = true }: SearchOptions): Promise<RetrievalHit[]> {
-  const [embedding] = await embedTexts([query]).catch(() => [[] as number[]]);
+  const started = Date.now();
+  log.info("search", { containerTag, query: query.slice(0, 80), k, graphExpand });
+
+  const [embedding] = await embedTexts([query]).catch((err) => {
+    log.warn("embed failed — vector search will be skipped", err);
+    return [[] as number[]];
+  });
   const vec = embedding.length ? vectorLiteral(embedding) : null;
+  if (!vec) log.warn("no embedding produced — running lexical+graph only", { containerTag });
 
   type VectorRow = { content: string; memory_id: string; container_tag: string; distance: number };
   type LexicalRow = { content: string; memory_id: string; container_tag: string; sim: number };
@@ -63,7 +73,20 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
     }
   }
 
-  return dedupe(hits).slice(0, k * 2);
+  const deduped = dedupe(hits).slice(0, k * 2);
+  log.info("search result", {
+    containerTag,
+    ms: Date.now() - started,
+    rawHits: hits.length,
+    deduped: deduped.length,
+    vector: vectorHits.length,
+    lexical: lexicalHits.length,
+    bySource: deduped.reduce<Record<string, number>>((acc, h) => {
+      acc[h.source] = (acc[h.source] ?? 0) + 1;
+      return acc;
+    }, {}),
+  });
+  return deduped;
 }
 
 function dedupe(hits: RetrievalHit[]): RetrievalHit[] {
