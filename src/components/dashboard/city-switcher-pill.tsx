@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { CITIES, type CityKey } from "@/lib/mock-data";
 
@@ -13,6 +13,7 @@ export function CitySwitcherPill({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -41,69 +42,138 @@ export function CitySwitcherPill({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={listboxId}
         className={cn(
-          "group inline-flex items-center gap-1.5 rounded-full border border-hairline bg-panel py-1 pl-2.5 pr-1.5 text-[11.5px] font-medium text-foreground transition-all",
-          "hover:border-hairline-strong hover:bg-muted/30",
-          open && "border-hairline-strong bg-muted/30"
+          // Floating pill. Backdrop-blur is purposeful for legibility over the
+          // coloured borough map underneath; not decorative.
+          "group inline-flex items-center gap-2 rounded-full border bg-panel/85 py-[5px] pl-2 pr-1.5 text-[11.5px] font-medium tracking-tight text-foreground backdrop-blur-md transition-all duration-150 ease-out",
+          "shadow-[0_1px_0_oklch(1_0_0_/_0.65)_inset,0_4px_14px_-6px_oklch(0.18_0.01_250_/_0.18),0_1px_3px_-1px_oklch(0.18_0.01_250_/_0.08)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/40",
+          open
+            ? "border-hairline-strong bg-panel/95"
+            : "border-hairline hover:border-hairline-strong hover:bg-panel/95"
         )}
       >
-        <span className="size-1.5 rounded-full bg-teal" />
-        <span className="tracking-tight">{current.label}</span>
-        <svg
-          viewBox="0 0 12 12"
-          className={cn(
-            "size-3 text-muted-foreground transition-transform",
-            open && "rotate-180"
-          )}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        {/* Active indicator: pulsing teal dot signals the "live" city. */}
+        <span className="relative flex size-2 items-center justify-center">
+          <span
+            aria-hidden="true"
+            className="absolute inline-flex size-full animate-ping rounded-full bg-teal/35 opacity-70"
+          />
+          <span className="relative inline-flex size-1.5 rounded-full bg-teal" />
+        </span>
+        <span className="flex items-baseline gap-1.5">
+          <span className="font-semibold tracking-tight">{current.label}</span>
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground/80">
+            {current.shortLabel}
+          </span>
+        </span>
+        <span
           aria-hidden="true"
+          className="ml-0.5 flex size-4 items-center justify-center rounded-full bg-canvas/60 text-muted-foreground ring-1 ring-inset ring-hairline transition-colors group-hover:text-foreground"
         >
-          <path d="M3 4.5L6 7.5L9 4.5" />
-        </svg>
+          <svg
+            viewBox="0 0 12 12"
+            className={cn(
+              "size-2.5 transition-transform duration-150 ease-out",
+              open && "rotate-180"
+            )}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 4.75L6 7.75L9 4.75" />
+          </svg>
+        </span>
       </button>
       {open ? (
         <div
+          id={listboxId}
           role="listbox"
-          className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-hairline bg-panel shadow-[0_6px_24px_-8px_rgb(0_0_0_/_0.10),0_2px_6px_-2px_rgb(0_0_0_/_0.06)]"
+          aria-label="Cities"
+          className={cn(
+            "absolute left-0 top-[calc(100%+8px)] z-50 min-w-[208px] overflow-hidden rounded-xl border border-hairline bg-panel/95 backdrop-blur-md",
+            "shadow-[0_12px_36px_-12px_oklch(0.18_0.01_250_/_0.18),0_2px_8px_-2px_oklch(0.18_0.01_250_/_0.08)]"
+          )}
         >
-          {CITIES.map((c) => {
-            const selected = c.key === value;
-            return (
-              <button
-                key={c.key}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                onClick={() => {
-                  onChange(c.key);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex w-full items-center justify-between gap-3 px-2.5 py-1.5 text-left text-[12px] transition-colors",
-                  selected
-                    ? "bg-teal-soft text-foreground"
-                    : "text-foreground hover:bg-muted/40"
-                )}
-              >
-                <span className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 border-b border-hairline bg-canvas/40 px-2.5 py-1.5">
+            <span className="text-[9.5px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+              Switch municipality
+            </span>
+            <span className="font-mono text-[9.5px] tabular text-muted-foreground/60">
+              {CITIES.length}
+            </span>
+          </div>
+          <div className="p-1">
+            {CITIES.map((c) => {
+              const selected = c.key === value;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(c.key);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors duration-100 ease-out",
+                    "focus-visible:outline-none focus-visible:bg-muted/40",
+                    selected
+                      ? "bg-teal-soft/70"
+                      : "hover:bg-muted/40"
+                  )}
+                >
                   <span
+                    aria-hidden="true"
                     className={cn(
-                      "size-1.5 rounded-full",
-                      selected ? "bg-teal" : "bg-hairline-strong"
+                      "flex size-4 shrink-0 items-center justify-center rounded-full transition-colors",
+                      selected
+                        ? "bg-teal text-primary-foreground"
+                        : "bg-canvas/60 ring-1 ring-inset ring-hairline"
                     )}
-                  />
-                  <span className="font-medium tracking-tight">{c.label}</span>
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
-                  {c.shortLabel}
-                </span>
-              </button>
-            );
-          })}
+                  >
+                    {selected ? (
+                      <svg
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-2.5"
+                      >
+                        <path d="M2.75 6.25L5 8.5L9.25 3.75" />
+                      </svg>
+                    ) : (
+                      <span className="size-1 rounded-full bg-muted-foreground/40" />
+                    )}
+                  </span>
+                  <span className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
+                    <span
+                      className={cn(
+                        "text-[12px] font-semibold tracking-tight",
+                        selected ? "text-foreground" : "text-foreground/85"
+                      )}
+                    >
+                      {c.label}
+                    </span>
+                    <span
+                      className={cn(
+                        "font-mono text-[9.5px] uppercase tracking-[0.1em] tabular",
+                        selected ? "text-teal" : "text-muted-foreground/60"
+                      )}
+                    >
+                      {c.shortLabel}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : null}
     </div>

@@ -9,7 +9,7 @@ import {
 } from "./activity-approval-dialog";
 import { ChannelPreviews } from "./channel-previews";
 import { CampaignMetricsPanel } from "./campaign-metrics-panel";
-import { ImpactChart } from "./impact-chart";
+import { cn } from "@/lib/utils";
 import type { TraceStep } from "@/lib/hooks/use-intervention-stream";
 import type {
   Channel,
@@ -133,36 +133,85 @@ export function RightPanel({
   const showFocused =
     focusedBuurt && focusedBuurt.toLowerCase() !== (selectedName ?? "").toLowerCase();
 
+  // Visual hierarchy: while running, Agent Trace is the star. Once a strategy
+  // arrives with creatives approved, Channel Previews takes the spotlight.
+  const hasApprovals = approvedKeys.size > 0;
+  const traceIsStar = running && !hasApprovals;
+  const previewsAreStar = hasApprovals;
+
   return (
     <aside className="flex h-full min-h-0 w-full flex-col border-l border-hairline bg-panel">
+      {/* Header bar replaces the redundant Context section */}
+      <ContextHeader
+        selectedName={selectedName}
+        focusedBuurt={focusedBuurt}
+        showFocused={Boolean(showFocused)}
+        running={running}
+        error={error}
+        strategy={strategy}
+      />
+
       <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <Section
-          title="Context"
-          meta={selectedName ? (showFocused ? `${focusedBuurt} · worst CDI` : selectedName) : ""}
-        >
-          <ContextBlock
-            selectedName={selectedName}
-            focusedBuurt={focusedBuurt}
-            running={running}
-            error={error}
-            strategy={strategy}
-          />
-        </Section>
-
-        <Section title="Agent Trace" meta={`${completedSteps}/${steps.length} steps`}>
-          <AgentTrace steps={steps} />
-        </Section>
-
-        <Section
-          title="Activities"
+        {/* AGENT TRACE — elevated visually while orchestrator is running */}
+        <SectionHeader
+          title="Agent Trace"
+          tone={traceIsStar ? "live" : "muted"}
           meta={
-            activities.length > 0
-              ? `${approvedKeys.size}/${activities.length} approved`
-              : running
-                ? "loading…"
-                : ""
+            running ? (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] tabular text-teal">
+                <span className="size-1.5 animate-blink-soft rounded-full bg-teal" />
+                {completedSteps}/{steps.length} steps
+              </span>
+            ) : (
+              <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+                {completedSteps}/{steps.length} steps
+              </span>
+            )
           }
+        />
+        <div
+          className={cn(
+            "px-4 transition-colors",
+            traceIsStar
+              ? "border-b border-hairline-strong bg-teal-soft/30 py-4"
+              : "border-b border-hairline py-3",
+          )}
         >
+          <AgentTrace steps={steps} />
+        </div>
+
+        {/* ACTIVITIES */}
+        <SectionHeader
+          title="Recommended Activities"
+          tone="default"
+          meta={
+            activities.length > 0 ? (
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] tabular">
+                <span
+                  className={cn(
+                    "tabular",
+                    approvedKeys.size === activities.length
+                      ? "text-risk-green"
+                      : approvedKeys.size > 0
+                        ? "text-teal"
+                        : "text-muted-foreground/70",
+                  )}
+                >
+                  {approvedKeys.size}
+                </span>
+                <span className="text-muted-foreground/50">/</span>
+                <span className="text-muted-foreground/70">{activities.length}</span>
+                <span className="ml-0.5 text-muted-foreground/60">approved</span>
+              </span>
+            ) : running ? (
+              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                <span className="size-1 animate-blink-soft rounded-full bg-muted-foreground/60" />
+                generating
+              </span>
+            ) : null
+          }
+        />
+        <div className="border-b border-hairline px-4 py-3">
           <ActivitiesList
             activities={activities}
             clusters={clusters}
@@ -170,32 +219,48 @@ export function RightPanel({
             approvedKeys={approvedKeys}
             onSelect={(activity, key) => setSelected({ activity, key })}
           />
-        </Section>
+        </div>
 
-        <Section title="Channel Previews" meta={`${messages.length || 0} variants`}>
+        {/* CHANNEL PREVIEWS — becomes the star post-approval */}
+        <SectionHeader
+          title="Channel Previews"
+          tone={previewsAreStar ? "spotlight" : "default"}
+          meta={
+            messages.length > 0 ? (
+              <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+                {messages.length} {messages.length === 1 ? "variant" : "variants"}
+              </span>
+            ) : null
+          }
+        />
+        <div
+          className={cn(
+            "border-b border-hairline px-4",
+            previewsAreStar ? "bg-canvas/40 py-4" : "py-3",
+          )}
+        >
           <ChannelPreviews
             messages={messages}
             running={running}
             enrichments={enrichments}
           />
-        </Section>
+        </div>
 
-        <Section
-          title="Impact Projection"
+        {/* CAMPAIGN METRICS — peer weight, distinct treatment */}
+        <SectionHeader
+          title="Campaign Metrics"
+          tone="default"
           meta={
-            strategy
-              ? `+${strategy.predictedScoreGain} pts · 6w`
-              : running
-                ? "computing…"
-                : ""
+            selectedName ? (
+              <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+                projected · 6w
+              </span>
+            ) : null
           }
-        >
-          <ImpactChart weeks={strategy?.weeks ?? null} />
-        </Section>
-
-        <Section title="Campaign Metrics" meta={selectedName ?? ""}>
+        />
+        <div className="px-4 py-3">
           <CampaignMetricsPanel borough={selectedName} />
-        </Section>
+        </div>
       </div>
 
       <ActivityApprovalDialog
@@ -215,92 +280,203 @@ export function RightPanel({
   );
 }
 
-function ContextBlock({
+function ContextHeader({
   selectedName,
   focusedBuurt,
+  showFocused,
   running,
   error,
   strategy,
 }: {
   selectedName: string | null;
   focusedBuurt: string | null;
+  showFocused: boolean;
   running: boolean;
   error: string | null;
   strategy: InterventionStrategy | null;
 }) {
   if (!selectedName) {
     return (
-      <p className="text-[11px] leading-relaxed text-muted-foreground">
-        Click a borough on the map or open one from the sidebar to start. The dashboard will
-        stream the orchestrator trace, demographic-matched activities, and per-cluster previews
-        live.
-      </p>
+      <div className="shrink-0 border-b border-hairline bg-canvas/30 px-4 py-3">
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-hairline bg-panel text-muted-foreground/70">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="size-3" aria-hidden="true">
+              <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 3 4.5 6.5 4.5 6.5s4.5-3.5 4.5-6.5c0-2.5-2-4.5-4.5-4.5z" />
+              <circle cx="7" cy="6" r="1.5" />
+            </svg>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11.5px] font-medium leading-tight text-foreground">
+              Select a borough to begin
+            </p>
+            <p className="mt-0.5 text-[10.5px] leading-snug text-muted-foreground">
+              Click the map or pick from the sidebar. The orchestrator trace, demographic clusters,
+              and per-cluster previews stream live.
+            </p>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  const showFocused =
-    focusedBuurt && focusedBuurt.toLowerCase() !== selectedName.toLowerCase();
+  // Status badge tone
+  const statusTone: "live" | "ready" | "idle" | "error" = error
+    ? "error"
+    : running
+      ? "live"
+      : strategy
+        ? "ready"
+        : "idle";
+
+  const statusDot =
+    statusTone === "live"
+      ? "bg-teal animate-blink-soft"
+      : statusTone === "ready"
+        ? "bg-risk-green"
+        : statusTone === "error"
+          ? "bg-risk-red"
+          : "bg-muted-foreground/40";
+
+  const statusLabel =
+    statusTone === "live"
+      ? "Streaming"
+      : statusTone === "ready"
+        ? "Ready"
+        : statusTone === "error"
+          ? "Error"
+          : "Idle";
 
   return (
-    <div className="rounded-lg border border-hairline bg-panel p-2.5">
-      <div className="flex items-baseline justify-between gap-2">
-        <h3 className="truncate text-[12.5px] font-semibold tracking-tight text-foreground">
-          {selectedName}
-        </h3>
+    <div className="shrink-0 border-b border-hairline bg-canvas/40 px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={cn(
+                "inline-flex h-4 items-center gap-1 rounded-full bg-panel px-1.5 text-[9px] font-semibold uppercase tracking-[0.06em] ring-1 ring-inset",
+                statusTone === "live" && "text-teal ring-teal/25",
+                statusTone === "ready" && "text-risk-green ring-risk-green/25",
+                statusTone === "error" && "text-risk-red ring-risk-red/25",
+                statusTone === "idle" && "text-muted-foreground ring-hairline-strong",
+              )}
+            >
+              <span className={cn("size-1 rounded-full", statusDot)} />
+              {statusLabel}
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+              Intervention
+            </span>
+          </div>
+          <h2 className="mt-1 truncate text-[15px] font-semibold tracking-tight text-foreground">
+            {selectedName}
+          </h2>
+          {showFocused && focusedBuurt ? (
+            <p className="mt-0.5 truncate text-[10.5px] leading-snug text-muted-foreground">
+              Worst-CDI buurt: <span className="text-foreground/80">{focusedBuurt}</span>
+            </p>
+          ) : null}
+        </div>
+
         {strategy ? (
-          <span className="shrink-0 font-mono tabular text-[10px] text-muted-foreground">
-            +{strategy.predictedScoreGain} pts · 6w
-          </span>
+          <div className="flex shrink-0 items-stretch gap-0 overflow-hidden rounded-md border border-hairline bg-panel">
+            <Stat
+              value={`+${strategy.predictedScoreGain}`}
+              unit="pts"
+              label="CDI 6w"
+              accent="green"
+            />
+            <span className="w-px self-stretch bg-hairline" aria-hidden="true" />
+            <Stat
+              value={`€${Math.round(strategy.costPerConnectionEUR)}`}
+              label="per conn."
+              accent="default"
+            />
+          </div>
         ) : null}
       </div>
-      <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-        {showFocused ? (
-          <>
-            Worst-CDI buurt:{" "}
-            <span className="text-foreground/80">{focusedBuurt}</span>
-          </>
-        ) : running ? (
-          "Streaming orchestrator output…"
-        ) : strategy ? (
-          <>
-            {strategy.activities.length} activities ·{" "}
-            {strategy.clusters.length} clusters · €
-            <span className="text-foreground/80">
-              {Math.round(strategy.costPerConnectionEUR)}
-            </span>{" "}
-            per connection
-          </>
-        ) : (
-          "Awaiting orchestrator…"
-        )}
-      </p>
+
       {error ? (
-        <p className="mt-1 text-[10.5px] text-risk-red">Error: {error}</p>
+        <p className="mt-2 flex items-start gap-1.5 rounded-md border border-risk-red/25 bg-risk-red-soft/40 px-2 py-1 text-[10.5px] leading-snug text-risk-red">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" className="mt-0.5 size-2.5 shrink-0" aria-hidden="true">
+            <circle cx="6" cy="6" r="4.5" />
+            <path d="M6 4v2.5" />
+            <path d="M6 8v.01" />
+          </svg>
+          <span>{error}</span>
+        </p>
       ) : null}
     </div>
   );
 }
 
-function Section({
-  title,
-  meta,
-  children,
+function Stat({
+  value,
+  unit,
+  label,
+  accent,
 }: {
-  title: string;
-  meta?: string;
-  children: React.ReactNode;
+  value: string;
+  unit?: string;
+  label: string;
+  accent: "default" | "green";
 }) {
   return (
-    <section className="border-b border-hairline px-4 py-3 last:border-b-0">
-      <header className="mb-2 flex items-center justify-between">
-        <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="flex flex-col items-end justify-center gap-0.5 px-2.5 py-1">
+      <div className="flex items-baseline gap-0.5 leading-none">
+        <span
+          className={cn(
+            "font-mono tabular text-[14px] font-semibold",
+            accent === "green" ? "text-risk-green" : "text-foreground",
+          )}
+        >
+          {value}
+        </span>
+        {unit ? (
+          <span className="font-mono text-[9px] tabular text-muted-foreground/80">
+            {unit}
+          </span>
+        ) : null}
+      </div>
+      <span className="text-[9px] uppercase tracking-[0.07em] text-muted-foreground/70">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  meta,
+  tone,
+}: {
+  title: string;
+  meta?: React.ReactNode;
+  tone: "default" | "live" | "spotlight" | "muted";
+}) {
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-[1] flex items-center justify-between gap-2 px-4 py-1.5",
+        tone === "live" && "border-b border-teal/25 bg-teal-soft/50 backdrop-blur-[2px]",
+        tone === "spotlight" && "border-b border-hairline bg-canvas/60",
+        tone === "default" && "border-b border-hairline bg-panel/80 backdrop-blur-[1px]",
+        tone === "muted" && "border-b border-hairline bg-panel/80",
+      )}
+    >
+      <div className="flex items-center gap-1.5">
+        {tone === "live" ? (
+          <span className="size-1 shrink-0 animate-blink-soft rounded-full bg-teal" />
+        ) : null}
+        <h2
+          className={cn(
+            "text-[10.5px] font-semibold uppercase tracking-[0.09em]",
+            tone === "live" ? "text-teal" : "text-muted-foreground",
+          )}
+        >
           {title}
         </h2>
-        {meta ? (
-          <span className="font-mono text-[10px] tabular text-muted-foreground/70">{meta}</span>
-        ) : null}
-      </header>
-      {children}
-    </section>
+      </div>
+      {meta ?? null}
+    </header>
   );
 }

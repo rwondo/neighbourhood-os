@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cdiColorHex } from "@/lib/cdi-colors";
 import { cn } from "@/lib/utils";
 
 const RISK_LABEL: Record<NonNullable<BoroughDetailResponse["riskLevel"]>, string> = {
@@ -25,6 +24,33 @@ const CITY_LABEL: Record<CityKey, string> = {
   rotterdam: "Rotterdam",
   amsterdam: "Amsterdam",
   denhaag: "The Hague",
+};
+
+// Tailwind palette tied to the CDI color tokens (Tailwind, not inline).
+const CDI_TONE: Record<
+  NonNullable<BoroughDetailResponse["color"]>,
+  { wrap: string; text: string; accent: string }
+> = {
+  green: {
+    wrap: "bg-risk-green-soft ring-risk-green/25",
+    text: "text-risk-green",
+    accent: "bg-risk-green",
+  },
+  yellow: {
+    wrap: "bg-risk-amber-soft ring-risk-amber/25",
+    text: "text-risk-amber",
+    accent: "bg-risk-amber",
+  },
+  orange: {
+    wrap: "bg-risk-amber-soft ring-risk-amber/30",
+    text: "text-risk-amber",
+    accent: "bg-risk-amber",
+  },
+  red: {
+    wrap: "bg-risk-red-soft ring-risk-red/25",
+    text: "text-risk-red",
+    accent: "bg-risk-red",
+  },
 };
 
 export function BoroughDetailDialog({
@@ -47,7 +73,6 @@ export function BoroughDetailDialog({
   useEffect(() => {
     if (!open || !borough) return;
     let cancelled = false;
-    // Fetch-and-reset pattern: clear stale data before the new fetch resolves.
     /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(null);
@@ -77,7 +102,7 @@ export function BoroughDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[640px]">
+      <DialogContent className="max-w-[680px]">
         <DialogHeader>
           <div className="min-w-0 flex-1">
             <DialogTitle className="truncate">{borough ?? "Borough"}</DialogTitle>
@@ -92,7 +117,7 @@ export function BoroughDetailDialog({
                   buurten
                 </>
               ) : loading ? (
-                "Loading borough breakdown…"
+                "Loading borough breakdown..."
               ) : error ? (
                 <span className="text-risk-red">Error: {error}</span>
               ) : (
@@ -107,7 +132,7 @@ export function BoroughDetailDialog({
           {loading ? <Skeleton /> : null}
           {!loading && data ? (
             <div className="space-y-4">
-              <ComponentsBlock components={data.components} />
+              <ComponentsBlock components={data.components} color={data.color} />
               <DemographicsBlock demographics={data.demographics} />
               <InfrastructureBlock infrastructure={data.infrastructure} />
               <TopBuurtenBlock buurten={data.topBuurten} />
@@ -126,28 +151,34 @@ export function BoroughDetailDialog({
           ) : null}
         </div>
 
-        <DialogFooter>
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="inline-flex h-7 items-center justify-center rounded-md border border-hairline bg-panel px-3 text-[11.5px] font-medium text-foreground/80 transition-colors hover:bg-muted/40"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            disabled={!data}
-            onClick={() => {
-              onGenerate();
-              onOpenChange(false);
-            }}
-            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md bg-teal px-3 text-[11.5px] font-medium text-primary-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <svg viewBox="0 0 12 12" fill="currentColor" className="size-2.5" aria-hidden="true">
-              <path d="M6 1l1.5 3.5L11 6l-3.5 1.5L6 11l-1.5-3.5L1 6l3.5-1.5L6 1z" />
-            </svg>
-            Generate Intervention
-          </button>
+        <DialogFooter className="border-t border-hairline bg-canvas/40">
+          <div className="flex w-full items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="inline-flex h-8 items-center justify-center rounded-md border border-hairline bg-panel px-3 text-[11.5px] font-medium text-foreground/80 transition-colors hover:bg-muted/40"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              disabled={!data}
+              onClick={() => {
+                onGenerate();
+                onOpenChange(false);
+              }}
+              className="group inline-flex h-8 items-center justify-center gap-2 rounded-md bg-teal px-4 text-[12px] font-semibold tracking-tight text-primary-foreground shadow-[0_1px_0_oklch(0.4_0.08_186)] transition-all hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            >
+              <svg viewBox="0 0 12 12" fill="currentColor" className="size-3 transition-transform group-hover:rotate-12" aria-hidden="true">
+                <path d="M6 1l1.5 3.5L11 6l-3.5 1.5L6 11l-1.5-3.5L1 6l3.5-1.5L6 1z" />
+              </svg>
+              Generate Intervention
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+                <path d="M3 6h6" />
+                <path d="M6.5 3.5L9 6L6.5 8.5" />
+              </svg>
+            </button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -163,19 +194,24 @@ function CdiPill({
   risk: BoroughDetailResponse["riskLevel"];
   color: BoroughDetailResponse["color"];
 }) {
+  const tone = CDI_TONE[color];
   return (
     <div
-      className="flex shrink-0 flex-col items-end gap-0.5 rounded-md px-2.5 py-1 ring-1 ring-inset"
-      style={{
-        backgroundColor: `${cdiColorHex(color)}15`,
-        color: cdiColorHex(color),
-      }}
+      className={cn(
+        "flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1 ring-1 ring-inset",
+        tone.wrap,
+      )}
     >
       <div className="flex items-baseline gap-1">
-        <span className="font-mono tabular text-[16px] font-semibold leading-none">{cdi}</span>
-        <span className="text-[9.5px] uppercase tracking-[0.06em] opacity-80">CDI</span>
+        <span className={cn("font-mono tabular text-[17px] font-semibold leading-none", tone.text)}>
+          {cdi}
+        </span>
+        <span className={cn("text-[9.5px] uppercase tracking-[0.06em] opacity-75", tone.text)}>
+          CDI
+        </span>
       </div>
-      <span className="text-[9.5px] uppercase tracking-[0.08em] opacity-90">
+      <span className="h-3 w-px bg-current opacity-30" />
+      <span className={cn("text-[9.5px] font-semibold uppercase tracking-[0.08em]", tone.text)}>
         {RISK_LABEL[risk]}
       </span>
     </div>
@@ -190,47 +226,200 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ComponentsBlock({ components }: { components: BoroughDetailResponse["components"] }) {
+// V/A/S components — asymmetric layout to escape the homework-grid trap.
+// V dominates (40% weight), A is medium (35%), S is the inverse counterweight (25%).
+function ComponentsBlock({
+  components,
+  color,
+}: {
+  components: BoroughDetailResponse["components"];
+  color: BoroughDetailResponse["color"];
+}) {
+  const dominantTone = CDI_TONE[color];
   return (
     <section>
-      <SectionLabel>Why this CDI · components</SectionLabel>
-      <div className="grid grid-cols-3 gap-2">
-        <StatTile
-          accent="red"
-          weight="40%"
+      <SectionLabel>Why this CDI · component breakdown</SectionLabel>
+      <div className="grid grid-cols-5 gap-2">
+        {/* V — dominant tile (3/5 width) */}
+        <ComponentTileLarge
           name="V — Vulnerability"
           value={components.V}
+          weight="40%"
+          accent="red"
           sub={
             <>
-              E <Mono>{components.E}</Mono> · H <Mono>{components.H}</Mono>
+              <SubChip label="65+ share" value={components.E} />
+              <SubChip label="living alone" value={components.H} />
             </>
           }
-          hint="age 65+ share · living-alone share"
+          dominantTone={dominantTone}
         />
-        <StatTile
-          accent="amber"
-          weight="35%"
-          name="A — Access Barrier"
+        {/* A — medium tile (2/5 width) */}
+        <ComponentTileSmall
+          name="A — Access"
           value={components.A}
-          sub={
+          weight="35%"
+          accent="amber"
+          inline={
             <>
-              PT <Mono>{components.PT}</Mono> · W <Mono>{components.W}</Mono> · D{" "}
-              <Mono>{components.D}</Mono> · R <Mono>{components.R}</Mono>
+              <MicroStat label="PT" value={components.PT} />
+              <MicroStat label="W" value={components.W} />
+              <MicroStat label="D" value={components.D} />
+              <MicroStat label="R" value={components.R} />
             </>
           }
-          hint="transit · walkability · distance · weather"
         />
-        <StatTile
-          accent="green"
-          weight="25%"
-          name="S — Social Infra"
-          value={components.S}
-          sub={<span className="opacity-70">higher = denser amenities</span>}
-          hint="weighted POI density 0–100"
-          inverse
-        />
+        {/* S — inverse counterweight (full row, distinctive treatment) */}
+        <ComponentBarS value={components.S} weight="25%" />
       </div>
     </section>
+  );
+}
+
+function ComponentTileLarge({
+  name,
+  value,
+  weight,
+  accent,
+  sub,
+  dominantTone,
+}: {
+  name: string;
+  value: number;
+  weight: string;
+  accent: "red" | "amber";
+  sub: React.ReactNode;
+  dominantTone: { wrap: string; text: string; accent: string };
+}) {
+  const tone =
+    accent === "red"
+      ? "border-risk-red/25 bg-risk-red-soft/40"
+      : "border-risk-amber/25 bg-risk-amber-soft/40";
+  return (
+    <div className={cn("col-span-3 rounded-md border px-3 py-2.5", tone)}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-foreground">
+          {name}
+        </span>
+        <span className="font-mono text-[9.5px] uppercase text-muted-foreground/80">
+          weight {weight}
+        </span>
+      </div>
+      <div className="mt-2 flex items-baseline gap-1.5">
+        <span className="font-mono tabular text-[28px] font-semibold leading-none text-foreground">
+          {value.toFixed(1)}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+          / 100
+        </span>
+        <div className="ml-auto h-1.5 w-20 overflow-hidden rounded-full bg-panel ring-1 ring-inset ring-hairline">
+          <div
+            className={cn("h-full rounded-full", dominantTone.accent)}
+            style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+          />
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">{sub}</div>
+    </div>
+  );
+}
+
+function ComponentTileSmall({
+  name,
+  value,
+  weight,
+  accent,
+  inline,
+}: {
+  name: string;
+  value: number;
+  weight: string;
+  accent: "amber";
+  inline: React.ReactNode;
+}) {
+  const tone =
+    accent === "amber"
+      ? "border-risk-amber/25 bg-risk-amber-soft/40"
+      : "border-risk-red/25 bg-risk-red-soft/40";
+  return (
+    <div className={cn("col-span-2 rounded-md border px-2.5 py-2", tone)}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-foreground">
+          {name}
+        </span>
+        <span className="font-mono text-[9.5px] uppercase text-muted-foreground/80">
+          {weight}
+        </span>
+      </div>
+      <div className="mt-1.5 font-mono tabular text-[22px] font-semibold leading-none text-foreground">
+        {value.toFixed(1)}
+        <span className="ml-1 text-[9.5px] uppercase tracking-[0.07em] text-muted-foreground/70">
+          / 100
+        </span>
+      </div>
+      <div className="mt-2 grid grid-cols-4 gap-1">{inline}</div>
+    </div>
+  );
+}
+
+function ComponentBarS({ value, weight }: { value: number; weight: string }) {
+  return (
+    <div className="col-span-5 rounded-md border border-risk-green/25 bg-risk-green-soft/40 px-3 py-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-foreground">
+            S — Social Infra
+          </span>
+          <span className="font-mono text-[9.5px] uppercase text-muted-foreground/80">
+            {weight} · inverse
+          </span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="font-mono tabular text-[20px] font-semibold leading-none text-foreground">
+            {value.toFixed(1)}
+          </span>
+          <span className="text-[9.5px] uppercase tracking-[0.07em] text-muted-foreground/70">
+            / 100
+          </span>
+        </div>
+      </div>
+      <div className="mt-1.5 relative h-1.5 overflow-hidden rounded-full bg-panel ring-1 ring-inset ring-hairline">
+        <div
+          className="h-full rounded-full bg-risk-green"
+          style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+        />
+      </div>
+      <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
+        Weighted POI density across libraries, community centres, parks, cafés, sports, benches,
+        transit. Higher = denser amenity network.
+      </p>
+    </div>
+  );
+}
+
+function SubChip({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-hairline bg-panel/80 px-1.5 py-0.5">
+      <span className="text-[9.5px] uppercase tracking-[0.05em] text-muted-foreground/80">
+        {label}
+      </span>
+      <span className="font-mono tabular text-[11px] font-medium text-foreground">
+        {value.toFixed(1)}
+      </span>
+    </span>
+  );
+}
+
+function MicroStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-sm bg-panel/70 px-1 py-0.5 text-center ring-1 ring-inset ring-hairline">
+      <div className="font-mono text-[8.5px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
+      <div className="font-mono tabular text-[10.5px] font-semibold text-foreground">
+        {value.toFixed(0)}
+      </div>
+    </div>
   );
 }
 
@@ -312,51 +501,6 @@ function TopBuurtenBlock({ buurten }: { buurten: BoroughDetailResponse["topBuurt
   );
 }
 
-function StatTile({
-  name,
-  value,
-  sub,
-  hint,
-  weight,
-  accent,
-  inverse,
-}: {
-  name: string;
-  value: number;
-  sub: React.ReactNode;
-  hint: string;
-  weight: string;
-  accent: "red" | "amber" | "green";
-  inverse?: boolean;
-}) {
-  const tone =
-    accent === "red"
-      ? "border-risk-red/25 bg-risk-red-soft/40"
-      : accent === "amber"
-        ? "border-risk-amber/25 bg-risk-amber-soft/40"
-        : "border-risk-green/25 bg-risk-green-soft/40";
-  return (
-    <div className={cn("rounded-md border px-2.5 py-2", tone)}>
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-foreground/80">
-          {name}
-        </span>
-        <span className="font-mono text-[9px] uppercase text-muted-foreground/70">{weight}</span>
-      </div>
-      <div className="mt-1 flex items-baseline gap-1.5">
-        <span className="font-mono tabular text-[20px] font-semibold leading-none text-foreground">
-          {value.toFixed(1)}
-        </span>
-        <span className="text-[9px] uppercase tracking-[0.08em] text-muted-foreground/70">
-          {inverse ? "/ 100" : "/ 100"}
-        </span>
-      </div>
-      <p className="mt-1 truncate text-[10.5px] text-foreground/75">{sub}</p>
-      <p className="mt-0.5 truncate text-[10px] text-muted-foreground/70">{hint}</p>
-    </div>
-  );
-}
-
 function FactCell({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-md border border-hairline bg-panel px-2.5 py-1.5">
@@ -381,17 +525,13 @@ function InfraCell({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Mono({ children }: { children: React.ReactNode }) {
-  return <span className="font-mono tabular text-foreground/75">{children}</span>;
-}
-
 function Skeleton() {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-2">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-[88px] animate-pulse rounded-md border border-hairline bg-muted/30" />
-        ))}
+      <div className="grid grid-cols-5 gap-2">
+        <div className="col-span-3 h-[110px] animate-pulse rounded-md border border-hairline bg-muted/30" />
+        <div className="col-span-2 h-[110px] animate-pulse rounded-md border border-hairline bg-muted/30" />
+        <div className="col-span-5 h-12 animate-pulse rounded-md border border-hairline bg-muted/30" />
       </div>
       <div className="grid grid-cols-3 gap-2">
         {[0, 1, 2, 3, 4, 5].map((i) => (

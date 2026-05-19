@@ -5,7 +5,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -119,26 +118,12 @@ const CROOSWIJK: CampaignMetrics = {
   costPerConnectionEUR: 420,
 };
 
-const TONE_COLORS: Record<Tone, { fg: string; bg: string; dot: string }> = {
-  green: {
-    fg: "text-risk-green",
-    bg: "bg-risk-green-soft/40",
-    dot: "bg-risk-green",
-  },
-  amber: {
-    fg: "text-risk-amber",
-    bg: "bg-risk-amber-soft/50",
-    dot: "bg-risk-amber",
-  },
-  red: { fg: "text-risk-red", bg: "bg-risk-red-soft/40", dot: "bg-risk-red" },
-};
-
 const CHANNEL_HEX: Record<string, string> = {
-  WhatsApp: "oklch(0.65 0.13 150)",
+  WhatsApp: "oklch(0.69 0.16 150)",
   SMS: "oklch(0.62 0.1 220)",
-  Leaflet: "oklch(0.7 0.12 70)",
-  Meta: "oklch(0.55 0.16 250)",
-  TikTok: "oklch(0.65 0.16 320)",
+  Leaflet: "oklch(0.68 0.16 65)",
+  Meta: "oklch(0.5 0.18 260)",
+  TikTok: "oklch(0.6 0.2 20)",
 };
 
 function formatNumber(n: number, unit?: string): string {
@@ -155,7 +140,7 @@ function formatPct(p: number): string {
 const BIJLMER: CampaignMetrics = {
   funnel: [
     { label: "Instagram + TikTok impressions", value: 38_400, tone: "green" },
-    { label: "Ad clicks → opt-in page", value: 1_124, vsPrevious: 0.082, trend: "up", tone: "green" },
+    { label: "Ad clicks to opt-in page", value: 1_124, vsPrevious: 0.082, trend: "up", tone: "green" },
     { label: "WhatsApp opt-ins", value: 612, vsPrevious: 0.31, trend: "up", tone: "green" },
     { label: "WhatsApp reads (EN/NL)", value: 558, vsPrevious: 0.91, trend: "up", tone: "green" },
     { label: "Event RSVPs", value: 188, vsPrevious: 0.52, trend: "up", tone: "amber" },
@@ -268,6 +253,38 @@ function metricsForBorough(borough: string | null): CampaignMetrics | null {
   return syntheticMetrics(borough);
 }
 
+// Municipal baseline cost-per-connection from PRD (current-era programs).
+const BASELINE_EUR = 5_800;
+
+type StageKey = "distribution" | "engagement" | "conversion";
+
+const STAGE_META: Record<
+  StageKey,
+  { label: string; caption: string; accent: string; chip: string; ringChip: string }
+> = {
+  distribution: {
+    label: "Stage 1 · Distribution",
+    caption: "Reach into the buurt",
+    accent: "bg-muted-foreground/40",
+    chip: "text-muted-foreground bg-panel",
+    ringChip: "ring-hairline-strong",
+  },
+  engagement: {
+    label: "Stage 2 · Engagement",
+    caption: "Opt-ins and reads",
+    accent: "bg-teal",
+    chip: "text-teal bg-teal-soft/60",
+    ringChip: "ring-teal/30",
+  },
+  conversion: {
+    label: "Stage 3 · Conversion",
+    caption: "Show-up and return",
+    accent: "bg-risk-green",
+    chip: "text-risk-green bg-risk-green-soft/60",
+    ringChip: "ring-risk-green/30",
+  },
+};
+
 export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
   const [open, setOpen] = useState(true);
   const data = useMemo(() => metricsForBorough(borough), [borough]);
@@ -280,152 +297,395 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
     );
   }
 
+  // Slice the 9-row funnel into 3 narrative stages + the punchline.
+  // Indexes 0..1 distribution, 2..3 engagement, 4..7 conversion, 8 is cost (the punchline).
+  const distribution = data.funnel.slice(0, 2);
+  const engagement = data.funnel.slice(2, 4);
+  const conversion = data.funnel.slice(4, 8);
+  const punchline = data.funnel[8];
+
+  const connectionsTotal = data.weeklyConnections.reduce(
+    (s, w) => s + w.connections,
+    0,
+  );
+  const savingsPct = Math.round((1 - punchline.value / BASELINE_EUR) * 100);
+  const maxOptIns = Math.max(...data.perChannel.map((c) => c.optIns));
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-md border border-hairline bg-panel px-2.5 py-1.5 text-left transition-colors hover:bg-muted/30"
+        aria-expanded={open}
+        className="group flex w-full items-center justify-between gap-2 rounded-md border border-hairline bg-panel px-2.5 py-1.5 text-left ring-1 ring-inset ring-transparent transition-all duration-150 ease-out hover:border-hairline-strong hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-teal/30"
       >
-        <span className="text-[11px] font-semibold tracking-tight text-foreground">
-          Full funnel · {borough}
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm bg-muted/50 text-muted-foreground transition-colors group-hover:bg-teal-soft/60 group-hover:text-teal">
+            <svg
+              viewBox="0 0 10 10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={cn(
+                "size-2.5 transition-transform duration-200 ease-out",
+                open ? "rotate-90" : "rotate-0",
+              )}
+              aria-hidden="true"
+            >
+              <path d="M3.5 2L6.5 5L3.5 8" />
+            </svg>
+          </span>
+          <span className="truncate text-[11px] font-semibold tracking-tight text-foreground">
+            Full funnel
+          </span>
+          <span className="truncate text-[10.5px] text-muted-foreground/80">
+            {borough}
+          </span>
         </span>
-        <span className="font-mono text-[10px] tabular text-muted-foreground">
-          €{data.costPerConnectionEUR}/conn · {open ? "−" : "+"}
+        <span className="inline-flex shrink-0 items-baseline gap-1">
+          <span className="font-mono text-[11px] tabular font-semibold text-risk-green">
+            €{data.costPerConnectionEUR}
+          </span>
+          <span className="text-[9.5px] uppercase tracking-[0.07em] text-muted-foreground/70">
+            / conn
+          </span>
         </span>
       </button>
 
       {open ? (
-        <>
-          <ol className="space-y-1">
-            {data.funnel.map((row) => {
-              const tone = TONE_COLORS[row.tone];
-              return (
-                <li
-                  key={row.label}
-                  className={cn(
-                    "flex items-center gap-2 rounded-md border border-hairline px-2 py-1.5",
-                    tone.bg,
-                  )}
-                >
-                  <span className={cn("size-1.5 shrink-0 rounded-full", tone.dot)} />
-                  <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-foreground/85">
-                    {row.label}
-                  </span>
-                  <span className={cn("shrink-0 font-mono text-[12px] tabular font-medium", tone.fg)}>
-                    {formatNumber(row.value, row.unit)}
-                  </span>
-                  {row.vsPrevious !== undefined ? (
-                    <span
-                      className={cn(
-                        "inline-flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-[10px] tabular",
-                        row.trend === "down" && row.tone === "green"
-                          ? "text-risk-green"
-                          : row.trend === "up"
-                            ? "text-foreground/70"
-                            : "text-muted-foreground",
-                      )}
-                    >
-                      <span aria-hidden>
-                        {row.trend === "up" ? "↑" : row.trend === "down" ? "↓" : "—"}
-                      </span>
-                      {formatPct(row.vsPrevious)}
-                    </span>
-                  ) : (
-                    <span className="w-12 shrink-0" />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+        <div className="space-y-3">
+          {/* STAGE 1 · DISTRIBUTION — single-line emphasis, no rhythm yet */}
+          <StageGroup
+            stage="distribution"
+            rows={distribution}
+            previousValue={null}
+          />
 
-          <div className="rounded-md border border-hairline bg-panel p-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                Connections per week
+          {/* STAGE 2 · ENGAGEMENT — opt-ins start to bloom */}
+          <StageGroup
+            stage="engagement"
+            rows={engagement}
+            previousValue={distribution[distribution.length - 1]?.value ?? null}
+          />
+
+          {/* STAGE 3 · CONVERSION — denser, taller rows; this is where attendance happens */}
+          <StageGroup
+            stage="conversion"
+            rows={conversion}
+            previousValue={engagement[engagement.length - 1]?.value ?? null}
+          />
+
+          {/* PUNCHLINE — pulled OUT of the row list. This is the receipt. */}
+          {punchline ? (
+            <CostPunchline
+              value={punchline.value}
+              baseline={BASELINE_EUR}
+              savingsPct={savingsPct}
+              connections={conversion[conversion.length - 1]?.value ?? 0}
+            />
+          ) : null}
+
+          {/* PAIRED PROOF — connections velocity + opt-ins composition share one frame */}
+          <div className="overflow-hidden rounded-md border border-hairline bg-panel">
+            <div className="flex items-center justify-between border-b border-hairline bg-canvas/40 px-2.5 py-1.5">
+              <h4 className="text-[10px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+                Distribution proof
               </h4>
-              <span className="font-mono text-[10px] tabular text-foreground/70">
-                Σ {data.weeklyConnections.reduce((s, w) => s + w.connections, 0)}
+              <span className="text-[9.5px] uppercase tracking-[0.07em] text-muted-foreground/70">
+                what drove the funnel
               </span>
             </div>
-            <div className="mt-1 h-[88px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data.weeklyConnections}
-                  margin={{ top: 8, right: 4, bottom: 0, left: -22 }}
-                >
-                  <CartesianGrid
-                    stroke="oklch(0.93 0.004 250)"
-                    strokeDasharray="2 3"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="week"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 9, fill: "oklch(0.55 0.01 250)" }}
-                    tickFormatter={(v) => `w${v}`}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    width={28}
-                    tick={{ fontSize: 9, fill: "oklch(0.55 0.01 250)" }}
-                  />
-                  <Bar
-                    dataKey="connections"
-                    radius={[3, 3, 0, 0]}
-                    fill="oklch(0.55 0.105 186)"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
 
-          <div className="rounded-md border border-hairline bg-panel p-2">
-            <h4 className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              Opt-ins by channel
-            </h4>
-            <div className="mt-1 h-[88px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={data.perChannel}
-                  layout="vertical"
-                  margin={{ top: 0, right: 6, bottom: 0, left: 0 }}
-                >
-                  <CartesianGrid
-                    stroke="oklch(0.93 0.004 250)"
-                    strokeDasharray="2 3"
-                    horizontal={false}
-                  />
-                  <XAxis
-                    type="number"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 9, fill: "oklch(0.55 0.01 250)" }}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="channel"
-                    tickLine={false}
-                    axisLine={false}
-                    width={56}
-                    tick={{ fontSize: 9.5, fill: "oklch(0.4 0.01 250)" }}
-                  />
-                  <Bar dataKey="optIns" radius={[0, 3, 3, 0]}>
-                    {data.perChannel.map((entry) => (
-                      <Cell
-                        key={entry.channel}
-                        fill={CHANNEL_HEX[entry.channel] ?? "oklch(0.55 0.105 186)"}
+            <div className="grid grid-cols-2 divide-x divide-hairline">
+              {/* Velocity (vertical) */}
+              <div className="px-2.5 py-2">
+                <div className="flex items-baseline justify-between gap-1">
+                  <span className="text-[10px] font-medium tracking-tight text-foreground/80">
+                    Connections / week
+                  </span>
+                  <span className="inline-flex items-baseline gap-0.5">
+                    <span className="font-mono text-[11px] tabular font-semibold text-risk-green">
+                      {connectionsTotal}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.07em] text-muted-foreground/70">
+                      total
+                    </span>
+                  </span>
+                </div>
+                <div className="mt-1 h-[84px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={data.weeklyConnections}
+                      margin={{ top: 6, right: 4, bottom: 0, left: -24 }}
+                    >
+                      <CartesianGrid
+                        stroke="oklch(0.93 0.004 250)"
+                        strokeDasharray="2 3"
+                        vertical={false}
                       />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                      <XAxis
+                        dataKey="week"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 9, fill: "oklch(0.55 0.01 250)" }}
+                        tickFormatter={(v) => `w${v}`}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        width={28}
+                        tick={{ fontSize: 9, fill: "oklch(0.55 0.01 250)" }}
+                      />
+                      <Bar
+                        dataKey="connections"
+                        radius={[3, 3, 0, 0]}
+                        fill="oklch(0.61 0.13 162)"
+                        isAnimationActive
+                        animationDuration={560}
+                        animationEasing="ease-out"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Composition (horizontal) — bespoke rows so colors lock to channel + breathe */}
+              <div className="px-2.5 py-2">
+                <div className="flex items-baseline justify-between gap-1">
+                  <span className="text-[10px] font-medium tracking-tight text-foreground/80">
+                    Opt-ins by channel
+                  </span>
+                  <span className="font-mono text-[9.5px] tabular text-muted-foreground/70">
+                    {data.perChannel.length} channels
+                  </span>
+                </div>
+                <ul className="mt-1.5 space-y-1">
+                  {data.perChannel.map((row) => {
+                    const pct = (row.optIns / maxOptIns) * 100;
+                    const color =
+                      CHANNEL_HEX[row.channel] ?? "oklch(0.55 0.105 186)";
+                    return (
+                      <li
+                        key={row.channel}
+                        className="grid grid-cols-[44px_1fr_34px] items-center gap-1.5"
+                      >
+                        <span className="truncate text-[9.5px] font-medium tracking-tight text-foreground/80">
+                          {row.channel}
+                        </span>
+                        <span className="relative h-2 overflow-hidden rounded-full bg-muted/40">
+                          <span
+                            className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out"
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: color,
+                            }}
+                          />
+                        </span>
+                        <span className="text-right font-mono text-[10px] tabular font-medium text-foreground">
+                          {formatNumber(row.optIns)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           </div>
-        </>
+        </div>
       ) : null}
     </div>
+  );
+}
+
+function StageGroup({
+  stage,
+  rows,
+  previousValue,
+}: {
+  stage: StageKey;
+  rows: FunnelRow[];
+  previousValue: number | null;
+}) {
+  const meta = STAGE_META[stage];
+  if (rows.length === 0) return null;
+
+  // Survival rate: how many of the previous stage's last metric made it into this stage's first.
+  const survival =
+    previousValue && previousValue > 0
+      ? rows[0].value / previousValue
+      : null;
+
+  // Conversion stage uses larger, denser rows; engagement is mid; distribution is minimal.
+  const density: "tight" | "comfy" | "dense" =
+    stage === "distribution" ? "tight" : stage === "engagement" ? "comfy" : "dense";
+
+  return (
+    <section className="space-y-1">
+      <header className="flex items-center gap-2">
+        <span className={cn("h-3 w-0.5 shrink-0 rounded-full", meta.accent)} aria-hidden="true" />
+        <h4 className="text-[10px] font-semibold uppercase tracking-[0.09em] text-foreground/80">
+          {meta.label}
+        </h4>
+        <span className="text-[10px] text-muted-foreground/70">{meta.caption}</span>
+        {survival !== null ? (
+          <span
+            className={cn(
+              "ml-auto inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-mono text-[9.5px] tabular font-medium ring-1 ring-inset",
+              meta.chip,
+              meta.ringChip,
+            )}
+            title="Carried over from previous stage"
+          >
+            <span className="text-[8.5px]" aria-hidden="true">
+              {"→"}
+            </span>
+            {Math.round(survival * 100)}% carry
+          </span>
+        ) : null}
+      </header>
+
+      <ol className="space-y-1">
+        {rows.map((row) => (
+          <FunnelLine key={row.label} row={row} density={density} />
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function FunnelLine({
+  row,
+  density,
+}: {
+  row: FunnelRow;
+  density: "tight" | "comfy" | "dense";
+}) {
+  const valueSize =
+    density === "dense"
+      ? "text-[13px]"
+      : density === "comfy"
+        ? "text-[12.5px]"
+        : "text-[12px]";
+
+  const padding =
+    density === "dense"
+      ? "px-2.5 py-2"
+      : density === "comfy"
+        ? "px-2.5 py-1.5"
+        : "px-2 py-1.5";
+
+  // Density also dictates ink: conversion rows get a denser ring, distribution stays flat.
+  const ring =
+    density === "dense"
+      ? "ring-1 ring-inset ring-hairline-strong"
+      : density === "comfy"
+        ? "ring-1 ring-inset ring-hairline"
+        : "ring-1 ring-inset ring-transparent border border-hairline";
+
+  return (
+    <li
+      className={cn(
+        "flex items-center gap-2 rounded-md bg-panel transition-colors duration-150 ease-out hover:bg-muted/25",
+        padding,
+        ring,
+      )}
+    >
+      <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-foreground/85">
+        {row.label}
+      </span>
+      <span
+        className={cn(
+          "shrink-0 font-mono tabular font-semibold text-foreground",
+          valueSize,
+        )}
+      >
+        {formatNumber(row.value, row.unit)}
+      </span>
+      <span className="inline-flex w-12 shrink-0 items-center justify-end font-mono text-[10px] tabular">
+        {row.vsPrevious !== undefined ? (
+          <span
+            className={cn(
+              "inline-flex items-center gap-0.5",
+              row.trend === "up" ? "text-foreground/65" : "text-muted-foreground/70",
+            )}
+          >
+            <span className="text-[9px]" aria-hidden="true">
+              {row.trend === "up" ? "↑" : row.trend === "down" ? "↓" : "–"}
+            </span>
+            {formatPct(row.vsPrevious)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground/50">{"–"}</span>
+        )}
+      </span>
+    </li>
+  );
+}
+
+function CostPunchline({
+  value,
+  baseline,
+  savingsPct,
+  connections,
+}: {
+  value: number;
+  baseline: number;
+  savingsPct: number;
+  connections: number;
+}) {
+  // Bar widths driven by the ratio between baseline and this campaign.
+  const ourWidth = Math.max(6, (value / baseline) * 100);
+
+  return (
+    <section className="relative overflow-hidden rounded-md border border-risk-green/30 bg-risk-green-soft/35 px-3 py-2.5 ring-1 ring-inset ring-risk-green/20">
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-risk-green">
+            Outcome · cost per connection
+          </p>
+          <p className="mt-0.5 text-[10px] leading-snug text-foreground/70">
+            {connections} connections formed at{" "}
+            <span className="font-mono tabular text-foreground/85">
+              €{value.toLocaleString("en-GB")}
+            </span>{" "}
+            each.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-risk-green px-1.5 py-0.5 font-mono text-[10px] tabular font-semibold text-primary-foreground">
+          <span aria-hidden="true">{"↓"}</span>
+          {Math.abs(savingsPct)}%
+        </span>
+      </div>
+
+      <div className="mt-2.5 space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="w-20 shrink-0 text-[10px] uppercase tracking-[0.06em] text-muted-foreground/80">
+            Municipal avg
+          </span>
+          <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
+            <span className="absolute inset-y-0 left-0 w-full rounded-full bg-muted-foreground/35" />
+          </span>
+          <span className="w-16 shrink-0 text-right font-mono text-[11px] tabular text-muted-foreground">
+            €{baseline.toLocaleString("en-GB")}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-20 shrink-0 text-[10px] uppercase tracking-[0.06em] text-risk-green/90">
+            This campaign
+          </span>
+          <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-risk-green transition-[width] duration-700 ease-out"
+              style={{ width: `${ourWidth}%` }}
+            />
+          </span>
+          <span className="w-16 shrink-0 text-right font-mono text-[13px] tabular font-semibold text-risk-green">
+            €{value.toLocaleString("en-GB")}
+          </span>
+        </div>
+      </div>
+    </section>
   );
 }
