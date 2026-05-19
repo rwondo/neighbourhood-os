@@ -38,6 +38,9 @@ export type InterventionStrategy = {
   weeks: { week: number; score: number }[];
 };
 
+export type CreativeStatus = "pending" | "ready" | "fallback" | "failed";
+export type MCPCampaignStatus = "idle" | "creating" | "live" | "manual_fallback";
+
 export type ClusterMessage = {
   clusterId: string;
   channel: Channel;
@@ -45,6 +48,14 @@ export type ClusterMessage = {
   tone: string;
   message: string;
   pdfUrl?: string;
+  creativeUrl?: string | null;
+  creativeStatus?: CreativeStatus;
+  creativePrompt?: string;
+  qrCodeUrl?: string | null;
+  joinUrl?: string;
+  mcpCampaignId?: string | null;
+  adsManagerUrl?: string | null;
+  mcpStatus?: MCPCampaignStatus;
 };
 
 export type StepStatus = "active" | "completed" | "skipped" | "error";
@@ -55,6 +66,16 @@ export type AgentTraceEvent =
   | { type: "info"; key: string; value: string | number }
   | { type: "strategy"; strategy: InterventionStrategy }
   | { type: "cluster_message"; message: ClusterMessage }
+  | {
+      type: "cluster_message_enriched";
+      clusterId: string;
+      channel: Channel;
+      creativeUrl?: string | null;
+      creativeStatus?: CreativeStatus;
+      creativePrompt?: string;
+      qrCodeUrl?: string | null;
+      joinUrl?: string;
+    }
   | { type: "done" }
   | { type: "error"; message: string };
 
@@ -76,7 +97,8 @@ export type BuurtRecord = {
   socialParticipationDrop: number;
   score: number;
   trend: Trend;
-  updatedAt: string;
+  // Drizzle returns this as a Date; some synthetic records pass a string. Accept both.
+  updatedAt: Date | string;
 };
 
 export type BoroughAggregate = {

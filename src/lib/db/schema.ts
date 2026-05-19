@@ -1,5 +1,4 @@
 import { pgTable, text, integer, real, timestamp, jsonb, varchar, boolean } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 export const neighbourhoods = pgTable("neighbourhoods", {
   id: text("id").primaryKey(),

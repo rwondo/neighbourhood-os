@@ -11,6 +11,9 @@ import type { AgentTraceEvent, BuurtRecord, CityKey, ClusterMessage } from "@/li
 const log = makeLogger("api:simulate");
 
 export const runtime = "nodejs";
+// Vercel function timeout — long enough to cover Kimi K2.6 thinking (45s)
+// + web search (30s) + personalisation (45s) + retries.
+export const maxDuration = 300;
 
 type SimulatePayload = {
   neighbourhoodId?: string;
@@ -142,7 +145,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // ── Step 6: persist strategy + messages ───────────────────────────
+      // ── Step 6: persist strategy + messages ──────────────────────────
       emit({ type: "step", id: "s6", label: "Storing strategy and messages", status: "active" });
       try {
         await db.insert(interventions).values({
@@ -185,7 +188,13 @@ export async function POST(req: NextRequest) {
 
       // ── Step 7: stream final ready signal ─────────────────────────────
       emit({ type: "step", id: "s7", label: "Streaming results to dashboard", status: "active" });
-      emit({ type: "step", id: "s7", label: "Streaming results to dashboard", status: "completed", detail: `${messages.length} previews on screen` });
+      emit({
+        type: "step",
+        id: "s7",
+        label: "Streaming results to dashboard",
+        status: "completed",
+        detail: `${messages.length} previews · awaiting approval`,
+      });
 
       try {
         await db.insert(agentRuns).values({

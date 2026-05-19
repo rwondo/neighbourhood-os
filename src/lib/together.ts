@@ -54,7 +54,11 @@ type JsonAgentCallArgs = {
   reasoning?: "low" | "medium" | "high" | null;
   /** Optional label included in logs to identify the call site */
   label?: string;
+  /** Hard upper bound on wall-clock time. Default 45s — Kimi K2.6 thinking can take 15-71s. */
+  timeoutMs?: number;
 };
+
+const DEFAULT_AGENT_TIMEOUT_MS = 45_000;
 
 function describeError(err: unknown): Record<string, unknown> {
   if (err instanceof APIError) {
@@ -81,6 +85,7 @@ export async function jsonAgentCall<T>({
   maxTokens = 4096,
   reasoning = null,
   label = "jsonAgentCall",
+  timeoutMs = DEFAULT_AGENT_TIMEOUT_MS,
 }: JsonAgentCallArgs): Promise<T> {
   const style = detectReasoningStyle(model);
   const thinkingEnabled = !!reasoning;
@@ -131,8 +136,13 @@ export async function jsonAgentCall<T>({
     systemChars: system.length,
   });
 
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
   try {
-    const completion = await together.chat.completions.create(body);
+    const completion = await together.chat.completions.create(body, {
+      signal: ac.signal,
+      timeout: timeoutMs,
+    });
     const choice = completion.choices[0];
     const raw = choice?.message?.content ?? "";
     const finishReason = choice?.finish_reason;
@@ -162,12 +172,22 @@ export async function jsonAgentCall<T>({
       throw parseErr;
     }
   } catch (err) {
+    const aborted =
+      ac.signal.aborted ||
+      (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted")));
     log.error(`${label} ← failed`, {
       ms: Date.now() - started,
       model,
+      aborted,
+      timeoutMs,
       ...describeError(err),
     });
+    if (aborted) {
+      throw new Error(`${label} timed out after ${timeoutMs}ms`);
+    }
     throw err;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

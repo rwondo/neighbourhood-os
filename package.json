@@ -21,6 +21,7 @@
     "recalc": "tsx -e \"fetch('http://localhost:3000/api/recalculate', {method:'POST'}).then(r=>r.text()).then(console.log)\""
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@react-pdf/renderer": "^4",
     "@turf/centroid": "^7.3.5",
     "@types/adm-zip": "^0.5.8",
@@ -35,6 +36,7 @@
     "next": "16.2.6",
     "openai": "^6.38.0",
     "postgres": "^3.4.9",
+    "qrcode": "^1.5.4",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -54,6 +56,7 @@
     "@types/d3-geo": "^3.1.0",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-simple-maps": "^3.0.6",

@@ -81,33 +81,49 @@ export function RegionMap({
   const [hover, setHover] = useState<HoverInfo | null>(null);
   const [zoom, setZoom] = useState<number>(profile.zoomLevel);
   const [center, setCenter] = useState<[number, number]>(profile.zoomCenter);
+  const [mapError, setMapError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Sync zoom/center to the new city profile — intentional reset.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setZoom(profile.zoomLevel);
     setCenter(profile.zoomCenter);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [profile]);
 
   useEffect(() => {
     let cancelled = false;
+    const fetchJson = async <T,>(url: string): Promise<T> => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${url} → ${res.status}`);
+      return (await res.json()) as T;
+    };
     Promise.all([
-      fetch(BOROUGHS_URL).then((r) => r.json() as Promise<FeatureCollection<Geometry, BoroughProps>>),
-      fetch(GEMEENTEN_URL).then((r) => r.json() as Promise<GemeenteTopology>),
-      fetch(WATER_URL).then((r) => r.json() as Promise<FeatureCollection<Geometry, WaterProps>>),
+      fetchJson<FeatureCollection<Geometry, BoroughProps>>(BOROUGHS_URL),
+      fetchJson<GemeenteTopology>(GEMEENTEN_URL),
+      fetchJson<FeatureCollection<Geometry, WaterProps>>(WATER_URL),
     ])
       .then(([b, g, w]) => {
         if (cancelled) return;
         setBoroughs(b);
         setGemeenteTopo(g);
         setWater(w);
+        setMapError(null);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (cancelled) return;
+        setMapError(err instanceof Error ? err.message : "Map data unavailable");
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
+    // Clear hover state on city change so we don't show a tooltip for a
+    // borough that no longer exists in the visible map.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHover(null);
   }, [city]);
 
@@ -227,11 +243,25 @@ export function RegionMap({
         </ComposableMap>
       ) : null}
 
-      {!ready ? (
+      {!ready && !mapError ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel/80 px-3 py-1.5 text-[11px] text-muted-foreground backdrop-blur">
             <span className="size-1.5 animate-pulse rounded-full bg-teal" />
             Loading map…
+          </div>
+        </div>
+      ) : null}
+
+      {mapError ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="inline-flex max-w-[280px] flex-col items-center gap-1.5 rounded-md border border-risk-red/40 bg-risk-red-soft/60 px-3 py-2 text-center text-[11px] text-foreground backdrop-blur">
+            <svg viewBox="0 0 14 14" className="size-3.5 text-risk-red" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+              <path d="M7 1.5L13 12.5H1L7 1.5Z" />
+              <path d="M7 6v2.5" />
+              <path d="M7 10.5v.01" />
+            </svg>
+            <span className="font-medium">Map data unavailable</span>
+            <span className="text-muted-foreground">{mapError}</span>
           </div>
         </div>
       ) : null}
@@ -437,6 +467,12 @@ const BoroughPath = memo(function BoroughPath({
   );
 });
 
+// Approx tooltip dimensions used to clamp x/y so it never clips outside the map
+// container (the container has overflow-hidden — anything off-edge disappears).
+const TOOLTIP_HALF_WIDTH = 90;
+const TOOLTIP_HEIGHT = 56;
+const TOOLTIP_PAD = 8;
+
 function MapTooltip({
   x,
   y,
@@ -450,17 +486,55 @@ function MapTooltip({
   score: number;
   riskLevel?: BoroughScore["riskLevel"];
 }) {
-  const tone =
-    score < 60
+  // Prefer CDI-derived risk band (matches polygon fill); fall back to legacy
+  // score thresholds only when the API hasn't resolved the borough yet.
+  const tone = riskLevel
+    ? riskLevel === "severe"
+      ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
+      : riskLevel === "high"
+        ? "border-risk-amber/40 bg-risk-amber-soft/80 text-foreground"
+        : riskLevel === "moderate"
+          ? "border-risk-amber/40 bg-risk-amber-soft/45 text-foreground"
+          : "border-risk-green/40 bg-risk-green-soft/70 text-foreground"
+    : score < 60
       ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
       : score < 80
         ? "border-risk-amber/40 bg-risk-amber-soft/70 text-foreground"
         : "border-risk-green/40 bg-risk-green-soft/70 text-foreground";
   const label = riskLevel ? RISK_LEVEL_LABEL[riskLevel] : riskLabel(score);
+
+  // Clamp the tooltip position to the container so it doesn't clip at edges.
+  // We read the parent (the .relative map container) at render time.
+  const ref = useRef<HTMLDivElement>(null);
+  const [clamp, setClamp] = useState<{ left: number; top: number; flipBelow: boolean }>({
+    left: x,
+    top: y,
+    flipBelow: false,
+  });
+  useEffect(() => {
+    const el = ref.current;
+    const parent = el?.parentElement?.parentElement; // tooltip → wrapper → map container
+    if (!parent) {
+      setClamp({ left: x, top: y, flipBelow: false });
+      return;
+    }
+    const rect = parent.getBoundingClientRect();
+    const minX = TOOLTIP_HALF_WIDTH + TOOLTIP_PAD;
+    const maxX = rect.width - TOOLTIP_HALF_WIDTH - TOOLTIP_PAD;
+    const flipBelow = y < TOOLTIP_HEIGHT + TOOLTIP_PAD;
+    const left = Math.max(minX, Math.min(x, maxX));
+    const top = flipBelow ? y + TOOLTIP_PAD : y;
+    setClamp({ left, top, flipBelow });
+  }, [x, y]);
+
   return (
     <div
-      className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-[calc(100%+12px)]"
-      style={{ left: x, top: y }}
+      ref={ref}
+      className={cn(
+        "pointer-events-none absolute z-30 -translate-x-1/2",
+        clamp.flipBelow ? "translate-y-3" : "-translate-y-[calc(100%+12px)]",
+      )}
+      style={{ left: clamp.left, top: clamp.top }}
     >
       <div
         className={cn(

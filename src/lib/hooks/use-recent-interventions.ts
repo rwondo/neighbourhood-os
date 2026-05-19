@@ -11,6 +11,8 @@ export function useRecentInterventions(city: CityKey, refreshKey: number = 0) {
 
   useEffect(() => {
     let cancelled = false;
+    // Fetch-and-reset pattern — intentional sync setState before the fetch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
     fetch(`/api/interventions/recent?city=${city}`)

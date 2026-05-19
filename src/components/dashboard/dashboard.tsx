@@ -43,7 +43,11 @@ export function Dashboard() {
       />
       <CenterPanel
         city={city}
-        onCityChange={setCity}
+        onCityChange={(c) => {
+          setCity(c);
+          setSelected(null);
+          stream.reset();
+        }}
         onBoroughClick={(b) => setDetailBorough(b)}
       />
       <RightPanel

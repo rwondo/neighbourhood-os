@@ -1,18 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AgentTrace } from "./agent-trace";
 import { ActivitiesList } from "./activities-list";
-import { ActivityApprovalDialog } from "./activity-approval-dialog";
+import {
+  ActivityApprovalDialog,
+  type ApprovalResult,
+} from "./activity-approval-dialog";
 import { ChannelPreviews } from "./channel-previews";
+import { CampaignMetricsPanel } from "./campaign-metrics-panel";
 import { ImpactChart } from "./impact-chart";
 import type { TraceStep } from "@/lib/hooks/use-intervention-stream";
 import type {
+  Channel,
   CityKey,
   ClusterMessage,
+  CreativeStatus,
   InterventionStrategy,
+  MCPCampaignStatus,
   RecommendedActivity,
 } from "@/lib/types";
+
+export type ChannelEnrichment = {
+  creativeUrl: string | null;
+  creativeStatus: CreativeStatus;
+  qrCodeUrl: string | null;
+  joinUrl: string | null;
+  mcpStatus: MCPCampaignStatus;
+  campaignId: string | null;
+  adsManagerUrl: string | null;
+  fallback: boolean;
+};
+
+export type EnrichmentState = Record<string, ChannelEnrichment>;
+
+export function enrichmentKey(clusterId: string, channel: Channel): string {
+  return `${clusterId}::${channel}`;
+}
 
 export function RightPanel({
   city,
@@ -36,19 +60,75 @@ export function RightPanel({
   const completedSteps = steps.filter((s) => s.status === "completed").length;
   const activities = strategy?.activities ?? [];
   const clusters = strategy?.clusters ?? [];
-  const gain = strategy?.predictedScoreGain ?? 0;
 
   const [selected, setSelected] = useState<{ activity: RecommendedActivity; key: string } | null>(
     null,
   );
   const [approvedKeys, setApprovedKeys] = useState<Set<string>>(new Set());
+  const [enrichments, setEnrichments] = useState<EnrichmentState>({});
 
   // Reset approvals when a new strategy lands (each borough gets its own approval state).
   const strategyId = strategy?.neighbourhoodId ?? null;
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setApprovedKeys(new Set());
     setSelected(null);
+    setEnrichments({});
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [strategyId]);
+
+  const dialogMessages = useMemo(() => {
+    if (!selected) return messages;
+    const targetIds = new Set(selected.activity.targetClusters ?? []);
+    if (targetIds.size === 0) return messages;
+    return messages.filter((m) => targetIds.has(m.clusterId));
+  }, [messages, selected]);
+
+  const handleApprovalResult = (result: ApprovalResult) => {
+    if (!selected) return;
+    setApprovedKeys((prev) => {
+      const next = new Set(prev);
+      next.add(selected.key);
+      return next;
+    });
+    setEnrichments((prev) => {
+      const next: EnrichmentState = { ...prev };
+      const mcpByKey = new Map(
+        result.mcpResults.map((m) => [enrichmentKey(m.clusterId, m.channel), m]),
+      );
+      for (const c of result.creatives) {
+        const key = enrichmentKey(c.clusterId, c.channel);
+        const mcp = mcpByKey.get(key);
+        next[key] = {
+          creativeUrl: c.creativeUrl,
+          creativeStatus: c.creativeStatus,
+          qrCodeUrl: c.qrCodeUrl,
+          joinUrl: c.joinUrl,
+          mcpStatus: mcp?.status ?? "idle",
+          campaignId: mcp?.campaignId ?? null,
+          adsManagerUrl: mcp?.adsManagerUrl ?? null,
+          fallback: mcp?.fallback ?? false,
+        };
+      }
+      // Any MCP-only entries (shouldn't happen, but safe)
+      for (const m of result.mcpResults) {
+        const key = enrichmentKey(m.clusterId, m.channel);
+        if (!next[key]) {
+          next[key] = {
+            creativeUrl: null,
+            creativeStatus: "pending",
+            qrCodeUrl: null,
+            joinUrl: null,
+            mcpStatus: m.status,
+            campaignId: m.campaignId,
+            adsManagerUrl: m.adsManagerUrl,
+            fallback: m.fallback,
+          };
+        }
+      }
+      return next;
+    });
+  };
 
   const showFocused =
     focusedBuurt && focusedBuurt.toLowerCase() !== (selectedName ?? "").toLowerCase();
@@ -93,20 +173,28 @@ export function RightPanel({
         </Section>
 
         <Section title="Channel Previews" meta={`${messages.length || 0} variants`}>
-          <ChannelPreviews messages={messages} running={running} />
+          <ChannelPreviews
+            messages={messages}
+            running={running}
+            enrichments={enrichments}
+          />
         </Section>
 
         <Section
           title="Impact Projection"
-          meta={strategy ? `+${gain} social-fabric pts · 6w` : "6-week forecast"}
+          meta={
+            strategy
+              ? `+${strategy.predictedScoreGain} pts · 6w`
+              : running
+                ? "computing…"
+                : ""
+          }
         >
           <ImpactChart weeks={strategy?.weeks ?? null} />
-          {strategy ? (
-            <p className="mt-1.5 text-[10.5px] leading-snug text-muted-foreground">
-              Score = social fabric (0–100, higher = healthier). Projection assumes ~40% attendance
-              and 70% return rate based on De Jong Gierveld-calibrated priors.
-            </p>
-          ) : null}
+        </Section>
+
+        <Section title="Campaign Metrics" meta={selectedName ?? ""}>
+          <CampaignMetricsPanel borough={selectedName} />
         </Section>
       </div>
 
@@ -117,17 +205,11 @@ export function RightPanel({
         }}
         activity={selected?.activity ?? null}
         clusters={clusters}
+        messages={dialogMessages}
         borough={selectedName}
         city={city}
         alreadyApproved={selected ? approvedKeys.has(selected.key) : false}
-        onApproved={() => {
-          if (!selected) return;
-          setApprovedKeys((prev) => {
-            const next = new Set(prev);
-            next.add(selected.key);
-            return next;
-          });
-        }}
+        onApproved={handleApprovalResult}
       />
     </aside>
   );

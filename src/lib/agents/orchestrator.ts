@@ -49,6 +49,17 @@ function emitStep(emit: Emit, id: string, label: string, status: StepStatus, det
   emit(evt);
 }
 
+// Steps 1 and 3 finish near-instantly on the happy path (cold Supermemory,
+// deterministic cluster identification). Add a small floor so the agent trace
+// reads as a sequence of work rather than a flicker.
+async function withMinDuration<T>(minMs: number, fn: () => Promise<T> | T): Promise<T> {
+  const startedAt = Date.now();
+  const result = await fn();
+  const elapsed = Date.now() - startedAt;
+  if (elapsed < minMs) await new Promise((r) => setTimeout(r, minMs - elapsed));
+  return result;
+}
+
 function memorySnippet(hits: RetrievalHit[]): string {
   if (!hits.length) return "(no prior memory for this neighbourhood)";
   return hits
@@ -186,24 +197,26 @@ export async function runOrchestrator(
   const t1 = Date.now();
   const memoryScope = { borough: neighbourhood.borough, city: neighbourhood.city };
   try {
-    const [p, o] = await Promise.all([
-      queryNeighbourhood(
-        neighbourhood.buurtCode,
-        "demographic profile and risk factors",
-        memoryScope,
-      ).catch((err) => {
-        log.warn("memory.profile query failed", err);
-        return [] as RetrievalHit[];
-      }),
-      queryNeighbourhood(
-        neighbourhood.buurtCode,
-        "past intervention outcomes and attendance",
-        memoryScope,
-      ).catch((err) => {
-        log.warn("memory.outcome query failed", err);
-        return [] as RetrievalHit[];
-      }),
-    ]);
+    const [p, o] = await withMinDuration(1400, () =>
+      Promise.all([
+        queryNeighbourhood(
+          neighbourhood.buurtCode,
+          "demographic profile and risk factors",
+          memoryScope,
+        ).catch((err) => {
+          log.warn("memory.profile query failed", err);
+          return [] as RetrievalHit[];
+        }),
+        queryNeighbourhood(
+          neighbourhood.buurtCode,
+          "past intervention outcomes and attendance",
+          memoryScope,
+        ).catch((err) => {
+          log.warn("memory.outcome query failed", err);
+          return [] as RetrievalHit[];
+        }),
+      ]),
+    );
     profileHits = p;
     outcomeHits = o;
     log.info("supermemory hits", {
@@ -268,7 +281,7 @@ export async function runOrchestrator(
 
   // ── Step 3: Identify 3 resident clusters ──────────────────────────────
   emitStep(emit, "s3", "Identifying resident clusters", "active");
-  const clusters = identifyClusters(neighbourhood);
+  const clusters = await withMinDuration(1600, () => identifyClusters(neighbourhood));
   log.info("clusters identified", {
     count: clusters.length,
     clusters: clusters.map((c) => ({
@@ -371,34 +384,50 @@ Rules:
 
   // Ensure cluster identity and weeks. Keep up to 8 activities so under-served
   // boroughs still show real options when search returns lots of variety.
-  const rawActivities =
-    Array.isArray(strategyCore.activities) && strategyCore.activities.length > 0
-      ? strategyCore.activities.slice(0, 8)
-      : search.activities.slice(0, 8);
-  const safeActivities = ensureClusterCoverage(normaliseActivities(rawActivities, clusters), clusters);
-  const safeWeeks =
-    Array.isArray(strategyCore.weeks) && strategyCore.weeks.length === 6
-      ? strategyCore.weeks
-      : buildWeeks(neighbourhood.score, strategyCore.predictedScoreGain ?? 12);
-  const strategy: InterventionStrategy = {
-    neighbourhoodId: neighbourhood.id,
-    rationale: strategyCore.rationale ?? `${neighbourhood.name} flagged by sensing layer.`,
-    activities: safeActivities,
-    clusters,
-    predictedScoreGain: Math.max(4, Math.min(22, strategyCore.predictedScoreGain ?? 12)),
-    predictedConnections: Math.max(4, Math.round(strategyCore.predictedConnections ?? 18)),
-    costPerConnectionEUR: Math.max(180, Math.round(strategyCore.costPerConnectionEUR ?? 420)),
-    weeks: safeWeeks,
-  };
-  const baseScore = Math.round(neighbourhood.score);
-  const projectedScore = Math.round(neighbourhood.score + strategy.predictedScoreGain);
-  emitStep(
-    emit,
-    "s4",
-    "Generating bespoke intervention strategy",
-    "completed",
-    `${safeActivities.length} activities · +${strategy.predictedScoreGain} social-fabric points (${baseScore} → ${projectedScore} by week 6)`,
-  );
-  emit({ type: "strategy", strategy });
-  return { strategy, clusters, activities: strategy.activities };
+  // Any throw inside normalisation here would leave s4 stuck on "active" — wrap and degrade.
+  try {
+    const rawActivities =
+      Array.isArray(strategyCore.activities) && strategyCore.activities.length > 0
+        ? strategyCore.activities.slice(0, 8)
+        : search.activities.slice(0, 8);
+    const safeActivities = ensureClusterCoverage(normaliseActivities(rawActivities, clusters), clusters);
+    const safeWeeks =
+      Array.isArray(strategyCore.weeks) && strategyCore.weeks.length === 6
+        ? strategyCore.weeks
+        : buildWeeks(neighbourhood.score, strategyCore.predictedScoreGain ?? 12);
+    const strategy: InterventionStrategy = {
+      neighbourhoodId: neighbourhood.id,
+      rationale: strategyCore.rationale ?? `${neighbourhood.name} flagged by sensing layer.`,
+      activities: safeActivities,
+      clusters,
+      predictedScoreGain: Math.max(4, Math.min(22, strategyCore.predictedScoreGain ?? 12)),
+      predictedConnections: Math.max(4, Math.round(strategyCore.predictedConnections ?? 18)),
+      costPerConnectionEUR: Math.max(180, Math.round(strategyCore.costPerConnectionEUR ?? 420)),
+      weeks: safeWeeks,
+    };
+    const baseScore = Math.round(neighbourhood.score);
+    const projectedScore = Math.round(neighbourhood.score + strategy.predictedScoreGain);
+    emitStep(
+      emit,
+      "s4",
+      "Generating bespoke intervention strategy",
+      "completed",
+      `${safeActivities.length} activities · +${strategy.predictedScoreGain} social-fabric points (${baseScore} → ${projectedScore} by week 6)`,
+    );
+    emit({ type: "strategy", strategy });
+    return { strategy, clusters, activities: strategy.activities };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    log.error("strategy normalisation failed — using deterministic fallback", { message });
+    emitStep(
+      emit,
+      "s4",
+      "Generating bespoke intervention strategy",
+      "skipped",
+      `normalisation error — using deterministic fallback (${message})`,
+    );
+    const strategy = fallbackStrategy(neighbourhood, search.activities, clusters);
+    emit({ type: "strategy", strategy });
+    return { strategy, clusters, activities: strategy.activities };
+  }
 }

@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { riskLevelCDI, colorForCDI } from "@/lib/score";
+import { makeLogger } from "@/lib/log";
 import type { BoroughAggregate, CityKey } from "@/lib/types";
+
+const log = makeLogger("api:boroughs");
 
 const VALID_CITIES = ["rotterdam", "amsterdam", "denhaag"] as const;
 
@@ -45,6 +48,13 @@ export async function GET(req: NextRequest) {
   // Aggregate at SQL level. We reference `cdi`, `borough`, `cdi_breakdown` directly so
   // this route works even though those columns aren't yet typed in schema.ts.
   // If the parallel migration hasn't landed, we catch and degrade gracefully.
+  // Parameterised IN-list — safer than sql.raw string interpolation in case the
+  // exclusion list ever picks up a borough name with a single quote.
+  const industrialList = sql.join(
+    INDUSTRIAL_BOROUGHS.map((b) => sql`${b}`),
+    sql`, `,
+  );
+
   let rows: AggregateRow[] = [];
   try {
     rows = (await db.execute<AggregateRow>(sql`
@@ -60,14 +70,14 @@ export async function GET(req: NextRequest) {
       WHERE city = ${city}
         AND borough IS NOT NULL
         AND borough <> ''
-        AND borough NOT IN ${sql.raw(`('${INDUSTRIAL_BOROUGHS.join("','")}')`)}
+        AND borough NOT IN (${industrialList})
       GROUP BY borough
       ORDER BY AVG(COALESCE(cdi, 0)) DESC
     `)) as unknown as AggregateRow[];
   } catch (err) {
-    console.warn(
-      "[api/boroughs] aggregate query failed (likely missing cdi/borough/cdi_breakdown columns); returning empty list:",
-      err instanceof Error ? err.message : err,
+    log.warn(
+      "aggregate query failed (likely missing cdi/borough/cdi_breakdown columns); returning empty list",
+      { err: err instanceof Error ? err.message : err },
     );
     return NextResponse.json({ boroughs: [] satisfies BoroughAggregate[] });
   }

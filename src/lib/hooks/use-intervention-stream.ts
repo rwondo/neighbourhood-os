@@ -25,9 +25,62 @@ const DEFAULT_STEPS: TraceStep[] = [
   { id: "s7", label: "Streaming results to dashboard", status: "pending" },
 ];
 
+// Wall-clock timeout for the entire SSE stream — prevents a frozen agent trace if
+// the server hangs without emitting `done`. Set higher than the orchestrator's
+// per-step timeouts combined.
+const STREAM_WALL_CLOCK_MS = 180_000;
+
 export type SimulateTarget =
   | { neighbourhoodId: string }
   | { borough: string; city: CityKey };
+
+type StepEvent = Extract<AgentTraceEvent, { type: "step" }>;
+
+function applyEventToFrame(
+  event: AgentTraceEvent,
+  setters: {
+    setSteps: React.Dispatch<React.SetStateAction<TraceStep[]>>;
+    setStrategy: React.Dispatch<React.SetStateAction<InterventionStrategy | null>>;
+    setMessages: React.Dispatch<React.SetStateAction<ClusterMessage[]>>;
+    setInfo: React.Dispatch<React.SetStateAction<Record<string, string | number>>>;
+    setError: React.Dispatch<React.SetStateAction<string | null>>;
+  },
+): void {
+  if (event.type === "step") {
+    const step: StepEvent = event;
+    setters.setSteps((prev) =>
+      prev.map((s) =>
+        s.id === step.id
+          ? { ...s, status: step.status, detail: step.detail ?? s.detail, label: step.label ?? s.label }
+          : s,
+      ),
+    );
+  } else if (event.type === "strategy") {
+    setters.setStrategy(event.strategy);
+  } else if (event.type === "cluster_message") {
+    setters.setMessages((prev) => [...prev, event.message]);
+  } else if (event.type === "cluster_message_enriched") {
+    setters.setMessages((prev) =>
+      prev.map((m) =>
+        m.clusterId === event.clusterId && m.channel === event.channel
+          ? {
+              ...m,
+              creativeUrl:
+                event.creativeUrl !== undefined ? event.creativeUrl : m.creativeUrl,
+              creativeStatus: event.creativeStatus ?? m.creativeStatus,
+              creativePrompt: event.creativePrompt ?? m.creativePrompt,
+              qrCodeUrl: event.qrCodeUrl !== undefined ? event.qrCodeUrl : m.qrCodeUrl,
+              joinUrl: event.joinUrl ?? m.joinUrl,
+            }
+          : m,
+      ),
+    );
+  } else if (event.type === "info") {
+    setters.setInfo((prev) => ({ ...prev, [event.key]: event.value }));
+  } else if (event.type === "error") {
+    setters.setError(event.message);
+  }
+}
 
 export function useInterventionStream() {
   const [steps, setSteps] = useState<TraceStep[]>(DEFAULT_STEPS);
@@ -37,6 +90,7 @@ export function useInterventionStream() {
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const runIdRef = useRef(0);
 
   const reset = useCallback(() => {
     setSteps(DEFAULT_STEPS.map((s) => ({ ...s })));
@@ -48,11 +102,21 @@ export function useInterventionStream() {
 
   const start = useCallback(
     async (target: SimulateTarget) => {
+      // Abort any in-flight stream first so its `finally` runs before we proceed,
+      // and bump the runId so the old run's setRunning(false) can't clobber ours.
+      abortRef.current?.abort();
+      const myRunId = ++runIdRef.current;
       reset();
       setRunning(true);
-      abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+
+      // Wall-clock failsafe so the spinner cannot hang forever.
+      const wallClock = setTimeout(() => {
+        if (runIdRef.current === myRunId) controller.abort();
+      }, STREAM_WALL_CLOCK_MS);
+
+      const setters = { setSteps, setStrategy, setMessages, setInfo, setError };
 
       try {
         const res = await fetch("/api/simulate", {
@@ -62,8 +126,7 @@ export function useInterventionStream() {
           signal: controller.signal,
         });
         if (!res.ok || !res.body) {
-          setError(`Simulate failed (${res.status})`);
-          setRunning(false);
+          if (runIdRef.current === myRunId) setError(`Simulate failed (${res.status})`);
           return;
         }
         const reader = res.body.getReader();
@@ -81,34 +144,42 @@ export function useInterventionStream() {
             if (!json) continue;
             try {
               const event = JSON.parse(json) as AgentTraceEvent;
-              if (event.type === "step") {
-                setSteps((prev) =>
-                  prev.map((s) =>
-                    s.id === event.id
-                      ? { ...s, status: event.status, detail: event.detail ?? s.detail }
-                      : s,
-                  ),
-                );
-              } else if (event.type === "strategy") {
-                setStrategy(event.strategy);
-              } else if (event.type === "cluster_message") {
-                setMessages((prev) => [...prev, event.message]);
-              } else if (event.type === "info") {
-                setInfo((prev) => ({ ...prev, [event.key]: event.value }));
-              } else if (event.type === "error") {
-                setError(event.message);
-              }
+              if (runIdRef.current === myRunId) applyEventToFrame(event, setters);
+            } catch {
+              /* ignore malformed chunk */
+            }
+          }
+        }
+        // Flush any trailing frame that didn't end with \n\n before close.
+        const tail = buffer.trim();
+        if (tail.startsWith("data:")) {
+          const json = tail.slice(5).trim();
+          if (json) {
+            try {
+              const event = JSON.parse(json) as AgentTraceEvent;
+              if (runIdRef.current === myRunId) applyEventToFrame(event, setters);
             } catch {
               /* ignore malformed chunk */
             }
           }
         }
       } catch (err) {
-        if ((err as { name?: string }).name !== "AbortError") {
+        if (runIdRef.current !== myRunId) return; // a newer run took over
+        const name = (err as { name?: string }).name;
+        if (name === "AbortError") {
+          // Distinguish "user/borough switch abort" from "wall-clock timeout".
+          if (controller.signal.aborted && runIdRef.current === myRunId) {
+            // Only surface a timeout error if we're still the current run.
+            setError("Request timed out — please try again");
+          }
+        } else {
           setError(err instanceof Error ? err.message : String(err));
         }
       } finally {
-        setRunning(false);
+        clearTimeout(wallClock);
+        // Only clear running if this is still the active run — prevents a stale
+        // stream's late finally from clobbering a newer run's running=true.
+        if (runIdRef.current === myRunId) setRunning(false);
       }
     },
     [reset],

@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { neighbourhoods, interventions, clusterMessages, agentRuns } from "@/lib/db/schema";
 import { runOrchestrator } from "@/lib/agents/orchestrator";

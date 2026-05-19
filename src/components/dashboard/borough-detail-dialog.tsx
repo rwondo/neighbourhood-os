@@ -47,9 +47,12 @@ export function BoroughDetailDialog({
   useEffect(() => {
     if (!open || !borough) return;
     let cancelled = false;
+    // Fetch-and-reset pattern: clear stale data before the new fetch resolves.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(null);
     setData(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
     fetch(`/api/boroughs/${encodeURIComponent(borough)}?city=${city}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -108,6 +111,17 @@ export function BoroughDetailDialog({
               <DemographicsBlock demographics={data.demographics} />
               <InfrastructureBlock infrastructure={data.infrastructure} />
               <TopBuurtenBlock buurten={data.topBuurten} />
+            </div>
+          ) : null}
+          {!loading && !data && error ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-risk-red/30 bg-risk-red-soft/20 px-4 py-8 text-center">
+              <svg viewBox="0 0 14 14" className="size-4 text-risk-red" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                <path d="M7 1.5L13 12.5H1L7 1.5Z" />
+                <path d="M7 6v2.5" />
+                <path d="M7 10.5v.01" />
+              </svg>
+              <p className="text-[12px] font-medium text-foreground">Couldn&apos;t load borough breakdown</p>
+              <p className="text-[11px] text-muted-foreground">{error}</p>
             </div>
           ) : null}
         </div>

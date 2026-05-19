@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { makeLogger } from "@/lib/log";
 import type { CityKey } from "@/lib/types";
+
+const log = makeLogger("api:interventions/recent");
 
 const VALID_CITIES = ["rotterdam", "amsterdam", "denhaag"] as const;
 
@@ -60,10 +63,7 @@ export async function GET(req: NextRequest) {
       LIMIT 8
     `)) as unknown as RecentRow[];
   } catch (err) {
-    console.warn(
-      "[api/interventions/recent] query failed:",
-      err instanceof Error ? err.message : err,
-    );
+    log.warn("query failed", { err: err instanceof Error ? err.message : err });
     return NextResponse.json({ interventions: [] satisfies RecentInterventionRecord[] });
   }
 

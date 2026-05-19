@@ -113,7 +113,6 @@ async function realWebSearch(
     return null;
   }
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const city = cityLabel(neighbourhood.city);
   const today = new Date().toISOString().slice(0, 10);
   const input = `You are searching for REAL, SCHEDULED community events ${scope.instruction}, Netherlands during ${monthLabel}.
 

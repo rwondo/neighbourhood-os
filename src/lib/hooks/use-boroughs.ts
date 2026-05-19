@@ -43,10 +43,14 @@ export function useBoroughs(city: CityKey): {
 
   useEffect(() => {
     let cancelled = false;
+    // Fetch-and-reset pattern — synchronous setState here resets the previous
+    // city's data before the new fetch resolves. This is intentional.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(null);
     setScores(new Map());
     setOrdered([]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     fetch(`/api/boroughs?city=${city}`)
       .then((r) => {
