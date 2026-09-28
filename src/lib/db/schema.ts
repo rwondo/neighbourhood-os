@@ -113,7 +113,9 @@ export const chunks = pgTable("chunks", {
   containerTag: text("container_tag").notNull(),
   position: integer("position").notNull(),
   content: text("content").notNull(),
-  // embedding is vector(3072); managed via raw SQL since drizzle-orm 0.45 lacks a typed vector column for 3072 dims
+  // The `embedding vector(1536)` column is created by drizzle/0001_pgvector_memory.sql
+  // and written with raw SQL; it is deliberately not declared here. Apply schema
+  // changes with `pnpm db:migrate`, not `drizzle-kit push`, which would drop it.
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

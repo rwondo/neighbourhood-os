@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:push": "drizzle-kit push",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx scripts/seed-neighbourhoods.ts",
     "seed:memory": "tsx scripts/seed-memory.ts",
@@ -18,7 +18,8 @@
     "populate:names": "tsx scripts/populate-names.ts",
     "refresh:demographics": "tsx scripts/refresh-demographics.ts",
     "recompute:cdi": "tsx scripts/recompute-cdi.ts",
-    "export:snapshot": "tsx scripts/export-static-snapshot.ts"
+    "export:snapshot": "tsx scripts/export-static-snapshot.ts",
+    "pipeline": "pnpm db:migrate && pnpm seed && pnpm populate:centroids && pnpm populate:names && pnpm refresh:demographics && pnpm populate:osm && pnpm populate:transit && pnpm recompute:cdi && pnpm export:snapshot"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
