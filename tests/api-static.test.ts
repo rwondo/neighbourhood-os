@@ -11,7 +11,7 @@ test("GET /api/boroughs serves the snapshot in static mode", async () => {
   const res = await GET(new NextRequest("http://localhost/api/boroughs?city=amsterdam"));
   assert.equal(res.status, 200);
   const body = (await res.json()) as { boroughs: unknown[] };
-  assert.ok(Array.isArray(body.boroughs));
+  assert.equal(body.boroughs.length, 9);
 });
 
 test("GET /api/boroughs rejects an unknown city", async () => {

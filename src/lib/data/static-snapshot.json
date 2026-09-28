@@ -1,10 +1,2946 @@
 {
   "version": 1,
-  "generatedAt": null,
-  "sources": [],
+  "generatedAt": "2026-09-28T21:25:42.039Z",
+  "sources": [
+    "CBS Kerncijfers wijken en buurten 2023 (table 85618NED)",
+    "PDOK wijken en buurten 2023",
+    "OpenStreetMap via Overpass API",
+    "OVapi GTFS (gtfs-nl)",
+    "Open-Meteo"
+  ],
   "cities": {
-    "rotterdam": { "boroughs": [], "details": {}, "recentInterventions": [] },
-    "amsterdam": { "boroughs": [], "details": {}, "recentInterventions": [] },
-    "denhaag": { "boroughs": [], "details": {}, "recentInterventions": [] }
+    "rotterdam": {
+      "boroughs": [
+        {
+          "borough": "Hoek van Holland",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 31.5,
+          "avgCdi": 68.76,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 56.8,
+          "avgA": 62.97,
+          "avgS": 3.99
+        },
+        {
+          "borough": "Overschie",
+          "city": "rotterdam",
+          "buurtCount": 6,
+          "avgScore": 36.17,
+          "avgCdi": 63.66,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 47.06,
+          "avgA": 60.67,
+          "avgS": 5.59
+        },
+        {
+          "borough": "Prins Alexander",
+          "city": "rotterdam",
+          "buurtCount": 7,
+          "avgScore": 36.86,
+          "avgCdi": 62.89,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 55.99,
+          "avgA": 52.07,
+          "avgS": 10.94
+        },
+        {
+          "borough": "Charlois",
+          "city": "rotterdam",
+          "buurtCount": 10,
+          "avgScore": 37.5,
+          "avgCdi": 62.39,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 56.39,
+          "avgA": 47.52,
+          "avgS": 7.18
+        },
+        {
+          "borough": "Pernis",
+          "city": "rotterdam",
+          "buurtCount": 1,
+          "avgScore": 39,
+          "avgCdi": 60.78,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 47.76,
+          "avgA": 49.55,
+          "avgS": 2.66
+        },
+        {
+          "borough": "Kralingen-Crooswijk",
+          "city": "rotterdam",
+          "buurtCount": 8,
+          "avgScore": 39.88,
+          "avgCdi": 60.17,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 57.42,
+          "avgA": 49.21,
+          "avgS": 20.08
+        },
+        {
+          "borough": "Hoogvliet",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 40,
+          "avgCdi": 60.04,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 48.48,
+          "avgA": 44.89,
+          "avgS": 0.27
+        },
+        {
+          "borough": "Hillegersberg-Schiebroek",
+          "city": "rotterdam",
+          "buurtCount": 5,
+          "avgScore": 41.4,
+          "avgCdi": 58.63,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 48.04,
+          "avgA": 48.92,
+          "avgS": 10.85
+        },
+        {
+          "borough": "Rozenburg",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 42.5,
+          "avgCdi": 57.47,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 51.05,
+          "avgA": 53.99,
+          "avgS": 27.39
+        },
+        {
+          "borough": "IJsselmonde",
+          "city": "rotterdam",
+          "buurtCount": 4,
+          "avgScore": 43.75,
+          "avgCdi": 56.13,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 46.57,
+          "avgA": 47.61,
+          "avgS": 16.62
+        },
+        {
+          "borough": "Noord",
+          "city": "rotterdam",
+          "buurtCount": 8,
+          "avgScore": 46.75,
+          "avgCdi": 53.32,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 46.81,
+          "avgA": 43.89,
+          "avgS": 23.07
+        },
+        {
+          "borough": "Delfshaven",
+          "city": "rotterdam",
+          "buurtCount": 9,
+          "avgScore": 47.11,
+          "avgCdi": 52.86,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 46.03,
+          "avgA": 42.05,
+          "avgS": 21.1
+        },
+        {
+          "borough": "Feijenoord",
+          "city": "rotterdam",
+          "buurtCount": 9,
+          "avgScore": 53.22,
+          "avgCdi": 46.74,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 46.67,
+          "avgA": 39.26,
+          "avgS": 42.67
+        },
+        {
+          "borough": "Centrum",
+          "city": "rotterdam",
+          "buurtCount": 6,
+          "avgScore": 62.17,
+          "avgCdi": 37.86,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 52.5,
+          "avgA": 33.36,
+          "avgS": 79.26
+        }
+      ],
+      "details": {
+        "Hoek van Holland": {
+          "borough": "Hoek van Holland",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 31.5,
+          "avgCdi": 68.8,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 1,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 56.8,
+            "A": 63,
+            "S": 4,
+            "E": 80,
+            "H": 28.4,
+            "PT": 98.7,
+            "W": 96.6,
+            "D": 30.7,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 30.8,
+            "pctElderly65": 27.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 1.5,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 1.65
+          },
+          "infrastructure": {
+            "transitStops500m": 2,
+            "poiLibraries": 0,
+            "poiCommunityCentres": 1,
+            "poiParks": 0,
+            "poiBenches": 6,
+            "poiCafes": 2,
+            "poiSports": 2
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991703",
+              "name": "Rijnpoort",
+              "cdi": 69.21,
+              "score": 31,
+              "pctLivingAlone": 20,
+              "pctElderly65": 27.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991702",
+              "name": "Dorp",
+              "cdi": 68.32,
+              "score": 32,
+              "pctLivingAlone": 41.7,
+              "pctElderly65": 27.7,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Overschie": {
+          "borough": "Overschie",
+          "city": "rotterdam",
+          "buurtCount": 6,
+          "avgScore": 36.2,
+          "avgCdi": 63.7,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 2,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 47.1,
+            "A": 60.7,
+            "S": 5.6,
+            "E": 58.2,
+            "H": 33.5,
+            "PT": 90.4,
+            "W": 91.1,
+            "D": 36,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 33.9,
+            "pctElderly65": 20,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 2.7,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 1.88
+          },
+          "infrastructure": {
+            "transitStops500m": 44,
+            "poiLibraries": 1,
+            "poiCommunityCentres": 1,
+            "poiParks": 10,
+            "poiBenches": 32,
+            "poiCafes": 1,
+            "poiSports": 2
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990452",
+              "name": "Noord Kethel",
+              "cdi": 73.58,
+              "score": 26,
+              "pctLivingAlone": 33.3,
+              "pctElderly65": 28.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990454",
+              "name": "Schieveen",
+              "cdi": 70.21,
+              "score": 30,
+              "pctLivingAlone": 22.2,
+              "pctElderly65": 23.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990457",
+              "name": "Landzicht",
+              "cdi": 68.27,
+              "score": 32,
+              "pctLivingAlone": 47.5,
+              "pctElderly65": 24,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990456",
+              "name": "Overschie",
+              "cdi": 60.55,
+              "score": 39,
+              "pctLivingAlone": 39,
+              "pctElderly65": 17,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990451",
+              "name": "Kleinpolder",
+              "cdi": 56.79,
+              "score": 43,
+              "pctLivingAlone": 47.8,
+              "pctElderly65": 19,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Prins Alexander": {
+          "borough": "Prins Alexander",
+          "city": "rotterdam",
+          "buurtCount": 7,
+          "avgScore": 36.9,
+          "avgCdi": 62.9,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 3,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 56,
+            "A": 52.1,
+            "S": 10.9,
+            "E": 62.5,
+            "H": 48.1,
+            "PT": 87.2,
+            "W": 87.6,
+            "D": 13.3,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 42.8,
+            "pctElderly65": 21.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.89
+          },
+          "infrastructure": {
+            "transitStops500m": 68,
+            "poiLibraries": 3,
+            "poiCommunityCentres": 2,
+            "poiParks": 10,
+            "poiBenches": 96,
+            "poiCafes": 1,
+            "poiSports": 6
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991448",
+              "name": "Prinsenland",
+              "cdi": 71.06,
+              "score": 29,
+              "pctLivingAlone": 48.1,
+              "pctElderly65": 27,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991449",
+              "name": "Het Lage Land",
+              "cdi": 66.95,
+              "score": 33,
+              "pctLivingAlone": 56.6,
+              "pctElderly65": 22.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991463",
+              "name": "Ommoord",
+              "cdi": 66.59,
+              "score": 33,
+              "pctLivingAlone": 46.6,
+              "pctElderly65": 30.2,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991467",
+              "name": "Oosterflank",
+              "cdi": 63.53,
+              "score": 36,
+              "pctLivingAlone": 51.8,
+              "pctElderly65": 21.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991444",
+              "name": "'s-Gravenland",
+              "cdi": 61.93,
+              "score": 38,
+              "pctLivingAlone": 32.8,
+              "pctElderly65": 18.6,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Charlois": {
+          "borough": "Charlois",
+          "city": "rotterdam",
+          "buurtCount": 10,
+          "avgScore": 37.5,
+          "avgCdi": 62.4,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 4,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 56.4,
+            "A": 47.5,
+            "S": 7.2,
+            "E": 48.4,
+            "H": 66.2,
+            "PT": 76.8,
+            "W": 75.8,
+            "D": 18.4,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 53.7,
+            "pctElderly65": 16.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 10.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 1.11
+          },
+          "infrastructure": {
+            "transitStops500m": 176,
+            "poiLibraries": 2,
+            "poiCommunityCentres": 4,
+            "poiParks": 8,
+            "poiBenches": 59,
+            "poiCafes": 24,
+            "poiSports": 9
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991575",
+              "name": "Wielewaal",
+              "cdi": 79.59,
+              "score": 20,
+              "pctLivingAlone": 67,
+              "pctElderly65": 34.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991593",
+              "name": "Heijplaat",
+              "cdi": 70.49,
+              "score": 30,
+              "pctLivingAlone": 39.5,
+              "pctElderly65": 15.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991570",
+              "name": "Charlois Zuidrand",
+              "cdi": 70.22,
+              "score": 30,
+              "pctLivingAlone": 60.9,
+              "pctElderly65": 18,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991578",
+              "name": "Zuiderpark",
+              "cdi": 67.52,
+              "score": 32,
+              "pctLivingAlone": 54.5,
+              "pctElderly65": 24.2,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991573",
+              "name": "Zuidwijk",
+              "cdi": 62.77,
+              "score": 37,
+              "pctLivingAlone": 50.5,
+              "pctElderly65": 16.9,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Pernis": {
+          "borough": "Pernis",
+          "city": "rotterdam",
+          "buurtCount": 1,
+          "avgScore": 39,
+          "avgCdi": 60.8,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 5,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 47.8,
+            "A": 49.5,
+            "S": 2.7,
+            "E": 57.1,
+            "H": 36.3,
+            "PT": 77.6,
+            "W": 96.8,
+            "D": 6.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 35.6,
+            "pctElderly65": 19.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 2.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.6
+          },
+          "infrastructure": {
+            "transitStops500m": 17,
+            "poiLibraries": 1,
+            "poiCommunityCentres": 0,
+            "poiParks": 0,
+            "poiBenches": 2,
+            "poiCafes": 0,
+            "poiSports": 0
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991391",
+              "name": "Pernis",
+              "cdi": 60.78,
+              "score": 39,
+              "pctLivingAlone": 35.6,
+              "pctElderly65": 19.6,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Kralingen-Crooswijk": {
+          "borough": "Kralingen-Crooswijk",
+          "city": "rotterdam",
+          "buurtCount": 8,
+          "avgScore": 39.9,
+          "avgCdi": 60.2,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 6,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 57.4,
+            "A": 49.2,
+            "S": 20.1,
+            "E": 46.6,
+            "H": 70.7,
+            "PT": 86.7,
+            "W": 82.9,
+            "D": 8.2,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 56.5,
+            "pctElderly65": 16,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 5.5,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.66
+          },
+          "infrastructure": {
+            "transitStops500m": 81,
+            "poiLibraries": 4,
+            "poiCommunityCentres": 3,
+            "poiParks": 11,
+            "poiBenches": 224,
+            "poiCafes": 11,
+            "poiSports": 12
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990843",
+              "name": "Kralingse Bos",
+              "cdi": 70.39,
+              "score": 30,
+              "pctLivingAlone": 40,
+              "pctElderly65": 27.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990845",
+              "name": "De Esch",
+              "cdi": 68.5,
+              "score": 32,
+              "pctLivingAlone": 61.1,
+              "pctElderly65": 19.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990847",
+              "name": "Struisenburg",
+              "cdi": 62.21,
+              "score": 38,
+              "pctLivingAlone": 74.3,
+              "pctElderly65": 13.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990842",
+              "name": "Kralingen Oost",
+              "cdi": 58.68,
+              "score": 41,
+              "pctLivingAlone": 60.7,
+              "pctElderly65": 14.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990836",
+              "name": "Nieuw Crooswijk",
+              "cdi": 56.91,
+              "score": 43,
+              "pctLivingAlone": 46.9,
+              "pctElderly65": 8.9,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Hoogvliet": {
+          "borough": "Hoogvliet",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 40,
+          "avgCdi": 60,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 7,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 48.5,
+            "A": 44.9,
+            "S": 0.3,
+            "E": 55.1,
+            "H": 40.5,
+            "PT": 76.3,
+            "W": 70.3,
+            "D": 14.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 38.1,
+            "pctElderly65": 18.9,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 3.8,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.95
+          },
+          "infrastructure": {
+            "transitStops500m": 36,
+            "poiLibraries": 0,
+            "poiCommunityCentres": 0,
+            "poiParks": 0,
+            "poiBenches": 1,
+            "poiCafes": 0,
+            "poiSports": 0
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991699",
+              "name": "Hoogvliet Zuid",
+              "cdi": 63.13,
+              "score": 37,
+              "pctLivingAlone": 40.1,
+              "pctElderly65": 22.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991692",
+              "name": "Hoogvliet Noord",
+              "cdi": 56.95,
+              "score": 43,
+              "pctLivingAlone": 36.1,
+              "pctElderly65": 15.1,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Hillegersberg-Schiebroek": {
+          "borough": "Hillegersberg-Schiebroek",
+          "city": "rotterdam",
+          "buurtCount": 5,
+          "avgScore": 41.4,
+          "avgCdi": 58.6,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 8,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 48,
+            "A": 48.9,
+            "S": 10.9,
+            "E": 54.2,
+            "H": 40.5,
+            "PT": 82.4,
+            "W": 85.9,
+            "D": 9.1,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 38.1,
+            "pctElderly65": 18.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 3.9,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.7
+          },
+          "infrastructure": {
+            "transitStops500m": 67,
+            "poiLibraries": 2,
+            "poiCommunityCentres": 0,
+            "poiParks": 5,
+            "poiBenches": 80,
+            "poiCafes": 0,
+            "poiSports": 3
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990662",
+              "name": "Hillegersberg Noord",
+              "cdi": 65.77,
+              "score": 34,
+              "pctLivingAlone": 46.5,
+              "pctElderly65": 28.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990665",
+              "name": "Molenlaankwartier",
+              "cdi": 62.95,
+              "score": 37,
+              "pctLivingAlone": 34.4,
+              "pctElderly65": 23,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990660",
+              "name": "Schiebroek",
+              "cdi": 59.44,
+              "score": 41,
+              "pctLivingAlone": 45.7,
+              "pctElderly65": 18.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990664",
+              "name": "Terbregge",
+              "cdi": 53.83,
+              "score": 46,
+              "pctLivingAlone": 22.8,
+              "pctElderly65": 12.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990661",
+              "name": "Hillegersberg Zuid",
+              "cdi": 51.14,
+              "score": 49,
+              "pctLivingAlone": 41.3,
+              "pctElderly65": 11.3,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Rozenburg": {
+          "borough": "Rozenburg",
+          "city": "rotterdam",
+          "buurtCount": 2,
+          "avgScore": 42.5,
+          "avgCdi": 57.5,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 9,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 51.1,
+            "A": 54,
+            "S": 27.4,
+            "E": 58,
+            "H": 42.5,
+            "PT": 71.1,
+            "W": 73.4,
+            "D": 35.2,
+            "R": 25
+          },
+          "demographics": {
+            "pctLivingAlone": 17.4,
+            "pctElderly65": 11.4,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 1.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.6
+          },
+          "infrastructure": {
+            "transitStops500m": 6,
+            "poiLibraries": 1,
+            "poiCommunityCentres": 1,
+            "poiParks": 0,
+            "poiBenches": 5,
+            "poiCafes": 0,
+            "poiSports": 0
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05992704",
+              "name": "Rozenburg",
+              "cdi": 64.94,
+              "score": 35,
+              "pctLivingAlone": 34.8,
+              "pctElderly65": 22.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05992705",
+              "name": "Noordzeeweg",
+              "cdi": 50,
+              "score": 50,
+              "pctLivingAlone": 0,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "IJsselmonde": {
+          "borough": "IJsselmonde",
+          "city": "rotterdam",
+          "buurtCount": 4,
+          "avgScore": 43.8,
+          "avgCdi": 56.1,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 10,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 46.6,
+            "A": 47.6,
+            "S": 16.6,
+            "E": 47.3,
+            "H": 45.7,
+            "PT": 75.3,
+            "W": 84.3,
+            "D": 13.1,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 41.3,
+            "pctElderly65": 16.3,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 5.3,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.88
+          },
+          "infrastructure": {
+            "transitStops500m": 75,
+            "poiLibraries": 2,
+            "poiCommunityCentres": 1,
+            "poiParks": 3,
+            "poiBenches": 98,
+            "poiCafes": 0,
+            "poiSports": 6
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991283",
+              "name": "Oud IJsselmonde",
+              "cdi": 60.19,
+              "score": 40,
+              "pctLivingAlone": 34.4,
+              "pctElderly65": 16,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991289",
+              "name": "Groot IJsselmonde",
+              "cdi": 59.85,
+              "score": 40,
+              "pctLivingAlone": 46.3,
+              "pctElderly65": 20.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991290",
+              "name": "Beverwaard",
+              "cdi": 56.61,
+              "score": 43,
+              "pctLivingAlone": 36.2,
+              "pctElderly65": 12.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991284",
+              "name": "Lombardijen",
+              "cdi": 47.89,
+              "score": 52,
+              "pctLivingAlone": 48.5,
+              "pctElderly65": 16.2,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Noord": {
+          "borough": "Noord",
+          "city": "rotterdam",
+          "buurtCount": 8,
+          "avgScore": 46.8,
+          "avgCdi": 53.3,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 11,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 46.8,
+            "A": 43.9,
+            "S": 23.1,
+            "E": 32.3,
+            "H": 64.5,
+            "PT": 69.1,
+            "W": 73.6,
+            "D": 12.8,
+            "R": 6.3
+          },
+          "demographics": {
+            "pctLivingAlone": 47.2,
+            "pctElderly65": 9,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 4.2,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.55
+          },
+          "infrastructure": {
+            "transitStops500m": 161,
+            "poiLibraries": 1,
+            "poiCommunityCentres": 6,
+            "poiParks": 14,
+            "poiBenches": 142,
+            "poiCafes": 33,
+            "poiSports": 15
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990531",
+              "name": "Bergpolder",
+              "cdi": 58.21,
+              "score": 42,
+              "pctLivingAlone": 62.4,
+              "pctElderly65": 6.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990534",
+              "name": "Liskwartier",
+              "cdi": 57.7,
+              "score": 42,
+              "pctLivingAlone": 52.9,
+              "pctElderly65": 12.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990532",
+              "name": "Blijdorp",
+              "cdi": 55.72,
+              "score": 44,
+              "pctLivingAlone": 55.6,
+              "pctElderly65": 12.2,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990535",
+              "name": "Oude Noorden",
+              "cdi": 55.24,
+              "score": 45,
+              "pctLivingAlone": 53.3,
+              "pctElderly65": 11.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990515",
+              "name": "Agniesebuurt",
+              "cdi": 54.72,
+              "score": 45,
+              "pctLivingAlone": 55.7,
+              "pctElderly65": 12.1,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Delfshaven": {
+          "borough": "Delfshaven",
+          "city": "rotterdam",
+          "buurtCount": 9,
+          "avgScore": 47.1,
+          "avgCdi": 52.9,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 12,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 46,
+            "A": 42.1,
+            "S": 21.1,
+            "E": 34.1,
+            "H": 60.6,
+            "PT": 72.2,
+            "W": 74.6,
+            "D": 5.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 50.3,
+            "pctElderly65": 11.7,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.1,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.56
+          },
+          "infrastructure": {
+            "transitStops500m": 190,
+            "poiLibraries": 2,
+            "poiCommunityCentres": 9,
+            "poiParks": 11,
+            "poiBenches": 250,
+            "poiCafes": 32,
+            "poiSports": 10
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990322",
+              "name": "Tussendijken",
+              "cdi": 55.95,
+              "score": 44,
+              "pctLivingAlone": 54.3,
+              "pctElderly65": 12.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990321",
+              "name": "Bospolder",
+              "cdi": 55.56,
+              "score": 44,
+              "pctLivingAlone": 49.3,
+              "pctElderly65": 11.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990328",
+              "name": "Witte Dorp",
+              "cdi": 55.23,
+              "score": 45,
+              "pctLivingAlone": 36,
+              "pctElderly65": 18.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990324",
+              "name": "Nieuwe Westen",
+              "cdi": 54.07,
+              "score": 46,
+              "pctLivingAlone": 52,
+              "pctElderly65": 10.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990327",
+              "name": "Oud Mathenesse",
+              "cdi": 52.7,
+              "score": 47,
+              "pctLivingAlone": 59.6,
+              "pctElderly65": 11.1,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Feijenoord": {
+          "borough": "Feijenoord",
+          "city": "rotterdam",
+          "buurtCount": 9,
+          "avgScore": 53.2,
+          "avgCdi": 46.7,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 13,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 46.7,
+            "A": 39.3,
+            "S": 42.7,
+            "E": 37.8,
+            "H": 57.5,
+            "PT": 75,
+            "W": 57.7,
+            "D": 7.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 48.5,
+            "pctElderly65": 13,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 7.5,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.64
+          },
+          "infrastructure": {
+            "transitStops500m": 171,
+            "poiLibraries": 3,
+            "poiCommunityCentres": 10,
+            "poiParks": 15,
+            "poiBenches": 612,
+            "poiCafes": 31,
+            "poiSports": 5
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05991080",
+              "name": "Vreewijk",
+              "cdi": 58.58,
+              "score": 41,
+              "pctLivingAlone": 50.2,
+              "pctElderly65": 18.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991087",
+              "name": "Feijenoord",
+              "cdi": 52.71,
+              "score": 47,
+              "pctLivingAlone": 45.7,
+              "pctElderly65": 13,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991082",
+              "name": "Hillesluis",
+              "cdi": 51.5,
+              "score": 49,
+              "pctLivingAlone": 46.2,
+              "pctElderly65": 9.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991017",
+              "name": "Kop van Zuid",
+              "cdi": 51.27,
+              "score": 49,
+              "pctLivingAlone": 61.5,
+              "pctElderly65": 8.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05991081",
+              "name": "Bloemhof",
+              "cdi": 50.23,
+              "score": 50,
+              "pctLivingAlone": 47.3,
+              "pctElderly65": 10.7,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Centrum": {
+          "borough": "Centrum",
+          "city": "rotterdam",
+          "buurtCount": 6,
+          "avgScore": 62.2,
+          "avgCdi": 37.9,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 14,
+          "totalBoroughs": 14,
+          "components": {
+            "V": 52.5,
+            "A": 33.4,
+            "S": 79.3,
+            "E": 31.9,
+            "H": 77.7,
+            "PT": 50,
+            "W": 63,
+            "D": 8.7,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 60.7,
+            "pctElderly65": 11,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 4.9,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.68
+          },
+          "infrastructure": {
+            "transitStops500m": 228,
+            "poiLibraries": 10,
+            "poiCommunityCentres": 6,
+            "poiParks": 15,
+            "poiBenches": 673,
+            "poiCafes": 131,
+            "poiSports": 6
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05990118",
+              "name": "Nieuwe Werk",
+              "cdi": 42.43,
+              "score": 58,
+              "pctLivingAlone": 56.7,
+              "pctElderly65": 12.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990119",
+              "name": "Dijkzigt",
+              "cdi": 40.94,
+              "score": 59,
+              "pctLivingAlone": 64.2,
+              "pctElderly65": 5.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990111",
+              "name": "Oude Westen",
+              "cdi": 39.59,
+              "score": 60,
+              "pctLivingAlone": 55.6,
+              "pctElderly65": 16.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990113",
+              "name": "Cs Kwartier",
+              "cdi": 38.74,
+              "score": 61,
+              "pctLivingAlone": 61.4,
+              "pctElderly65": 11.2,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05990112",
+              "name": "Cool",
+              "cdi": 33.29,
+              "score": 67,
+              "pctLivingAlone": 63.1,
+              "pctElderly65": 10.1,
+              "pctSingleParent": 0
+            }
+          ]
+        }
+      },
+      "recentInterventions": []
+    },
+    "amsterdam": {
+      "boroughs": [
+        {
+          "borough": "Noord",
+          "city": "amsterdam",
+          "buurtCount": 68,
+          "avgScore": 43.85,
+          "avgCdi": 56.18,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 41.36,
+          "avgA": 52.81,
+          "avgS": 15.37
+        },
+        {
+          "borough": "Weesp",
+          "city": "amsterdam",
+          "buurtCount": 24,
+          "avgScore": 43.88,
+          "avgCdi": 56.1,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 37.42,
+          "avgA": 53.23,
+          "avgS": 10.01
+        },
+        {
+          "borough": "Zuidoost",
+          "city": "amsterdam",
+          "buurtCount": 46,
+          "avgScore": 45.37,
+          "avgCdi": 54.64,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 44.52,
+          "avgA": 47.83,
+          "avgS": 19.62
+        },
+        {
+          "borough": "Nieuw-West",
+          "city": "amsterdam",
+          "buurtCount": 72,
+          "avgScore": 46.04,
+          "avgCdi": 54.01,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 41.99,
+          "avgA": 45.95,
+          "avgS": 15.45
+        },
+        {
+          "borough": "Oost",
+          "city": "amsterdam",
+          "buurtCount": 71,
+          "avgScore": 48.87,
+          "avgCdi": 51.17,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 42.87,
+          "avgA": 43.74,
+          "avgS": 25.17
+        },
+        {
+          "borough": "Westpoort",
+          "city": "amsterdam",
+          "buurtCount": 12,
+          "avgScore": 48.92,
+          "avgCdi": 51.07,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 49.58,
+          "avgA": 50.74,
+          "avgS": 46.09
+        },
+        {
+          "borough": "Zuid",
+          "city": "amsterdam",
+          "buurtCount": 77,
+          "avgScore": 50.51,
+          "avgCdi": 49.52,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 46.15,
+          "avgA": 42.03,
+          "avgS": 34.61
+        },
+        {
+          "borough": "West",
+          "city": "amsterdam",
+          "buurtCount": 72,
+          "avgScore": 53.1,
+          "avgCdi": 46.89,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 43.38,
+          "avgA": 41.53,
+          "avgS": 39.99
+        },
+        {
+          "borough": "Centrum",
+          "city": "amsterdam",
+          "buurtCount": 69,
+          "avgScore": 53.55,
+          "avgCdi": 46.45,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 49.22,
+          "avgA": 37.75,
+          "avgS": 45.8
+        }
+      ],
+      "details": {
+        "Noord": {
+          "borough": "Noord",
+          "city": "amsterdam",
+          "buurtCount": 68,
+          "avgScore": 43.9,
+          "avgCdi": 56.2,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 1,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 41.4,
+            "A": 52.8,
+            "S": 15.4,
+            "E": 34.2,
+            "H": 50.1,
+            "PT": 81.8,
+            "W": 84.3,
+            "D": 21,
+            "R": 5.9
+          },
+          "demographics": {
+            "pctLivingAlone": 37.6,
+            "pctElderly65": 14.7,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 6.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.98
+          },
+          "infrastructure": {
+            "transitStops500m": 663,
+            "poiLibraries": 6,
+            "poiCommunityCentres": 48,
+            "poiParks": 86,
+            "poiBenches": 1479,
+            "poiCafes": 86,
+            "poiSports": 37
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363NQ01",
+              "name": "Noorderstrook-West",
+              "cdi": 70.67,
+              "score": 29,
+              "pctLivingAlone": 85,
+              "pctElderly65": 7.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363NQ08",
+              "name": "Holysloot",
+              "cdi": 69.75,
+              "score": 30,
+              "pctLivingAlone": 28.6,
+              "pctElderly65": 21.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363NA01",
+              "name": "Noorder IJplas",
+              "cdi": 67.86,
+              "score": 32,
+              "pctLivingAlone": 28.6,
+              "pctElderly65": 32.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363NQ09",
+              "name": "Ransdorp",
+              "cdi": 67.29,
+              "score": 33,
+              "pctLivingAlone": 33.3,
+              "pctElderly65": 25,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363NC01",
+              "name": "Tuindorp Oostzaan-West",
+              "cdi": 67.27,
+              "score": 33,
+              "pctLivingAlone": 47.3,
+              "pctElderly65": 33.9,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Weesp": {
+          "borough": "Weesp",
+          "city": "amsterdam",
+          "buurtCount": 24,
+          "avgScore": 43.9,
+          "avgCdi": 56.1,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 2,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 37.4,
+            "A": 53.2,
+            "S": 10,
+            "E": 36.3,
+            "H": 38.8,
+            "PT": 79.7,
+            "W": 89.7,
+            "D": 21,
+            "R": 4.2
+          },
+          "demographics": {
+            "pctLivingAlone": 29.4,
+            "pctElderly65": 16.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 3.9,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 1.04
+          },
+          "infrastructure": {
+            "transitStops500m": 325,
+            "poiLibraries": 4,
+            "poiCommunityCentres": 4,
+            "poiParks": 10,
+            "poiBenches": 346,
+            "poiCafes": 9,
+            "poiSports": 13
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363SD04",
+              "name": "Weesp-Zuid I",
+              "cdi": 73.19,
+              "score": 27,
+              "pctLivingAlone": 62.5,
+              "pctElderly65": 51.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363SE04",
+              "name": "Oostelijke Vechtoever",
+              "cdi": 66.98,
+              "score": 33,
+              "pctLivingAlone": 30.4,
+              "pctElderly65": 26.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363SE01",
+              "name": "Aetsveldsepolder",
+              "cdi": 63.13,
+              "score": 37,
+              "pctLivingAlone": 23.1,
+              "pctElderly65": 22.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363SC04",
+              "name": "Hogewey-Zuid",
+              "cdi": 62.2,
+              "score": 38,
+              "pctLivingAlone": 41.2,
+              "pctElderly65": 29.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363SC02",
+              "name": "Hogewey-Noord",
+              "cdi": 60.3,
+              "score": 40,
+              "pctLivingAlone": 37.3,
+              "pctElderly65": 21.3,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Zuidoost": {
+          "borough": "Zuidoost",
+          "city": "amsterdam",
+          "buurtCount": 46,
+          "avgScore": 45.4,
+          "avgCdi": 54.6,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 3,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 44.5,
+            "A": 47.8,
+            "S": 19.6,
+            "E": 29.9,
+            "H": 62.4,
+            "PT": 74.8,
+            "W": 77.6,
+            "D": 16.1,
+            "R": 7.6
+          },
+          "demographics": {
+            "pctLivingAlone": 46.6,
+            "pctElderly65": 11.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.7
+          },
+          "infrastructure": {
+            "transitStops500m": 648,
+            "poiLibraries": 15,
+            "poiCommunityCentres": 36,
+            "poiParks": 50,
+            "poiBenches": 1469,
+            "poiCafes": 32,
+            "poiSports": 22
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363TF01",
+              "name": "G-buurt-Oost",
+              "cdi": 67.56,
+              "score": 32,
+              "pctLivingAlone": 62.7,
+              "pctElderly65": 32.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363TA07",
+              "name": "Hoge Dijk",
+              "cdi": 66.25,
+              "score": 34,
+              "pctLivingAlone": 85,
+              "pctElderly65": 9.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363TF03",
+              "name": "Kantershof",
+              "cdi": 64.31,
+              "score": 36,
+              "pctLivingAlone": 59.1,
+              "pctElderly65": 22.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363TL03",
+              "name": "Reigersbos 3",
+              "cdi": 64.13,
+              "score": 36,
+              "pctLivingAlone": 53.6,
+              "pctElderly65": 19.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363TJ02",
+              "name": "Holendrecht-Oost",
+              "cdi": 63.64,
+              "score": 36,
+              "pctLivingAlone": 37.6,
+              "pctElderly65": 28.6,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Nieuw-West": {
+          "borough": "Nieuw-West",
+          "city": "amsterdam",
+          "buurtCount": 72,
+          "avgScore": 46,
+          "avgCdi": 54,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 4,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 42,
+            "A": 45.9,
+            "S": 15.5,
+            "E": 27.5,
+            "H": 59.7,
+            "PT": 76.4,
+            "W": 67,
+            "D": 17.4,
+            "R": 6.9
+          },
+          "demographics": {
+            "pctLivingAlone": 44.9,
+            "pctElderly65": 10.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.6,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.88
+          },
+          "infrastructure": {
+            "transitStops500m": 997,
+            "poiLibraries": 13,
+            "poiCommunityCentres": 41,
+            "poiParks": 86,
+            "poiBenches": 1463,
+            "poiCafes": 81,
+            "poiSports": 41
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363FF03",
+              "name": "Bedrijvenpark Lutkemeer",
+              "cdi": 68.5,
+              "score": 32,
+              "pctLivingAlone": 66.7,
+              "pctElderly65": 14.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363FA03",
+              "name": "Sloterdijk Poort-Zuid",
+              "cdi": 68.3,
+              "score": 32,
+              "pctLivingAlone": 85,
+              "pctElderly65": 4.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363FQ10",
+              "name": "Nieuwe Meer",
+              "cdi": 64.8,
+              "score": 35,
+              "pctLivingAlone": 65,
+              "pctElderly65": 9.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363FF01",
+              "name": "Osdorper Bovenpolder",
+              "cdi": 64.47,
+              "score": 36,
+              "pctLivingAlone": 38,
+              "pctElderly65": 22.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363FP06",
+              "name": "Riekerhaven",
+              "cdi": 62.8,
+              "score": 37,
+              "pctLivingAlone": 85,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Oost": {
+          "borough": "Oost",
+          "city": "amsterdam",
+          "buurtCount": 71,
+          "avgScore": 48.9,
+          "avgCdi": 51.2,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 5,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 42.9,
+            "A": 43.7,
+            "S": 25.2,
+            "E": 27.1,
+            "H": 62.2,
+            "PT": 74.4,
+            "W": 59.8,
+            "D": 17.7,
+            "R": 7.7
+          },
+          "demographics": {
+            "pctLivingAlone": 46.2,
+            "pctElderly65": 10,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 6.7,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.75
+          },
+          "infrastructure": {
+            "transitStops500m": 1069,
+            "poiLibraries": 17,
+            "poiCommunityCentres": 153,
+            "poiParks": 89,
+            "poiBenches": 3036,
+            "poiCafes": 252,
+            "poiSports": 67
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363MH06",
+              "name": "Bovendiep/Diemerpark",
+              "cdi": 66.46,
+              "score": 34,
+              "pctLivingAlone": 50,
+              "pctElderly65": 23.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363MN06",
+              "name": "Sportpark Middenmeer-Zuid",
+              "cdi": 66.32,
+              "score": 34,
+              "pctLivingAlone": 56.8,
+              "pctElderly65": 46.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363MN05",
+              "name": "Science Park-Zuid",
+              "cdi": 64.72,
+              "score": 35,
+              "pctLivingAlone": 85,
+              "pctElderly65": 1.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363MQ06",
+              "name": "Amstelkwartier-Zuid",
+              "cdi": 64.47,
+              "score": 36,
+              "pctLivingAlone": 84.6,
+              "pctElderly65": 6.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363MQ03",
+              "name": "Amstelglorie",
+              "cdi": 63.11,
+              "score": 37,
+              "pctLivingAlone": 42.9,
+              "pctElderly65": 20,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Westpoort": {
+          "borough": "Westpoort",
+          "city": "amsterdam",
+          "buurtCount": 12,
+          "avgScore": 48.9,
+          "avgCdi": 51.1,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 6,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 49.6,
+            "A": 50.7,
+            "S": 46.1,
+            "E": 45.8,
+            "H": 54.2,
+            "PT": 53.6,
+            "W": 53.8,
+            "D": 47.8,
+            "R": 45.8
+          },
+          "demographics": {
+            "pctLivingAlone": 7.1,
+            "pctElderly65": 0,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 0,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.84
+          },
+          "infrastructure": {
+            "transitStops500m": 22,
+            "poiLibraries": 0,
+            "poiCommunityCentres": 0,
+            "poiParks": 5,
+            "poiBenches": 37,
+            "poiCafes": 11,
+            "poiSports": 1
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363BB03",
+              "name": "Minervahaven-Noordoost",
+              "cdi": 62.86,
+              "score": 37,
+              "pctLivingAlone": 85,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363BA05",
+              "name": "Vervoerscentrum",
+              "cdi": 50,
+              "score": 50,
+              "pctLivingAlone": 0,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363BB01",
+              "name": "Coenhaven",
+              "cdi": 50,
+              "score": 50,
+              "pctLivingAlone": 0,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363BB02",
+              "name": "Vlothaven",
+              "cdi": 50,
+              "score": 50,
+              "pctLivingAlone": 0,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363BA02",
+              "name": "Amerikahaven",
+              "cdi": 50,
+              "score": 50,
+              "pctLivingAlone": 0,
+              "pctElderly65": 0,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Zuid": {
+          "borough": "Zuid",
+          "city": "amsterdam",
+          "buurtCount": 77,
+          "avgScore": 50.5,
+          "avgCdi": 49.5,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 7,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 46.2,
+            "A": 42,
+            "S": 34.6,
+            "E": 32.7,
+            "H": 62.6,
+            "PT": 76,
+            "W": 58.4,
+            "D": 12.9,
+            "R": 5.2
+          },
+          "demographics": {
+            "pctLivingAlone": 48.8,
+            "pctElderly65": 14.2,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 6.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.58
+          },
+          "infrastructure": {
+            "transitStops500m": 1236,
+            "poiLibraries": 22,
+            "poiCommunityCentres": 76,
+            "poiParks": 238,
+            "poiBenches": 5822,
+            "poiCafes": 722,
+            "poiSports": 129
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363KQ01",
+              "name": "Amsterdamse Bos",
+              "cdi": 69.96,
+              "score": 30,
+              "pctLivingAlone": 50,
+              "pctElderly65": 30.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363KD10",
+              "name": "Harmoniehofbuurt",
+              "cdi": 65.45,
+              "score": 35,
+              "pctLivingAlone": 61.8,
+              "pctElderly65": 49.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363KR03",
+              "name": "Buitenveldert-Zuidoost",
+              "cdi": 64.41,
+              "score": 36,
+              "pctLivingAlone": 60.5,
+              "pctElderly65": 21.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363KA06",
+              "name": "Bedrijventerrein Schinkel",
+              "cdi": 62.86,
+              "score": 37,
+              "pctLivingAlone": 85,
+              "pctElderly65": 5.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363KQ05",
+              "name": "Buitenveldert-Zuidwest",
+              "cdi": 62.16,
+              "score": 38,
+              "pctLivingAlone": 58.8,
+              "pctElderly65": 27.8,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "West": {
+          "borough": "West",
+          "city": "amsterdam",
+          "buurtCount": 72,
+          "avgScore": 53.1,
+          "avgCdi": 46.9,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 8,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 43.4,
+            "A": 41.5,
+            "S": 40,
+            "E": 26.3,
+            "H": 64.2,
+            "PT": 72.3,
+            "W": 59.9,
+            "D": 12.7,
+            "R": 6.9
+          },
+          "demographics": {
+            "pctLivingAlone": 48.7,
+            "pctElderly65": 10,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.3,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.49
+          },
+          "infrastructure": {
+            "transitStops500m": 1233,
+            "poiLibraries": 32,
+            "poiCommunityCentres": 109,
+            "poiParks": 242,
+            "poiBenches": 5767,
+            "poiCafes": 766,
+            "poiSports": 77
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363EC02",
+              "name": "Houthavens-Oost",
+              "cdi": 62.18,
+              "score": 38,
+              "pctLivingAlone": 56.8,
+              "pctElderly65": 22.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363EM03",
+              "name": "Orteliusbuurt-Zuid",
+              "cdi": 55.91,
+              "score": 44,
+              "pctLivingAlone": 58.4,
+              "pctElderly65": 13.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363ED04",
+              "name": "Robert Scottbuurt-West",
+              "cdi": 54.77,
+              "score": 45,
+              "pctLivingAlone": 72.5,
+              "pctElderly65": 13.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363EB08",
+              "name": "Zeeheldenbuurt",
+              "cdi": 53.91,
+              "score": 46,
+              "pctLivingAlone": 55.9,
+              "pctElderly65": 12.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363EA03",
+              "name": "Woon- en Groengebied Sloterdijk",
+              "cdi": 53.33,
+              "score": 47,
+              "pctLivingAlone": 46.3,
+              "pctElderly65": 6,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Centrum": {
+          "borough": "Centrum",
+          "city": "amsterdam",
+          "buurtCount": 69,
+          "avgScore": 53.6,
+          "avgCdi": 46.5,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 9,
+          "totalBoroughs": 9,
+          "components": {
+            "V": 49.2,
+            "A": 37.7,
+            "S": 45.8,
+            "E": 28.7,
+            "H": 74.3,
+            "PT": 69.3,
+            "W": 57.6,
+            "D": 8.1,
+            "R": 0.7
+          },
+          "demographics": {
+            "pctLivingAlone": 62.5,
+            "pctElderly65": 14.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.6,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.51
+          },
+          "infrastructure": {
+            "transitStops500m": 1646,
+            "poiLibraries": 62,
+            "poiCommunityCentres": 126,
+            "poiParks": 173,
+            "poiBenches": 5866,
+            "poiCafes": 2371,
+            "poiSports": 61
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU0363AF05",
+              "name": "Nieuwmarkt",
+              "cdi": 57.78,
+              "score": 42,
+              "pctLivingAlone": 68.7,
+              "pctElderly65": 30,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363AB10",
+              "name": "Elandsgrachtbuurt",
+              "cdi": 54.74,
+              "score": 45,
+              "pctLivingAlone": 66.6,
+              "pctElderly65": 18.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363AF07",
+              "name": "Valkenburg",
+              "cdi": 53.72,
+              "score": 46,
+              "pctLivingAlone": 67.9,
+              "pctElderly65": 24.2,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363AK08",
+              "name": "Kazernebuurt",
+              "cdi": 53.53,
+              "score": 46,
+              "pctLivingAlone": 65.3,
+              "pctElderly65": 25,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU0363AC01",
+              "name": "Langestraat e.o.",
+              "cdi": 53.25,
+              "score": 47,
+              "pctLivingAlone": 57.7,
+              "pctElderly65": 20.8,
+              "pctSingleParent": 0
+            }
+          ]
+        }
+      },
+      "recentInterventions": []
+    },
+    "denhaag": {
+      "boroughs": [
+        {
+          "borough": "Loosduinen",
+          "city": "denhaag",
+          "buurtCount": 13,
+          "avgScore": 41.23,
+          "avgCdi": 58.7,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 50.73,
+          "avgA": 54.1,
+          "avgS": 22.12
+        },
+        {
+          "borough": "Scheveningen",
+          "city": "denhaag",
+          "buurtCount": 14,
+          "avgScore": 47.14,
+          "avgCdi": 52.86,
+          "riskLevel": "severe",
+          "color": "red",
+          "avgV": 45.34,
+          "avgA": 51.77,
+          "avgS": 33.56
+        },
+        {
+          "borough": "Escamp",
+          "city": "denhaag",
+          "buurtCount": 21,
+          "avgScore": 48.86,
+          "avgCdi": 51.16,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 33.91,
+          "avgA": 45.9,
+          "avgS": 13.89
+        },
+        {
+          "borough": "Haagse Hout",
+          "city": "denhaag",
+          "buurtCount": 14,
+          "avgScore": 50.71,
+          "avgCdi": 49.38,
+          "riskLevel": "high",
+          "color": "orange",
+          "avgV": 43.86,
+          "avgA": 46.36,
+          "avgS": 37.54
+        },
+        {
+          "borough": "Leidschenveen-Ypenburg",
+          "city": "denhaag",
+          "buurtCount": 15,
+          "avgScore": 51.27,
+          "avgCdi": 48.77,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 24.79,
+          "avgA": 58.82,
+          "avgS": 26.91
+        },
+        {
+          "borough": "Segbroek",
+          "city": "denhaag",
+          "buurtCount": 12,
+          "avgScore": 57.33,
+          "avgCdi": 42.79,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "avgV": 35.37,
+          "avgA": 39.33,
+          "avgS": 40.5
+        },
+        {
+          "borough": "Centrum",
+          "city": "denhaag",
+          "buurtCount": 16,
+          "avgScore": 61.31,
+          "avgCdi": 38.64,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 37.9,
+          "avgA": 35.96,
+          "avgS": 56.4
+        },
+        {
+          "borough": "Laak",
+          "city": "denhaag",
+          "buurtCount": 8,
+          "avgScore": 61.75,
+          "avgCdi": 38.21,
+          "riskLevel": "low",
+          "color": "green",
+          "avgV": 29.22,
+          "avgA": 40.79,
+          "avgS": 51.03
+        }
+      ],
+      "details": {
+        "Loosduinen": {
+          "borough": "Loosduinen",
+          "city": "denhaag",
+          "buurtCount": 13,
+          "avgScore": 41.2,
+          "avgCdi": 58.7,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 1,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 50.7,
+            "A": 54.1,
+            "S": 22.1,
+            "E": 49.5,
+            "H": 52.3,
+            "PT": 81.2,
+            "W": 75.8,
+            "D": 35.9,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 49.8,
+            "pctElderly65": 29.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 3.1,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.95
+          },
+          "infrastructure": {
+            "transitStops500m": 178,
+            "poiLibraries": 4,
+            "poiCommunityCentres": 15,
+            "poiParks": 24,
+            "poiBenches": 261,
+            "poiCafes": 8,
+            "poiSports": 13
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05181591",
+              "name": "Kijkduin",
+              "cdi": 71.08,
+              "score": 29,
+              "pctLivingAlone": 40.4,
+              "pctElderly65": 40.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181894",
+              "name": "Waldeck-Noord",
+              "cdi": 69.84,
+              "score": 30,
+              "pctLivingAlone": 61.5,
+              "pctElderly65": 53.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181492",
+              "name": "Bohemen en Meer en Bos",
+              "cdi": 64.14,
+              "score": 36,
+              "pctLivingAlone": 56.5,
+              "pctElderly65": 39.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181785",
+              "name": "Kerketuinen en Zichtenburg",
+              "cdi": 60.76,
+              "score": 39,
+              "pctLivingAlone": 85,
+              "pctElderly65": 3.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181697",
+              "name": "Kraayenstein en Vroondaal",
+              "cdi": 59.61,
+              "score": 40,
+              "pctLivingAlone": 34.6,
+              "pctElderly65": 13.7,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Scheveningen": {
+          "borough": "Scheveningen",
+          "city": "denhaag",
+          "buurtCount": 14,
+          "avgScore": 47.1,
+          "avgCdi": 52.9,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 2,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 45.3,
+            "A": 51.8,
+            "S": 33.6,
+            "E": 42.2,
+            "H": 49.2,
+            "PT": 79.3,
+            "W": 77.8,
+            "D": 26.6,
+            "R": 3.6
+          },
+          "demographics": {
+            "pctLivingAlone": 44.1,
+            "pctElderly65": 23.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 4.2,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.69
+          },
+          "infrastructure": {
+            "transitStops500m": 175,
+            "poiLibraries": 2,
+            "poiCommunityCentres": 6,
+            "poiParks": 11,
+            "poiBenches": 436,
+            "poiCafes": 47,
+            "poiSports": 19
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05180374",
+              "name": "Duttendel",
+              "cdi": 63.04,
+              "score": 37,
+              "pctLivingAlone": 39,
+              "pctElderly65": 33.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180702",
+              "name": "Vissershaven",
+              "cdi": 59.51,
+              "score": 40,
+              "pctLivingAlone": 47.1,
+              "pctElderly65": 19.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180373",
+              "name": "Westbroekpark",
+              "cdi": 59.08,
+              "score": 41,
+              "pctLivingAlone": 49.1,
+              "pctElderly65": 50.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180271",
+              "name": "Belgisch Park",
+              "cdi": 58.38,
+              "score": 42,
+              "pctLivingAlone": 49.8,
+              "pctElderly65": 20.8,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180800",
+              "name": "Duindorp",
+              "cdi": 57.99,
+              "score": 42,
+              "pctLivingAlone": 42.7,
+              "pctElderly65": 16.7,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Escamp": {
+          "borough": "Escamp",
+          "city": "denhaag",
+          "buurtCount": 21,
+          "avgScore": 48.9,
+          "avgCdi": 51.2,
+          "riskLevel": "high",
+          "color": "orange",
+          "rankInCity": 3,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 33.9,
+            "A": 45.9,
+            "S": 13.9,
+            "E": 22.3,
+            "H": 48.1,
+            "PT": 77.9,
+            "W": 62.2,
+            "D": 23.3,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 46.7,
+            "pctElderly65": 15.1,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 6.4,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.72
+          },
+          "infrastructure": {
+            "transitStops500m": 339,
+            "poiLibraries": 5,
+            "poiCommunityCentres": 15,
+            "poiParks": 40,
+            "poiBenches": 209,
+            "poiCafes": 32,
+            "poiSports": 28
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05183536",
+              "name": "Zuiderpark",
+              "cdi": 82.87,
+              "score": 17,
+              "pctLivingAlone": 79.2,
+              "pctElderly65": 56.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183399",
+              "name": "De Uithof",
+              "cdi": 72.95,
+              "score": 27,
+              "pctLivingAlone": 52.4,
+              "pctElderly65": 30.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183398",
+              "name": "Dreven en Gaarden",
+              "cdi": 57.77,
+              "score": 42,
+              "pctLivingAlone": 48.2,
+              "pctElderly65": 15.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05184001",
+              "name": "Erasmus Veld",
+              "cdi": 55.71,
+              "score": 44,
+              "pctLivingAlone": 37.6,
+              "pctElderly65": 18.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183639",
+              "name": "Moerwijk-Zuid",
+              "cdi": 53.08,
+              "score": 47,
+              "pctLivingAlone": 54.1,
+              "pctElderly65": 10.7,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Haagse Hout": {
+          "borough": "Haagse Hout",
+          "city": "denhaag",
+          "buurtCount": 14,
+          "avgScore": 50.7,
+          "avgCdi": 49.4,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 4,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 43.9,
+            "A": 46.4,
+            "S": 37.5,
+            "E": 36.9,
+            "H": 52.3,
+            "PT": 70.1,
+            "W": 67.6,
+            "D": 28.2,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 49.8,
+            "pctElderly65": 22.9,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 4.9,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.81
+          },
+          "infrastructure": {
+            "transitStops500m": 306,
+            "poiLibraries": 7,
+            "poiCommunityCentres": 16,
+            "poiParks": 20,
+            "poiBenches": 526,
+            "poiCafes": 27,
+            "poiSports": 15
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05182449",
+              "name": "Haagse Bos",
+              "cdi": 69.8,
+              "score": 30,
+              "pctLivingAlone": 67.2,
+              "pctElderly65": 41.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180476",
+              "name": "Duinzigt",
+              "cdi": 65.09,
+              "score": 35,
+              "pctLivingAlone": 55.9,
+              "pctElderly65": 51.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180475",
+              "name": "Uilennest",
+              "cdi": 58.06,
+              "score": 42,
+              "pctLivingAlone": 51.4,
+              "pctElderly65": 25.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05182568",
+              "name": "Marlot",
+              "cdi": 54.89,
+              "score": 45,
+              "pctLivingAlone": 27.3,
+              "pctElderly65": 26.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05180477",
+              "name": "Waalsdorp",
+              "cdi": 51.9,
+              "score": 48,
+              "pctLivingAlone": 35.2,
+              "pctElderly65": 20.3,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Leidschenveen-Ypenburg": {
+          "borough": "Leidschenveen-Ypenburg",
+          "city": "denhaag",
+          "buurtCount": 15,
+          "avgScore": 51.3,
+          "avgCdi": 48.8,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 5,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 24.8,
+            "A": 58.8,
+            "S": 26.9,
+            "E": 23.1,
+            "H": 26.9,
+            "PT": 82.2,
+            "W": 79.5,
+            "D": 42.6,
+            "R": 10
+          },
+          "demographics": {
+            "pctLivingAlone": 21.4,
+            "pctElderly65": 9.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 2.5,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.91
+          },
+          "infrastructure": {
+            "transitStops500m": 99,
+            "poiLibraries": 1,
+            "poiCommunityCentres": 3,
+            "poiParks": 9,
+            "poiBenches": 357,
+            "poiCafes": 3,
+            "poiSports": 7
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05184316",
+              "name": "Vlietzoom-Oost",
+              "cdi": 61.3,
+              "score": 39,
+              "pctLivingAlone": 30,
+              "pctElderly65": 28.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05184110",
+              "name": "De Reef",
+              "cdi": 52.37,
+              "score": 48,
+              "pctLivingAlone": 53.7,
+              "pctElderly65": 4.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05184214",
+              "name": "Waterbuurt",
+              "cdi": 52.13,
+              "score": 48,
+              "pctLivingAlone": 26.8,
+              "pctElderly65": 9.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05184106",
+              "name": "Vlietzoom-West",
+              "cdi": 51.24,
+              "score": 49,
+              "pctLivingAlone": 43.8,
+              "pctElderly65": 21.6,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05184213",
+              "name": "Singels",
+              "cdi": 51.19,
+              "score": 49,
+              "pctLivingAlone": 26.7,
+              "pctElderly65": 12.3,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Segbroek": {
+          "borough": "Segbroek",
+          "city": "denhaag",
+          "buurtCount": 12,
+          "avgScore": 57.3,
+          "avgCdi": 42.8,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 6,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 35.4,
+            "A": 39.3,
+            "S": 40.5,
+            "E": 24.9,
+            "H": 48.2,
+            "PT": 73.3,
+            "W": 58.8,
+            "D": 8.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 46.8,
+            "pctElderly65": 16.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 3.8,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.46
+          },
+          "infrastructure": {
+            "transitStops500m": 234,
+            "poiLibraries": 7,
+            "poiCommunityCentres": 20,
+            "poiParks": 23,
+            "poiBenches": 400,
+            "poiCafes": 59,
+            "poiSports": 25
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05181250",
+              "name": "Bloemenbuurt-West",
+              "cdi": 50.79,
+              "score": 49,
+              "pctLivingAlone": 38.9,
+              "pctElderly65": 27.3,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181309",
+              "name": "Vogelwijk",
+              "cdi": 49.78,
+              "score": 50,
+              "pctLivingAlone": 22.2,
+              "pctElderly65": 20.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05182055",
+              "name": "Valkenboskwartier",
+              "cdi": 44.88,
+              "score": 55,
+              "pctLivingAlone": 54.1,
+              "pctElderly65": 10.9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181953",
+              "name": "Vruchtenbuurt",
+              "cdi": 44.48,
+              "score": 56,
+              "pctLivingAlone": 35.4,
+              "pctElderly65": 17.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05181143",
+              "name": "Sweelinckplein en omgeving",
+              "cdi": 44.35,
+              "score": 56,
+              "pctLivingAlone": 49.9,
+              "pctElderly65": 13.2,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Centrum": {
+          "borough": "Centrum",
+          "city": "denhaag",
+          "buurtCount": 16,
+          "avgScore": 61.3,
+          "avgCdi": 38.6,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 7,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 37.9,
+            "A": 36,
+            "S": 56.4,
+            "E": 17.6,
+            "H": 62.8,
+            "PT": 66.7,
+            "W": 48.8,
+            "D": 12.5,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 57.5,
+            "pctElderly65": 12.6,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 8.7,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.52
+          },
+          "infrastructure": {
+            "transitStops500m": 389,
+            "poiLibraries": 16,
+            "poiCommunityCentres": 32,
+            "poiParks": 49,
+            "poiBenches": 516,
+            "poiCafes": 326,
+            "poiSports": 36
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05180546",
+              "name": "Archipelbuurt",
+              "cdi": 48.31,
+              "score": 52,
+              "pctLivingAlone": 55.3,
+              "pctElderly65": 23.5,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05182916",
+              "name": "Schildersbuurt-Noord",
+              "cdi": 46.6,
+              "score": 53,
+              "pctLivingAlone": 47.4,
+              "pctElderly65": 14,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05182917",
+              "name": "Schildersbuurt-Oost",
+              "cdi": 46.18,
+              "score": 54,
+              "pctLivingAlone": 41.4,
+              "pctElderly65": 12,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05182347",
+              "name": "Willemspark",
+              "cdi": 43.63,
+              "score": 56,
+              "pctLivingAlone": 60.9,
+              "pctElderly65": 18.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183032",
+              "name": "Transvaalkwartier-Noord",
+              "cdi": 42.9,
+              "score": 57,
+              "pctLivingAlone": 50.9,
+              "pctElderly65": 11.9,
+              "pctSingleParent": 0
+            }
+          ]
+        },
+        "Laak": {
+          "borough": "Laak",
+          "city": "denhaag",
+          "buurtCount": 8,
+          "avgScore": 61.8,
+          "avgCdi": 38.2,
+          "riskLevel": "moderate",
+          "color": "yellow",
+          "rankInCity": 8,
+          "totalBoroughs": 8,
+          "components": {
+            "V": 29.2,
+            "A": 40.8,
+            "S": 51,
+            "E": 8,
+            "H": 55.2,
+            "PT": 70.4,
+            "W": 56.2,
+            "D": 18.8,
+            "R": 0
+          },
+          "demographics": {
+            "pctLivingAlone": 51.9,
+            "pctElderly65": 7.5,
+            "pctSingleParent": 0,
+            "lowIncomeIndex": 7.1,
+            "populationTurnover": 0,
+            "amenityDistanceKm": 0.64
+          },
+          "infrastructure": {
+            "transitStops500m": 173,
+            "poiLibraries": 3,
+            "poiCommunityCentres": 7,
+            "poiParks": 15,
+            "poiBenches": 409,
+            "poiCafes": 21,
+            "poiSports": 18
+          },
+          "topBuurten": [
+            {
+              "buurtCode": "BU05183721",
+              "name": "Groente- en Fruitmarkt",
+              "cdi": 47.8,
+              "score": 52,
+              "pctLivingAlone": 42.3,
+              "pctElderly65": 6.1,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183822",
+              "name": "Laakhaven-West",
+              "cdi": 46.96,
+              "score": 53,
+              "pctLivingAlone": 63.1,
+              "pctElderly65": 7.7,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183825",
+              "name": "Laakkwartier-Oost",
+              "cdi": 42.85,
+              "score": 57,
+              "pctLivingAlone": 52.8,
+              "pctElderly65": 8.4,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183826",
+              "name": "Noordpolderbuurt",
+              "cdi": 38.84,
+              "score": 61,
+              "pctLivingAlone": 54.7,
+              "pctElderly65": 9,
+              "pctSingleParent": 0
+            },
+            {
+              "buurtCode": "BU05183960",
+              "name": "Binckhorst",
+              "cdi": 37.72,
+              "score": 62,
+              "pctLivingAlone": 46.1,
+              "pctElderly65": 4.7,
+              "pctSingleParent": 0
+            }
+          ]
+        }
+      },
+      "recentInterventions": []
+    }
   }
 }
