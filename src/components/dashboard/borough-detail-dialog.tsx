@@ -455,6 +455,8 @@ function MicroStat({ label, value }: { label: string; value: number }) {
   );
 }
 
+const NOT_PUBLISHED = "Not published by CBS at buurt level";
+
 function DemographicsBlock({
   demographics,
 }: {
@@ -466,10 +468,11 @@ function DemographicsBlock({
       <div className="grid grid-cols-3 gap-2">
         <FactCell label="Living alone" value={`${demographics.pctLivingAlone}%`} />
         <FactCell label="Age 65+" value={`${demographics.pctElderly65}%`} />
-        <FactCell label="Single parent" value={`${demographics.pctSingleParent}%`} />
+        {/* CBS no longer publishes these two at buurt level; the pipeline stores 0. */}
+        <FactCell label="Single parent" value="n/a" title={NOT_PUBLISHED} />
         <FactCell label="Low-income idx" value={demographics.lowIncomeIndex} />
-        <FactCell label="Pop. turnover" value={`${demographics.populationTurnover}%`} />
-        <FactCell label="Amenity dist." value={`${demographics.amenityDistanceKm} km`} />
+        <FactCell label="Pop. turnover" value="n/a" title={NOT_PUBLISHED} />
+        <FactCell label="GP distance" value={`${demographics.amenityDistanceKm} km`} />
       </div>
     </section>
   );
@@ -533,9 +536,17 @@ function TopBuurtenBlock({ buurten }: { buurten: BoroughDetailResponse["topBuurt
   );
 }
 
-function FactCell({ label, value }: { label: string; value: string | number }) {
+function FactCell({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: string | number;
+  title?: string;
+}) {
   return (
-    <div className="rounded-md border border-hairline bg-panel px-2.5 py-1.5">
+    <div className="rounded-md border border-hairline bg-panel px-2.5 py-1.5" title={title}>
       <div className="text-[10px] uppercase tracking-[0.06em] text-muted-foreground">{label}</div>
       <div className="mt-0.5 font-mono tabular text-[14px] font-medium leading-none text-foreground">
         {value}
