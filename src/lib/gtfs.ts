@@ -1,6 +1,9 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import AdmZip from "adm-zip";
+import { makeLogger } from "@/lib/log";
+
+const log = makeLogger("gtfs");
 
 const GTFS_URL = "https://gtfs.ovapi.nl/nl/gtfs-nl.zip";
 const CACHE_DIR = path.resolve(process.cwd(), ".cache");
@@ -25,14 +28,14 @@ async function fileAgeMs(file: string): Promise<number | null> {
 
 async function downloadGtfs(): Promise<void> {
   await fs.mkdir(CACHE_DIR, { recursive: true });
-  console.log(`[gtfs] downloading ${GTFS_URL} -> ${CACHE_FILE}`);
+  log.info(`downloading ${GTFS_URL} -> ${CACHE_FILE}`);
   const res = await fetch(GTFS_URL);
   if (!res.ok) {
     throw new Error(`gtfs download failed: ${res.status} ${res.statusText}`);
   }
   const buf = Buffer.from(await res.arrayBuffer());
   await fs.writeFile(CACHE_FILE, buf);
-  console.log(`[gtfs] saved ${buf.byteLength} bytes`);
+  log.info(`saved ${buf.byteLength} bytes`);
 }
 
 // OVapi rows are wrapped in outer double-quotes; inner fields with commas
@@ -106,7 +109,7 @@ function parseStopsCsv(csv: string): StopPoint[] {
       totalKept++;
     }
   }
-  console.log(`[gtfs] parsed ${totalParsed} stop rows, kept ${totalKept} inside NL bbox`);
+  log.info(`parsed ${totalParsed} stop rows, kept ${totalKept} inside NL bbox`);
   return out;
 }
 
@@ -119,15 +122,15 @@ export async function ensureGtfsStops(): Promise<StopPoint[]> {
 
   const ageMs = await fileAgeMs(CACHE_FILE);
   if (ageMs === null || ageMs > SEVEN_DAYS_MS) {
-    if (ageMs === null) console.log(`[gtfs] no cached zip at ${CACHE_FILE}`);
-    else console.log(`[gtfs] cached zip is ${Math.round(ageMs / 86_400_000)}d old (> 7d), refreshing`);
+    if (ageMs === null) log.info(`no cached zip at ${CACHE_FILE}`);
+    else log.info(`cached zip is ${Math.round(ageMs / 86_400_000)}d old (> 7d), refreshing`);
     await downloadGtfs();
   } else {
-    console.log(`[gtfs] using cached zip (${Math.round(ageMs / 3_600_000)}h old)`);
+    log.info(`using cached zip (${Math.round(ageMs / 3_600_000)}h old)`);
   }
 
   const stat = await fs.stat(CACHE_FILE);
-  console.log(`[gtfs] zip size: ${(stat.size / (1024 * 1024)).toFixed(1)} MiB`);
+  log.info(`zip size: ${(stat.size / (1024 * 1024)).toFixed(1)} MiB`);
 
   const zip = new AdmZip(CACHE_FILE);
   const entry = zip.getEntry("stops.txt");

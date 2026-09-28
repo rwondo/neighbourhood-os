@@ -27,7 +27,7 @@ export async function renderLeafletPdf(input: LeafletInput): Promise<Buffer> {
         </Text>
         <Text style={styles.block}>{input.body}</Text>
         <Text style={styles.block}>Locatie: {input.venue}</Text>
-        <Text style={styles.footer}>Een initiatief van de gemeente. Vragen? Bel 14 010.</Text>
+        <Text style={styles.footer}>Voorbeeldfolder, gemaakt met het Neighbourhood OS-prototype.</Text>
       </Page>
     </Document>
   );

@@ -253,9 +253,6 @@ function metricsForBorough(borough: string | null): CampaignMetrics | null {
   return syntheticMetrics(borough);
 }
 
-// Municipal baseline cost-per-connection from PRD (current-era programs).
-const BASELINE_EUR = 5_800;
-
 type StageKey = "distribution" | "engagement" | "conversion";
 
 const STAGE_META: Record<
@@ -292,7 +289,7 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
   if (!borough || !data) {
     return (
       <p className="text-[11px] text-muted-foreground">
-        Select a borough to see live campaign metrics.
+        Select a borough to see an example campaign funnel.
       </p>
     );
   }
@@ -308,11 +305,14 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
     (s, w) => s + w.connections,
     0,
   );
-  const savingsPct = Math.round((1 - punchline.value / BASELINE_EUR) * 100);
   const maxOptIns = Math.max(...data.perChannel.map((c) => c.optIns));
 
   return (
     <div className="space-y-2.5">
+      <p className="rounded-md border border-hairline bg-muted/30 px-2.5 py-1.5 text-[10.5px] leading-snug text-muted-foreground">
+        Illustrative numbers. No campaign has been run: these are fixed example values, not
+        measurements.
+      </p>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -377,21 +377,19 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
             previousValue={engagement[engagement.length - 1]?.value ?? null}
           />
 
-          {/* PUNCHLINE — pulled OUT of the row list. This is the receipt. */}
+          {/* Cost per connection, pulled out of the row list. */}
           {punchline ? (
             <CostPunchline
               value={punchline.value}
-              baseline={BASELINE_EUR}
-              savingsPct={savingsPct}
               connections={conversion[conversion.length - 1]?.value ?? 0}
             />
           ) : null}
 
-          {/* PAIRED PROOF — connections velocity + opt-ins composition share one frame */}
+          {/* Connections per week + opt-ins per channel share one frame */}
           <div className="overflow-hidden rounded-md border border-hairline bg-panel">
             <div className="flex items-center justify-between border-b border-hairline bg-canvas/40 px-2.5 py-1.5">
               <h4 className="text-[10px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
-                Distribution proof
+                Channel mix
               </h4>
               <span className="text-[9.5px] uppercase tracking-[0.07em] text-muted-foreground/70">
                 what drove the funnel
@@ -624,68 +622,24 @@ function FunnelLine({
   );
 }
 
-function CostPunchline({
-  value,
-  baseline,
-  savingsPct,
-  connections,
-}: {
-  value: number;
-  baseline: number;
-  savingsPct: number;
-  connections: number;
-}) {
-  // Bar widths driven by the ratio between baseline and this campaign.
-  const ourWidth = Math.max(6, (value / baseline) * 100);
-
+function CostPunchline({ value, connections }: { value: number; connections: number }) {
   return (
     <section className="relative overflow-hidden rounded-md border border-risk-green/30 bg-risk-green-soft/35 px-3 py-2.5 ring-1 ring-inset ring-risk-green/20">
       <div className="flex items-baseline justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-risk-green">
-            Outcome · cost per connection
+            Example · cost per connection
           </p>
           <p className="mt-0.5 text-[10px] leading-snug text-foreground/70">
-            {connections} connections formed at{" "}
+            {connections} connections at{" "}
             <span className="font-mono tabular text-foreground/85">
               €{value.toLocaleString("en-GB")}
             </span>{" "}
             each.
           </p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-risk-green px-1.5 py-0.5 font-mono text-[10px] tabular font-semibold text-primary-foreground">
-          <span aria-hidden="true">{"↓"}</span>
-          {Math.abs(savingsPct)}%
-        </span>
       </div>
 
-      <div className="mt-2.5 space-y-1.5">
-        <div className="flex items-center gap-2">
-          <span className="w-20 shrink-0 text-[10px] uppercase tracking-[0.06em] text-muted-foreground/80">
-            Municipal avg
-          </span>
-          <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
-            <span className="absolute inset-y-0 left-0 w-full rounded-full bg-muted-foreground/35" />
-          </span>
-          <span className="w-16 shrink-0 text-right font-mono text-[11px] tabular text-muted-foreground">
-            €{baseline.toLocaleString("en-GB")}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-20 shrink-0 text-[10px] uppercase tracking-[0.06em] text-risk-green/90">
-            This campaign
-          </span>
-          <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
-            <span
-              className="absolute inset-y-0 left-0 rounded-full bg-risk-green transition-[width] duration-700 ease-out"
-              style={{ width: `${ourWidth}%` }}
-            />
-          </span>
-          <span className="w-16 shrink-0 text-right font-mono text-[13px] tabular font-semibold text-risk-green">
-            €{value.toLocaleString("en-GB")}
-          </span>
-        </div>
-      </div>
     </section>
   );
 }

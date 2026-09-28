@@ -299,7 +299,7 @@ export function LeftSidebar({
                 <span className="inline-flex items-center gap-1 font-mono tabular text-[10px] text-muted-foreground/75">
                   <span className="size-1 rounded-full bg-risk-green" />
                   {interventions.length}
-                  <span className="text-muted-foreground/55">approved</span>
+                  <span className="text-muted-foreground/55">generated</span>
                 </span>
               ) : null
             }
@@ -326,7 +326,7 @@ export function LeftSidebar({
                   </svg>
                 }
                 title="No interventions yet"
-                body="Approved activities for this city will appear here as receipts."
+                body="Generated intervention plans for this city will appear here."
               />
             ) : (
               <ul className="space-y-0.5">

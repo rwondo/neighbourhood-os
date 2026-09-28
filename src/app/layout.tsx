@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Neighbourhood OS — Municipal Intelligence Platform",
+  title: "Neighbourhood OS",
   description:
-    "AI-powered municipal social cohesion platform. Identify socially isolated neighbourhoods and engineer hyper-personalised connection opportunities.",
+    "Hackathon prototype: ranks Dutch neighbourhoods by a Connection Desert Index and drafts local outreach plans with an LLM pipeline.",
 };
 
 export default function RootLayout({

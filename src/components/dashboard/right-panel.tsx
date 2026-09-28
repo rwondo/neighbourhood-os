@@ -248,12 +248,12 @@ export function RightPanel({
 
         {/* CAMPAIGN METRICS — peer weight, distinct treatment */}
         <SectionHeader
-          title="Campaign Metrics"
+          title="Campaign Funnel"
           tone="default"
           meta={
             selectedName ? (
               <span className="font-mono text-[10px] tabular text-muted-foreground/70">
-                projected · 6w
+                simulated example
               </span>
             ) : null
           }
@@ -378,17 +378,20 @@ function ContextHeader({
         </div>
 
         {strategy ? (
-          <div className="flex shrink-0 items-stretch gap-0 overflow-hidden rounded-md border border-hairline bg-panel">
+          <div
+            className="flex shrink-0 items-stretch gap-0 overflow-hidden rounded-md border border-hairline bg-panel"
+            title="Estimated by the LLM within ranges set in the prompt. Not a measured outcome."
+          >
             <Stat
               value={`+${strategy.predictedScoreGain}`}
               unit="pts"
-              label="CDI 6w"
+              label="est. gain"
               accent="green"
             />
             <span className="w-px self-stretch bg-hairline" aria-hidden="true" />
             <Stat
               value={`€${Math.round(strategy.costPerConnectionEUR)}`}
-              label="per conn."
+              label="est. / conn."
               accent="default"
             />
           </div>

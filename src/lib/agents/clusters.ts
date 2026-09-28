@@ -128,7 +128,7 @@ export function identifyClusters(n: BuurtRecord): ResidentCluster[] {
     });
   }
 
-  // Always-on fallback so we never emit fewer than 3 clusters
+  // Always-on fallback so every buurt gets at least one cluster
   candidates.push({
     priority: 5,
     cluster: {

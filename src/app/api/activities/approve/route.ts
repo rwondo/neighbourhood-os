@@ -173,7 +173,8 @@ export async function POST(req: NextRequest) {
     let qrCodeUrl: string | null = null;
     let joinUrl: string | null = null;
     if (m.channel === "leaflet") {
-      joinUrl = `https://neighbourhoodos.nl/join/${slug}-${m.clusterId.replace(/^cluster_/, "")}`;
+      // Placeholder target: the prototype has no opt-in page yet.
+      joinUrl = `https://example.org/join/${slug}-${m.clusterId.replace(/^cluster_/, "")}`;
       try {
         qrCodeUrl = await QRCode.toDataURL(joinUrl, {
           errorCorrectionLevel: "M",

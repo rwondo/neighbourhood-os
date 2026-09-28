@@ -302,7 +302,7 @@ const DEFAULT_APPROVAL = {
         encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#0f172a"><rect width="100" height="100" fill="#ffffff"/><g><rect x="10" y="10" width="20" height="20"/><rect x="70" y="10" width="20" height="20"/><rect x="10" y="70" width="20" height="20"/><rect x="40" y="40" width="8" height="8"/><rect x="55" y="40" width="8" height="8"/><rect x="40" y="55" width="8" height="8"/><rect x="55" y="55" width="8" height="8"/><rect x="70" y="55" width="20" height="8"/><rect x="40" y="70" width="8" height="20"/></g></svg>',
         ),
-      joinUrl: "https://neighbourhoodos.nl/join/noord-elderly",
+      joinUrl: "https://example.org/join/noord-elderly",
     },
   ],
   mcpResults: [
@@ -366,7 +366,7 @@ const APPROVAL_COFFEE = {
       creativeUrl: CREATIVE_URL_LEAFLET,
       creativeStatus: "ready" as const,
       qrCodeUrl: DEFAULT_APPROVAL.creatives[2].qrCodeUrl,
-      joinUrl: "https://neighbourhoodos.nl/join/noord-coffee",
+      joinUrl: "https://example.org/join/noord-coffee",
     },
   ],
   mcpResults: [],
@@ -389,7 +389,7 @@ const APPROVAL_FAMILY = {
       creativeUrl: CREATIVE_URL_LEAFLET,
       creativeStatus: "ready" as const,
       qrCodeUrl: DEFAULT_APPROVAL.creatives[2].qrCodeUrl,
-      joinUrl: "https://neighbourhoodos.nl/join/noord-family",
+      joinUrl: "https://example.org/join/noord-family",
     },
   ],
   mcpResults: [],

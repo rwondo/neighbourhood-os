@@ -50,17 +50,8 @@ export function CenterPanel({
           </h1>
         </div>
         <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-teal opacity-50" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-teal" />
-            </span>
-            <span>Live</span>
-          </span>
-          <span className="text-muted-foreground/40">·</span>
           <span className="font-mono normal-case tracking-normal">
-            Last updated:{" "}
-            <span className="text-foreground/70">{profile.lastUpdatedLabel}</span>
+            Data: <span className="text-foreground/70">CBS 2023 · OSM · GTFS</span>
           </span>
           <span className="text-muted-foreground/40">·</span>
           <span className="font-mono normal-case tracking-normal">
@@ -84,16 +75,16 @@ export function CenterPanel({
             hint="this city"
           />
           <StatCard
-            label="Severe CDI"
+            label="Worst quartile"
             value={loading ? "—" : stats.severe}
             tone="red"
-            hint="70–100"
+            hint="highest CDI in city"
           />
           <StatCard
-            label="High CDI"
+            label="Second quartile"
             value={loading ? "—" : stats.high}
             tone="amber"
-            hint="50–70"
+            hint="next 25% of boroughs"
           />
           <StatCard
             label="Median CDI"

@@ -269,9 +269,9 @@ export function ActivityApprovalDialog({
                   </span>{" "}
                   creatives ·{" "}
                   <span className="font-mono tabular text-foreground/70">
-                    {result?.mcpResults.length ?? 0}
+                    {result?.mcpResults.filter((m) => m.status === "live").length ?? 0}
                   </span>{" "}
-                  campaigns live in Ads Manager (paused)
+                  campaigns created in Ads Manager (paused)
                 </span>
               ) : activity ? (
                 <>
@@ -543,7 +543,7 @@ function CreativePreviewPane({ result }: { result: ApprovalResult }) {
                     Join QR
                   </div>
                   <div className="truncate font-mono text-[10px] text-foreground/70">
-                    {c.joinUrl ?? "neighbourhoodos.nl/join/…"}
+                    {c.joinUrl ?? "example.org/join/…"}
                   </div>
                 </div>
                 <button

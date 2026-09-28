@@ -231,7 +231,6 @@ export function RegionMap({
             <GemeenteLayer collection={gemeenteCollection!} />
             <BoroughLayer
               collection={cityBoroughs!}
-              city={city}
               boroughScores={boroughScores}
               onHoverEnter={onHoverEnter}
               onHoverMove={onHoverMove}
@@ -352,7 +351,6 @@ type BoroughCallbacks = {
 
 const BoroughLayer = memo(function BoroughLayer({
   collection,
-  city,
   boroughScores,
   onHoverEnter,
   onHoverMove,
@@ -360,7 +358,6 @@ const BoroughLayer = memo(function BoroughLayer({
   onClick,
 }: {
   collection: FeatureCollection<Geometry, BoroughProps>;
-  city: CityKey;
   boroughScores: Map<string, BoroughScore>;
 } & BoroughCallbacks) {
   return (
@@ -370,7 +367,6 @@ const BoroughLayer = memo(function BoroughLayer({
           <BoroughPath
             key={geo.rsmKey}
             geography={geo as unknown as Feature<Geometry, BoroughProps>}
-            city={city}
             boroughScores={boroughScores}
             onHoverEnter={onHoverEnter}
             onHoverMove={onHoverMove}
@@ -385,7 +381,6 @@ const BoroughLayer = memo(function BoroughLayer({
 
 const BoroughPath = memo(function BoroughPath({
   geography,
-  city,
   boroughScores,
   onHoverEnter,
   onHoverMove,
@@ -393,7 +388,6 @@ const BoroughPath = memo(function BoroughPath({
   onClick,
 }: {
   geography: Feature<Geometry, BoroughProps>;
-  city: CityKey;
   boroughScores: Map<string, BoroughScore>;
   onHoverEnter: BoroughCallbacks["onHoverEnter"];
   onHoverMove: BoroughCallbacks["onHoverMove"];
@@ -403,7 +397,7 @@ const BoroughPath = memo(function BoroughPath({
   const { borough } = geography.properties;
   const live = boroughScores.get(borough);
   const liveScore = live?.avgScore;
-  const score = liveScore ?? scoreForBorough(borough, city); // fallback during loading
+  const score = liveScore ?? scoreForBorough(borough); // -1 = no data yet
   const liveRiskLevel = live?.riskLevel;
   const isIndustrial = score === -2;
   // Prefer the live CDI-band color from the API; fall back to legacy
@@ -488,7 +482,10 @@ function MapTooltip({
 }) {
   // Prefer CDI-derived risk band (matches polygon fill); fall back to legacy
   // score thresholds only when the API hasn't resolved the borough yet.
-  const tone = riskLevel
+  const noData = !riskLevel && score < 0;
+  const tone = noData
+    ? "border-hairline bg-panel/95 text-foreground"
+    : riskLevel
     ? riskLevel === "severe"
       ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
       : riskLevel === "high"
@@ -501,7 +498,7 @@ function MapTooltip({
       : score < 80
         ? "border-risk-amber/40 bg-risk-amber-soft/70 text-foreground"
         : "border-risk-green/40 bg-risk-green-soft/70 text-foreground";
-  const label = riskLevel ? RISK_LEVEL_LABEL[riskLevel] : riskLabel(score);
+  const label = noData ? "No data" : riskLevel ? RISK_LEVEL_LABEL[riskLevel] : riskLabel(score);
 
   // Clamp the tooltip position to the container so it doesn't clip at edges.
   // We read the parent (the .relative map container) at render time.
@@ -544,7 +541,7 @@ function MapTooltip({
       >
         <div className="text-[12px] font-semibold tracking-tight">{name}</div>
         <div className="mt-0.5 flex items-baseline gap-1.5">
-          <span className="font-mono tabular text-[15px] font-medium leading-none">{Math.round(score)}</span>
+          <span className="font-mono tabular text-[15px] font-medium leading-none">{noData ? "–" : Math.round(score)}</span>
           <span className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">
             {label}
           </span>
