@@ -1,5 +1,5 @@
 import { jsonOrchestratorCall } from "@/lib/together";
-import { queryNeighbourhood } from "@/lib/supermemory";
+import { queryNeighbourhood } from "@/lib/memory";
 import { makeLogger } from "@/lib/log";
 import { ORCHESTRATOR_SYSTEM } from "./prompts";
 import { searchLocalActivities } from "./web-search";
@@ -49,7 +49,7 @@ function emitStep(emit: Emit, id: string, label: string, status: StepStatus, det
   emit(evt);
 }
 
-// Steps 1 and 3 finish near-instantly on the happy path (cold Supermemory,
+// Steps 1 and 3 finish near-instantly on the happy path (cold memory,
 // deterministic cluster identification). Add a small floor so the agent trace
 // reads as a sequence of work rather than a flicker.
 async function withMinDuration<T>(minMs: number, fn: () => Promise<T> | T): Promise<T> {
@@ -190,8 +190,8 @@ export async function runOrchestrator(
     score: neighbourhood.score,
   });
 
-  // ── Step 1: Supermemory context ────────────────────────────────────────
-  emitStep(emit, "s1", "Retrieving Supermemory context", "active");
+  // ── Step 1: neighbourhood memory ────────────────────────────────────────
+  emitStep(emit, "s1", "Retrieving neighbourhood memory", "active");
   let profileHits: RetrievalHit[] = [];
   let outcomeHits: RetrievalHit[] = [];
   const t1 = Date.now();
@@ -219,7 +219,7 @@ export async function runOrchestrator(
     );
     profileHits = p;
     outcomeHits = o;
-    log.info("supermemory hits", {
+    log.info("memory hits", {
       buurtCode: neighbourhood.buurtCode,
       profileHits: profileHits.length,
       outcomeHits: outcomeHits.length,
@@ -233,7 +233,7 @@ export async function runOrchestrator(
       emitStep(
         emit,
         "s1",
-        "Retrieving Supermemory context",
+        "Retrieving neighbourhood memory",
         "skipped",
         `no memory found (${probedTags}) — run \`pnpm seed:memory\``,
       );
@@ -241,14 +241,14 @@ export async function runOrchestrator(
       emitStep(
         emit,
         "s1",
-        "Retrieving Supermemory context",
+        "Retrieving neighbourhood memory",
         "completed",
         `${profileHits.length + outcomeHits.length} memory hits`,
       );
     }
   } catch (err) {
-    log.error("supermemory unavailable", err);
-    emitStep(emit, "s1", "Retrieving Supermemory context", "skipped", "memory unavailable");
+    log.error("memory unavailable", err);
+    emitStep(emit, "s1", "Retrieving neighbourhood memory", "skipped", "memory unavailable");
   }
 
   // ── Step 2: Web search for local activities ───────────────────────────

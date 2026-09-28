@@ -51,7 +51,7 @@ export async function extractGraph({
 }): Promise<{ entities: Entity[]; edges: Edge[] }> {
   // Reasoning is disabled here: V4-Pro at reasoning_effort=high spends the
   // entire 2048-token budget on hidden reasoning and returns an empty body
-  // (seen in logs.txt:5 — finish_reason=length, responseChars=0, ms=53k).
+  // (observed during development: finish_reason=length, empty response after ~53s).
   // Entity/edge extraction is a flat structured task — no reasoning needed.
   const out = await withTimeout(
     jsonAgentCall<ExtractorOut>({

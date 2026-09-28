@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
 
   // Per-city quartile rebinning so the map shows differentiation.
   //
-  // Absolute CDI thresholds (per prompt.txt: 0-30 low, 30-50 moderate, 50-70 high,
+  // Absolute CDI thresholds (score.ts riskLevelCDI: 0-30 low, 30-50 moderate, 50-70 high,
   // 70-100 severe) cluster almost every borough into "high/orange" after the
   // V+A+S weighted average + buurt-level aggregation compress the dynamic range
   // to roughly 37-69. The numeric `avgCdi` stays authoritative for the tooltip;

@@ -17,8 +17,7 @@
     "populate:centroids": "tsx scripts/populate-centroids.ts",
     "populate:names": "tsx scripts/populate-names.ts",
     "refresh:demographics": "tsx scripts/refresh-demographics.ts",
-    "recompute:cdi": "tsx scripts/recompute-cdi.ts",
-    "recalc": "tsx -e \"fetch('http://localhost:3000/api/recalculate', {method:'POST'}).then(r=>r.text()).then(console.log)\""
+    "recompute:cdi": "tsx scripts/recompute-cdi.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

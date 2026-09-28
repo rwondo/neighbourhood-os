@@ -4,7 +4,7 @@ import { makeLogger } from "@/lib/log";
 const log = makeLogger("memory:embedder");
 
 if (!process.env.OPENAI_API_KEY) {
-  log.warn("OPENAI_API_KEY is not set — embeddings will fail and Supermemory vector search will be empty");
+  log.warn("OPENAI_API_KEY is not set — embeddings will fail and memory vector search will be empty");
 }
 
 const client = new OpenAI({

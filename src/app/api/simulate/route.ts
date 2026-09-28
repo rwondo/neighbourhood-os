@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       emit({ type: "info", key: "buurt", value: buurt.name });
       emit({ type: "info", key: "buurtCode", value: buurt.buurtCode });
 
-      // ── Steps 1-4 (Supermemory → web search → clusters → strategy) ─────
+      // ── Steps 1-4 (memory → web search → clusters → strategy) ─────
       const plan = await runOrchestrator(buurt, emit);
 
       // ── Step 5: parallel personalisation, stream each as it lands ─────

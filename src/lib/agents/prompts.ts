@@ -13,5 +13,3 @@ Rules:
 - Match channel constraints: SMS <=160 chars, TikTok casual + emoji, WhatsApp warm and personal, Facebook/Instagram localised, leaflet structured for print.
 - Match cluster's primary language; for international students default to English.
 - Output JSON: { message: string, tone: string, language: string, pdf?: { title: string, body: string, whenLabel: string, venue: string } }`;
-
-export const OUTCOME_SYSTEM = `You are an Outcome Agent. Given a campaign record and attendance signals, estimate connections formed and write a structured outcome JSON for Supermemory.`;

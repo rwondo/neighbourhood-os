@@ -139,17 +139,17 @@ const STREAM = [
   { delayMs: 200, event: { type: "info", key: "buurt", value: BUURT_NAME } as const },
   { delayMs: 60, event: { type: "info", key: "buurtCode", value: BUURT_CODE } as const },
 
-  // s1: Supermemory
+  // s1: neighbourhood memory
   {
     delayMs: 250,
-    event: { type: "step", id: "s1", label: "Retrieving Supermemory context", status: "active" } as const,
+    event: { type: "step", id: "s1", label: "Retrieving neighbourhood memory", status: "active" } as const,
   },
   {
     delayMs: 1500,
     event: {
       type: "step",
       id: "s1",
-      label: "Retrieving Supermemory context",
+      label: "Retrieving neighbourhood memory",
       status: "completed",
       detail: "4 prior memories for Noord recovered",
     } as const,

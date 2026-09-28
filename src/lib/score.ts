@@ -59,7 +59,7 @@ export function compareTrend(prev: number, curr: number): Trend {
 }
 
 // =============================================================================
-// Connection Desert Index (CDI) — per prompt.txt
+// Connection Desert Index (CDI)
 // =============================================================================
 // CDI is the new headline metric. HIGHER = WORSE (more "connection desert").
 // All component scores are 0-100 and produced by min-max normalization

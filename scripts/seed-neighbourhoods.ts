@@ -4,7 +4,7 @@ import { neighbourhoods } from "@/lib/db/schema";
 import { fetchCbsBuurten, GEMEENTE_CODES } from "@/lib/cbs";
 import { fetchCityWeather } from "@/lib/weather";
 import { computeSocialFabricScore } from "@/lib/score";
-import { seedNeighbourhoodProfile } from "@/lib/supermemory";
+import { seedNeighbourhoodProfile } from "@/lib/memory";
 
 const CITY_KEYS = ["rotterdam", "amsterdam", "denhaag"] as const;
 
@@ -33,7 +33,7 @@ function profileMarkdown(row: { name: string; buurtCode: string; score: number; 
   ].join("\n");
 }
 
-const SEED_MEMORY = process.env.SEED_SUPERMEMORY === "1";
+const SEED_MEMORY = process.env.SEED_MEMORY === "1";
 const MEMORY_TIMEOUT_MS = 20_000;
 
 function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
@@ -109,7 +109,7 @@ async function main() {
         await withTimeout(
           seedNeighbourhoodProfile(r.buurtCode, profileMarkdown({ ...r, score }), { city, name: r.name }),
           MEMORY_TIMEOUT_MS,
-          `supermemory(${r.buurtCode})`,
+          `memory(${r.buurtCode})`,
         );
         console.log(`[seed]   memory ${r.buurtCode} ok in ${Date.now() - t0}ms`);
       } catch (e) {

@@ -1,19 +1,19 @@
 /**
- * Seed Supermemory for the buurten the demo will actually touch.
+ * Seed neighbourhood memory for the buurten the demo will actually touch.
  *
  * Usage:
  *   pnpm tsx scripts/seed-memory.ts                       # seed worst-CDI buurt per borough across all 3 cities
  *   pnpm tsx scripts/seed-memory.ts BU05991703 BU03630000 # seed specific buurt codes
  *
  * The full `pnpm seed` script also writes memory rows, but only when
- * SEED_SUPERMEMORY=1 is exported AND it does so for all ~10k buurten, which
+ * SEED_MEMORY=1 is exported AND it does so for all ~10k buurten, which
  * takes a long time. This script seeds only the ones the demo flow lands on.
  */
 import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
-import { seedNeighbourhoodProfile, writeOutcome } from "@/lib/supermemory";
+import { seedNeighbourhoodProfile, writeOutcome } from "@/lib/memory";
 
 type Row = typeof neighbourhoods.$inferSelect;
 

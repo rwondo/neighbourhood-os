@@ -18,7 +18,7 @@ export type TraceStep = {
 };
 
 const DEFAULT_STEPS: TraceStep[] = [
-  { id: "s1", label: "Retrieving Supermemory context", status: "pending" },
+  { id: "s1", label: "Retrieving neighbourhood memory", status: "pending" },
   { id: "s2", label: "Searching local activities on the web", status: "pending" },
   { id: "s3", label: "Identifying resident clusters", status: "pending" },
   { id: "s4", label: "Generating bespoke intervention strategy", status: "pending" },
