@@ -131,7 +131,12 @@ const STREAM = [
   // s1: neighbourhood memory
   {
     delayMs: 250,
-    event: { type: "step", id: "s1", label: "Retrieving neighbourhood memory", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s1",
+      label: "Retrieving neighbourhood memory",
+      status: "active",
+    } as const,
   },
   {
     delayMs: 1500,
@@ -147,7 +152,12 @@ const STREAM = [
   // s2: Web search
   {
     delayMs: 350,
-    event: { type: "step", id: "s2", label: "Searching local events in Noord", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s2",
+      label: "Searching local events in Noord",
+      status: "active",
+    } as const,
   },
   {
     delayMs: 3800,
@@ -163,7 +173,12 @@ const STREAM = [
   // s3: Clusters
   {
     delayMs: 300,
-    event: { type: "step", id: "s3", label: "Identifying resident clusters", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s3",
+      label: "Identifying resident clusters",
+      status: "active",
+    } as const,
   },
   {
     delayMs: 1600,
@@ -172,7 +187,8 @@ const STREAM = [
       id: "s3",
       label: "Identifying resident clusters",
       status: "completed",
-      detail: "Dutch elderly 65+ · Young creatives 25-35 · Migrant families with school-age children",
+      detail:
+        "Dutch elderly 65+ · Young creatives 25-35 · Migrant families with school-age children",
     } as const,
   },
 
@@ -201,7 +217,12 @@ const STREAM = [
   // s5: Personalisation — interleave cluster_message events as they stream
   {
     delayMs: 250,
-    event: { type: "step", id: "s5", label: "Personalising messages per cluster", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s5",
+      label: "Personalising messages per cluster",
+      status: "active",
+    } as const,
   },
   { delayMs: 1700, event: { type: "cluster_message", message: MESSAGES[0] } as const },
   { delayMs: 1300, event: { type: "cluster_message", message: MESSAGES[1] } as const },
@@ -220,7 +241,12 @@ const STREAM = [
   // s6: Store
   {
     delayMs: 200,
-    event: { type: "step", id: "s6", label: "Storing strategy and messages", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s6",
+      label: "Storing strategy and messages",
+      status: "active",
+    } as const,
   },
   {
     delayMs: 900,
@@ -236,7 +262,12 @@ const STREAM = [
   // s7: Stream
   {
     delayMs: 200,
-    event: { type: "step", id: "s7", label: "Streaming results to dashboard", status: "active" } as const,
+    event: {
+      type: "step",
+      id: "s7",
+      label: "Streaming results to dashboard",
+      status: "active",
+    } as const,
   },
   {
     delayMs: 400,

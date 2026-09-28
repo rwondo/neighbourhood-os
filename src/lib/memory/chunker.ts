@@ -50,7 +50,12 @@ function splitSentences(text: string): string[] {
   return out;
 }
 
-function makeChunk(memoryId: string, containerTag: string, position: number, content: string): Chunk {
+function makeChunk(
+  memoryId: string,
+  containerTag: string,
+  position: number,
+  content: string,
+): Chunk {
   return {
     id: `chk_${memoryId}_${position}`,
     memoryId,

@@ -10,8 +10,7 @@ export function isStaticMode(): boolean {
   return process.env.STATIC_SNAPSHOT === "1" || !process.env.DATABASE_URL?.trim();
 }
 
-export const STATIC_MODE_MESSAGE =
-  "Live agent runs need a database and API keys (see README).";
+export const STATIC_MODE_MESSAGE = "Live agent runs need a database and API keys (see README).";
 
 export function staticModeResponse(): Response {
   return Response.json({ error: "static_mode", message: STATIC_MODE_MESSAGE }, { status: 503 });

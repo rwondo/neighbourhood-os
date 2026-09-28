@@ -41,14 +41,18 @@ test("returns one to three clusters with unique ids and a minimum size", () => {
 });
 
 test("a very old buurt gets a low-digital elderly cluster reached by leaflet", () => {
-  const elderly = identifyClusters(buurt({ pctElderly65: 30 })).find((c) => c.id === "cluster_elderly");
+  const elderly = identifyClusters(buurt({ pctElderly65: 30 })).find(
+    (c) => c.id === "cluster_elderly",
+  );
   assert.ok(elderly);
   assert.equal(elderly.preferredChannel, "leaflet");
   assert.equal(elderly.digitalLiteracy, "low");
 });
 
 test("a moderately old buurt reaches its elderly cluster by SMS", () => {
-  const elderly = identifyClusters(buurt({ pctElderly65: 15 })).find((c) => c.id === "cluster_elderly");
+  const elderly = identifyClusters(buurt({ pctElderly65: 15 })).find(
+    (c) => c.id === "cluster_elderly",
+  );
   assert.ok(elderly);
   assert.equal(elderly.preferredChannel, "sms");
 });

@@ -51,7 +51,7 @@ export function CitySwitcherPill({
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/40",
           open
             ? "border-hairline-strong bg-panel/95"
-            : "border-hairline hover:border-hairline-strong hover:bg-panel/95"
+            : "border-hairline hover:border-hairline-strong hover:bg-panel/95",
         )}
       >
         {/* Active indicator: pulsing teal dot signals the "live" city. */}
@@ -76,7 +76,7 @@ export function CitySwitcherPill({
             viewBox="0 0 12 12"
             className={cn(
               "size-2.5 transition-transform duration-150 ease-out",
-              open && "rotate-180"
+              open && "rotate-180",
             )}
             fill="none"
             stroke="currentColor"
@@ -95,7 +95,7 @@ export function CitySwitcherPill({
           aria-label="Cities"
           className={cn(
             "absolute left-0 top-[calc(100%+8px)] z-50 min-w-[208px] overflow-hidden rounded-xl border border-hairline bg-panel/95 backdrop-blur-md",
-            "shadow-[0_12px_36px_-12px_oklch(0.18_0.01_250_/_0.18),0_2px_8px_-2px_oklch(0.18_0.01_250_/_0.08)]"
+            "shadow-[0_12px_36px_-12px_oklch(0.18_0.01_250_/_0.18),0_2px_8px_-2px_oklch(0.18_0.01_250_/_0.08)]",
           )}
         >
           <div className="flex items-center justify-between gap-2 border-b border-hairline bg-canvas/40 px-2.5 py-1.5">
@@ -122,9 +122,7 @@ export function CitySwitcherPill({
                   className={cn(
                     "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors duration-100 ease-out",
                     "focus-visible:outline-none focus-visible:bg-muted/40",
-                    selected
-                      ? "bg-teal-soft/70"
-                      : "hover:bg-muted/40"
+                    selected ? "bg-teal-soft/70" : "hover:bg-muted/40",
                   )}
                 >
                   <span
@@ -133,7 +131,7 @@ export function CitySwitcherPill({
                       "flex size-4 shrink-0 items-center justify-center rounded-full transition-colors",
                       selected
                         ? "bg-teal text-primary-foreground"
-                        : "bg-canvas/60 ring-1 ring-inset ring-hairline"
+                        : "bg-canvas/60 ring-1 ring-inset ring-hairline",
                     )}
                   >
                     {selected ? (
@@ -156,7 +154,7 @@ export function CitySwitcherPill({
                     <span
                       className={cn(
                         "text-[12px] font-semibold tracking-tight",
-                        selected ? "text-foreground" : "text-foreground/85"
+                        selected ? "text-foreground" : "text-foreground/85",
                       )}
                     >
                       {c.label}
@@ -164,7 +162,7 @@ export function CitySwitcherPill({
                     <span
                       className={cn(
                         "font-mono text-[9.5px] uppercase tracking-[0.1em] tabular",
-                        selected ? "text-teal" : "text-muted-foreground/60"
+                        selected ? "text-teal" : "text-muted-foreground/60",
                       )}
                     >
                       {c.shortLabel}

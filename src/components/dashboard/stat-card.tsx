@@ -43,15 +43,12 @@ export function StatCard({
     <div
       className={cn(
         "group relative rounded-lg border border-hairline bg-panel px-3 py-2.5",
-        "transition-colors duration-200 ease-out hover:border-hairline-strong hover:bg-canvas/60"
+        "transition-colors duration-200 ease-out hover:border-hairline-strong hover:bg-canvas/60",
       )}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span
-            aria-hidden="true"
-            className={cn("size-1 rounded-full", dotTone)}
-          />
+          <span aria-hidden="true" className={cn("size-1 rounded-full", dotTone)} />
           <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground">
             {label}
           </span>
@@ -65,7 +62,7 @@ export function StatCard({
       <div
         className={cn(
           "mt-1.5 flex items-baseline gap-1 font-mono tabular text-[22px] font-semibold leading-none",
-          numeralTone
+          numeralTone,
         )}
       >
         {value}

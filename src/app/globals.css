@@ -157,8 +157,7 @@
     font-variant-numeric: tabular-nums;
   }
   .grain {
-    background-image:
-      radial-gradient(rgba(0, 0, 0, 0.012) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0, 0, 0, 0.012) 1px, transparent 1px);
     background-size: 3px 3px;
   }
   .paper-grid {
@@ -191,7 +190,8 @@
     background: oklch(0.78 0.008 250);
   }
   @keyframes trace-pulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 0 0 oklch(0.55 0.105 186 / 0.35);
     }
     50% {
@@ -202,23 +202,40 @@
     animation: trace-pulse 1.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   }
   @keyframes trace-sweep {
-    0% { transform: translateY(-100%); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translateY(100%); opacity: 0; }
+    0% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
   }
   .animate-trace-sweep {
     animation: trace-sweep 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   }
   @keyframes shimmer-x {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
   .animate-shimmer-x {
     animation: shimmer-x 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
   @keyframes blink-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
   }
   .animate-blink-soft {
     animation: blink-soft 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;

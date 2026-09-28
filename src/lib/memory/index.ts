@@ -45,10 +45,13 @@ export async function ingestDocument({
   extractGraph?: boolean;
 }): Promise<{ memoryId: string }> {
   const memoryId = id ?? `mem_${containerTag}_${Date.now()}`;
-  await getDb().insert(memories).values({ id: memoryId, containerTag, kind, content, metadata: metadata ?? null }).onConflictDoUpdate({
-    target: memories.id,
-    set: { content, metadata: metadata ?? null },
-  });
+  await getDb()
+    .insert(memories)
+    .values({ id: memoryId, containerTag, kind, content, metadata: metadata ?? null })
+    .onConflictDoUpdate({
+      target: memories.id,
+      set: { content, metadata: metadata ?? null },
+    });
 
   const pieces = chunkText({ memoryId, containerTag, text: content });
   if (pieces.length) {
@@ -56,28 +59,52 @@ export async function ingestDocument({
     for (let i = 0; i < pieces.length; i++) {
       const c = pieces[i];
       const vec = vectors[i];
-      await getDb().insert(chunks).values({ id: c.id, memoryId, containerTag, position: c.position, content: c.content }).onConflictDoUpdate({
-        target: chunks.id,
-        set: { content: c.content },
-      });
+      await getDb()
+        .insert(chunks)
+        .values({ id: c.id, memoryId, containerTag, position: c.position, content: c.content })
+        .onConflictDoUpdate({
+          target: chunks.id,
+          set: { content: c.content },
+        });
       if (vec && vec.length) {
-        await getDb().execute(sql`UPDATE chunks SET embedding = ${vectorLiteral(vec)}::vector WHERE id = ${c.id}`);
+        await getDb().execute(
+          sql`UPDATE chunks SET embedding = ${vectorLiteral(vec)}::vector WHERE id = ${c.id}`,
+        );
       }
     }
   }
 
   if (shouldExtractGraph) {
-    const graph = await extractGraph({ containerTag, memoryId, content }).catch(() => ({ entities: [], edges: [] }));
+    const graph = await extractGraph({ containerTag, memoryId, content }).catch(() => ({
+      entities: [],
+      edges: [],
+    }));
     for (const e of graph.entities) {
       await getDb()
         .insert(entities)
-        .values({ id: e.id, containerTag: e.containerTag, type: e.type, name: e.name, normalizedName: e.normalizedName, metadata: e.metadata ?? null })
+        .values({
+          id: e.id,
+          containerTag: e.containerTag,
+          type: e.type,
+          name: e.name,
+          normalizedName: e.normalizedName,
+          metadata: e.metadata ?? null,
+        })
         .onConflictDoNothing();
     }
     for (const edge of graph.edges) {
       await getDb()
         .insert(edges)
-        .values({ id: edge.id, containerTag: edge.containerTag, sourceEntity: edge.sourceEntity, targetEntity: edge.targetEntity, relation: edge.relation, weight: edge.weight, sourceMemoryId: edge.sourceMemoryId ?? null, metadata: edge.metadata ?? null })
+        .values({
+          id: edge.id,
+          containerTag: edge.containerTag,
+          sourceEntity: edge.sourceEntity,
+          targetEntity: edge.targetEntity,
+          relation: edge.relation,
+          weight: edge.weight,
+          sourceMemoryId: edge.sourceMemoryId ?? null,
+          metadata: edge.metadata ?? null,
+        })
         .onConflictDoNothing();
     }
   }
@@ -119,7 +146,10 @@ export async function seedNeighbourhoodProfile(
   return result;
 }
 
-async function probeContainer(containerTag: string, timeoutMs = 3000): Promise<"empty" | "populated" | "unknown"> {
+async function probeContainer(
+  containerTag: string,
+  timeoutMs = 3000,
+): Promise<"empty" | "populated" | "unknown"> {
   const probe = getDb().execute<{ exists: boolean }>(
     sql`SELECT EXISTS(SELECT 1 FROM memories WHERE container_tag = ${containerTag}) AS exists`,
   );
@@ -130,7 +160,10 @@ async function probeContainer(containerTag: string, timeoutMs = 3000): Promise<"
     ])) as unknown as Array<{ exists: boolean }>;
     return result[0]?.exists ? "populated" : "empty";
   } catch (err) {
-    log.warn("memory existence probe failed — defaulting to search", { containerTag, err: err instanceof Error ? err.message : err });
+    log.warn("memory existence probe failed — defaulting to search", {
+      containerTag,
+      err: err instanceof Error ? err.message : err,
+    });
     return "unknown";
   }
 }
@@ -148,10 +181,8 @@ export async function queryNeighbourhood(
 ): Promise<RetrievalHit[]> {
   // Backwards-compat: previous signature was (buurtCode, q, limit). If the
   // third arg is a number, treat it as limit.
-  const opts: NeighbourhoodQueryOptions =
-    typeof options === "number" ? {} : options;
-  const limit =
-    typeof options === "number" ? options : (legacyLimit ?? 4);
+  const opts: NeighbourhoodQueryOptions = typeof options === "number" ? {} : options;
+  const limit = typeof options === "number" ? options : (legacyLimit ?? 4);
 
   const buurtContainer = containerForBuurt(buurtCode);
   const boroughContainer =

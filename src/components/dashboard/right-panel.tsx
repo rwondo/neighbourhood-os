@@ -3,10 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AgentTrace } from "./agent-trace";
 import { ActivitiesList } from "./activities-list";
-import {
-  ActivityApprovalDialog,
-  type ApprovalResult,
-} from "./activity-approval-dialog";
+import { ActivityApprovalDialog, type ApprovalResult } from "./activity-approval-dialog";
 import { ChannelPreviews } from "./channel-previews";
 import { CampaignMetricsPanel } from "./campaign-metrics-panel";
 import { cn } from "@/lib/utils";
@@ -248,11 +245,7 @@ export function RightPanel({
             previewsAreStar ? "bg-canvas/40 py-4" : "py-3",
           )}
         >
-          <ChannelPreviews
-            messages={messages}
-            running={running}
-            enrichments={enrichments}
-          />
+          <ChannelPreviews messages={messages} running={running} enrichments={enrichments} />
         </div>
 
         {/* CAMPAIGN METRICS — peer weight, distinct treatment */}
@@ -314,7 +307,16 @@ function ContextHeader({
       <div className="shrink-0 border-b border-hairline bg-canvas/30 px-4 py-3">
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-hairline bg-panel text-muted-foreground/70">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="size-3" aria-hidden="true">
+            <svg
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-3"
+              aria-hidden="true"
+            >
               <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 3 4.5 6.5 4.5 6.5s4.5-3.5 4.5-6.5c0-2.5-2-4.5-4.5-4.5z" />
               <circle cx="7" cy="6" r="1.5" />
             </svg>
@@ -435,7 +437,14 @@ function ContextHeader({
 
       {error ? (
         <p className="mt-2 flex items-start gap-1.5 rounded-md border border-risk-red/25 bg-risk-red-soft/40 px-2 py-1 text-[10.5px] leading-snug text-risk-red">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" className="mt-0.5 size-2.5 shrink-0" aria-hidden="true">
+          <svg
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            className="mt-0.5 size-2.5 shrink-0"
+            aria-hidden="true"
+          >
             <circle cx="6" cy="6" r="4.5" />
             <path d="M6 4v2.5" />
             <path d="M6 8v.01" />
@@ -470,9 +479,7 @@ function Stat({
           {value}
         </span>
         {unit ? (
-          <span className="font-mono text-[9px] tabular text-muted-foreground/80">
-            {unit}
-          </span>
+          <span className="font-mono text-[9px] tabular text-muted-foreground/80">{unit}</span>
         ) : null}
       </div>
       <span className="text-[9px] uppercase tracking-[0.07em] text-muted-foreground/70">

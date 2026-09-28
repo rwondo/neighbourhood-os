@@ -63,7 +63,9 @@ async function fetchAllForPrefix(prefix: string): Promise<BuurtFeature[]> {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`PDOK ${prefix} page ${startIndex} HTTP ${res.status}: ${body.slice(0, 300)}`);
+      throw new Error(
+        `PDOK ${prefix} page ${startIndex} HTTP ${res.status}: ${body.slice(0, 300)}`,
+      );
     }
     const fc = (await res.json()) as FeatureCollection<Geometry, BuurtProps>;
     const features = (fc.features ?? []) as BuurtFeature[];
@@ -81,13 +83,7 @@ function isPlaceholderName(name: string, gemeenteName: string): boolean {
   const lower = trimmed.toLowerCase();
   if (lower === gemeenteName.toLowerCase()) return true;
   // Common municipality-name aliases that signal "no proper buurt name"
-  const aliases = new Set([
-    "amsterdam",
-    "rotterdam",
-    "den haag",
-    "'s-gravenhage",
-    "s-gravenhage",
-  ]);
+  const aliases = new Set(["amsterdam", "rotterdam", "den haag", "'s-gravenhage", "s-gravenhage"]);
   return aliases.has(lower);
 }
 
@@ -160,7 +156,10 @@ async function main() {
   console.log(`[names] PDOK features skipped (not in DB): ${skippedNotInDb}`);
   console.log(`[names] DB buurten still showing gemeente as name: ${still.length}`);
   if (still.length > 0) {
-    const sample = still.slice(0, 10).map((r) => `${r.buurt_code}=${r.name}`).join(", ");
+    const sample = still
+      .slice(0, 10)
+      .map((r) => `${r.buurt_code}=${r.name}`)
+      .join(", ");
     console.log(`[names]   sample: ${sample}${still.length > 10 ? " …" : ""}`);
   }
   console.log("[names] sample new names:");

@@ -3,13 +3,13 @@ import { INDUSTRIAL_BOROUGHS, parseCity, queryBoroughDetail } from "@/lib/data/b
 import { SNAPSHOT_CACHE_HEADERS, snapshotBoroughDetail } from "@/lib/data/static-snapshot";
 import { isStaticMode } from "@/lib/runtime-mode";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ borough: string }> },
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ borough: string }> }) {
   const city = parseCity(req.nextUrl.searchParams.get("city"));
   if (!city) {
-    return NextResponse.json({ error: "Missing or invalid 'city' query parameter." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing or invalid 'city' query parameter." },
+      { status: 400 },
+    );
   }
   const { borough: rawBorough } = await params;
   const borough = decodeURIComponent(rawBorough);
@@ -24,5 +24,8 @@ export async function GET(
   if (!detail) {
     return NextResponse.json({ error: "borough_not_found" }, { status: 404 });
   }
-  return NextResponse.json(detail, isStaticMode() ? { headers: SNAPSHOT_CACHE_HEADERS } : undefined);
+  return NextResponse.json(
+    detail,
+    isStaticMode() ? { headers: SNAPSHOT_CACHE_HEADERS } : undefined,
+  );
 }

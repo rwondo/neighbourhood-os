@@ -10,7 +10,10 @@ const inRange = (v: number) => Number.isFinite(v) && v >= 0 && v <= 100;
  * empty list means the snapshot covers every residential borough on the map
  * with values in range. Used by the export script and the test suite.
  */
-export function validateSnapshot(snapshot: StaticSnapshot, boroughShapes: BoroughFeatures): string[] {
+export function validateSnapshot(
+  snapshot: StaticSnapshot,
+  boroughShapes: BoroughFeatures,
+): string[] {
   const problems: string[] = [];
   if (!snapshot.generatedAt) problems.push("generatedAt is empty (placeholder snapshot)");
 
@@ -29,11 +32,14 @@ export function validateSnapshot(snapshot: StaticSnapshot, boroughShapes: Boroug
         .map((f) => f.properties.borough)
         .filter((b) => !INDUSTRIAL_BOROUGHS.has(b)),
     );
-    for (const b of onMap) if (!inSnapshot.has(b)) problems.push(`${city}/${b}: on map but not in snapshot`);
-    for (const b of inSnapshot) if (!onMap.has(b)) problems.push(`${city}/${b}: in snapshot but not on map`);
+    for (const b of onMap)
+      if (!inSnapshot.has(b)) problems.push(`${city}/${b}: on map but not in snapshot`);
+    for (const b of inSnapshot)
+      if (!onMap.has(b)) problems.push(`${city}/${b}: in snapshot but not on map`);
 
     for (const b of data.boroughs) {
-      if (!inRange(b.avgCdi)) problems.push(`${city}/${b.borough}: avgCdi ${b.avgCdi} out of range`);
+      if (!inRange(b.avgCdi))
+        problems.push(`${city}/${b.borough}: avgCdi ${b.avgCdi} out of range`);
       const detail = data.details[b.borough];
       if (!detail) {
         problems.push(`${city}/${b.borough}: missing detail`);

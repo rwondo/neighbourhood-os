@@ -63,7 +63,9 @@ async function fetchAllForPrefix(prefix: string): Promise<BuurtFeature[]> {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`PDOK ${prefix} page ${startIndex} HTTP ${res.status}: ${body.slice(0, 300)}`);
+      throw new Error(
+        `PDOK ${prefix} page ${startIndex} HTTP ${res.status}: ${body.slice(0, 300)}`,
+      );
     }
     const fc = (await res.json()) as FeatureCollection<Geometry, BuurtProps>;
     const features = (fc.features ?? []) as BuurtFeature[];
@@ -171,7 +173,9 @@ async function main() {
   console.log("[centroids] -------- summary --------");
   console.log(`[centroids] features fetched: ${allFeatures.length}`);
   console.log(`[centroids] rows updated: ${updated}`);
-  console.log(`[centroids] PDOK codes not in DB: ${missingInDb}${missingExamples.length ? ` (sample: ${missingExamples.join(", ")})` : ""}`);
+  console.log(
+    `[centroids] PDOK codes not in DB: ${missingInDb}${missingExamples.length ? ` (sample: ${missingExamples.join(", ")})` : ""}`,
+  );
   console.log(`[centroids] bad geometry: ${badGeom}, missing buurtcode: ${badCode}`);
   console.log(`[centroids] DB neighbourhoods with non-zero centroid: ${count}`);
   console.log(`[centroids] DB neighbourhoods still zero: ${zeroCount}`);

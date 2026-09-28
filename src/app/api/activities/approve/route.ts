@@ -69,7 +69,10 @@ function slugify(s: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-async function resolveBuurt(borough: string, city: CityKey | undefined): Promise<BuurtRecord | null> {
+async function resolveBuurt(
+  borough: string,
+  city: CityKey | undefined,
+): Promise<BuurtRecord | null> {
   const cityFilter = city ? eq(neighbourhoods.city, city) : undefined;
   const boroughFilter = sql`${neighbourhoods.borough} = ${borough}`;
   const where = cityFilter ? and(cityFilter, boroughFilter) : boroughFilter;
@@ -106,12 +109,13 @@ export async function POST(req: NextRequest) {
 
   const buurt = borough ? await resolveBuurt(borough, city).catch(() => null) : null;
   if (!buurt) {
-    log.warn("approve: borough not resolved — creatives will use synthetic record", { borough, city });
+    log.warn("approve: borough not resolved — creatives will use synthetic record", {
+      borough,
+      city,
+    });
   }
 
-  const clustersById = new Map(
-    (payload.clusters ?? []).map((c) => [c.id, c]),
-  );
+  const clustersById = new Map((payload.clusters ?? []).map((c) => [c.id, c]));
   const messages = payload.messages ?? [];
 
   const fallbackNeighbourhood: BuurtRecord =
@@ -211,15 +215,10 @@ export async function POST(req: NextRequest) {
   });
 
   // ── Fire MCP campaigns for Meta / TikTok clusters ──────────────────────
-  const creativeByKey = new Map(
-    creatives.map((c) => [`${c.clusterId}::${c.channel}`, c]),
-  );
+  const creativeByKey = new Map(creatives.map((c) => [`${c.clusterId}::${c.channel}`, c]));
 
   const mcpJobs = messages
-    .filter(
-      (m) =>
-        m.channel === "facebook" || m.channel === "instagram" || m.channel === "tiktok",
-    )
+    .filter((m) => m.channel === "facebook" || m.channel === "instagram" || m.channel === "tiktok")
     .map(async (m): Promise<MCPDispatchResult> => {
       const cluster = clustersById.get(m.clusterId);
       const cr = creativeByKey.get(`${m.clusterId}::${m.channel}`);

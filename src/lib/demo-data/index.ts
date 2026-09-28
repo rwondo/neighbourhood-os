@@ -54,7 +54,10 @@ export function readDemoFlag(): string | null {
  * - `?demo=<borough>` → only use snapshot when borough matches
  * - no flag → never use snapshot
  */
-export function resolveDemoSnapshot(borough: string | null, city: string | null): DemoSnapshot | null {
+export function resolveDemoSnapshot(
+  borough: string | null,
+  city: string | null,
+): DemoSnapshot | null {
   const flag = readDemoFlag();
   if (!flag) return null;
   const snapshot = getDemoSnapshot(borough, city);

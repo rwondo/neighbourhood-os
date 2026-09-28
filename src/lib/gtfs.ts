@@ -135,7 +135,10 @@ export async function ensureGtfsStops(): Promise<StopPoint[]> {
   const zip = new AdmZip(CACHE_FILE);
   const entry = zip.getEntry("stops.txt");
   if (!entry) {
-    const names = zip.getEntries().map((e) => e.entryName).join(", ");
+    const names = zip
+      .getEntries()
+      .map((e) => e.entryName)
+      .join(", ");
     throw new Error(`stops.txt not found in GTFS zip; entries: ${names}`);
   }
   const csv = entry.getData().toString("utf8");

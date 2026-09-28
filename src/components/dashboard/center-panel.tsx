@@ -27,8 +27,7 @@ export function CenterPanel({
     const high = boroughs.filter((b) => b.riskLevel === "high").length;
     const sorted = [...boroughs].map((b) => b.avgCdi).sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
-    const median =
-      sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    const median = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
     return {
       total: boroughs.length,
       severe,
@@ -55,9 +54,7 @@ export function CenterPanel({
           </span>
           <span className="text-muted-foreground/40">·</span>
           <span className="font-mono normal-case tracking-normal">
-            <span className="text-foreground/70 tabular">
-              {loading ? "…" : stats.total}
-            </span>{" "}
+            <span className="text-foreground/70 tabular">{loading ? "…" : stats.total}</span>{" "}
             <span>boroughs scored</span>
           </span>
         </div>
@@ -69,11 +66,7 @@ export function CenterPanel({
 
       <div className="shrink-0 px-5 pb-4">
         <div className="grid grid-cols-4 gap-2.5">
-          <StatCard
-            label="Boroughs Scored"
-            value={loading ? "—" : stats.total}
-            hint="this city"
-          />
+          <StatCard label="Boroughs Scored" value={loading ? "—" : stats.total} hint="this city" />
           <StatCard
             label="Worst quartile"
             value={loading ? "—" : stats.severe}

@@ -236,7 +236,16 @@ export function ActivityApprovalDialog({
               {showPreview ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-flex size-5 items-center justify-center rounded-full bg-risk-green text-white">
-                    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-2.5" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="size-2.5"
+                      aria-hidden="true"
+                    >
                       <path d="M2 5l2 2 4-4.5" />
                     </svg>
                   </span>
@@ -445,9 +454,7 @@ export function ActivityApprovalDialog({
 }
 
 function CreativePreviewPane({ result }: { result: ApprovalResult }) {
-  const mcpByKey = new Map(
-    result.mcpResults.map((m) => [`${m.clusterId}::${m.channel}`, m]),
-  );
+  const mcpByKey = new Map(result.mcpResults.map((m) => [`${m.clusterId}::${m.channel}`, m]));
   const visible = result.creatives.filter(
     (c) =>
       c.channel === "facebook" ||
@@ -492,12 +499,7 @@ function CreativePreviewPane({ result }: { result: ApprovalResult }) {
               </span>
             </div>
 
-            <div
-              className={cn(
-                "relative w-full overflow-hidden bg-canvas/40",
-                aspect,
-              )}
-            >
+            <div className={cn("relative w-full overflow-hidden bg-canvas/40", aspect)}>
               {hasImage && c.creativeUrl ? (
                 <Image
                   src={c.creativeUrl}
@@ -616,9 +618,7 @@ function FactRow({ label, value }: { label: string; value: string }) {
 }
 
 function Bullet() {
-  return (
-    <span className="mt-[5px] size-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />
-  );
+  return <span className="mt-[5px] size-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />;
 }
 
 function CheckIcon() {

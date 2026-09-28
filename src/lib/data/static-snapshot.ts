@@ -25,7 +25,10 @@ export function snapshotBoroughs(city: CityKey): BoroughAggregate[] {
   return SNAPSHOT.cities[city]?.boroughs ?? [];
 }
 
-export function snapshotBoroughDetail(city: CityKey, borough: string): BoroughDetailResponse | null {
+export function snapshotBoroughDetail(
+  city: CityKey,
+  borough: string,
+): BoroughDetailResponse | null {
   return SNAPSHOT.cities[city]?.details[borough] ?? null;
 }
 

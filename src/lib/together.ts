@@ -10,8 +10,7 @@ const log = makeLogger("together");
 // output budget isn't spent on hidden reasoning.
 // Slugs from https://www.together.ai/models/kimi-k26 and
 // https://www.together.ai/models/deepseek-v4-pro.
-export const ORCHESTRATOR_MODEL =
-  process.env.TOGETHER_ORCHESTRATOR_MODEL ?? "moonshotai/Kimi-K2.6";
+export const ORCHESTRATOR_MODEL = process.env.TOGETHER_ORCHESTRATOR_MODEL ?? "moonshotai/Kimi-K2.6";
 export const AGENT_MODEL = process.env.TOGETHER_AGENT_MODEL ?? "moonshotai/Kimi-K2.6";
 
 log.info("Together AI client init", {
@@ -37,7 +36,13 @@ function detectReasoningStyle(model: string): ReasoningStyle {
   // plus `temperature: 1.0` (thinking) or `0.6` (instant). The Moonshot-native
   // `thinking: { type: ... }` is silently ignored by Together (observed during development).
   // K2 / K2-Instruct are non-thinking; treat as "none".
-  if (lc.includes("kimi-k2.6") || lc.includes("kimi-k2-6") || lc.includes("kimi-k2.5") || lc.includes("kimi-k2-5") || lc.includes("kimi-k2-thinking")) {
+  if (
+    lc.includes("kimi-k2.6") ||
+    lc.includes("kimi-k2-6") ||
+    lc.includes("kimi-k2.5") ||
+    lc.includes("kimi-k2-5") ||
+    lc.includes("kimi-k2-thinking")
+  ) {
     return "kimi";
   }
   return "none";

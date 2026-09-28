@@ -114,7 +114,10 @@ export async function createMetaCampaign(args: MetaCampaignArgs): Promise<MCPCam
     const conn = await withTimeout(connect(META_URL), TIMEOUT_MS, "meta.connect");
     close = conn.close;
     const tools = await withTimeout(conn.client.listTools(), TIMEOUT_MS, "meta.listTools");
-    log.info("meta MCP tools", { count: tools.tools.length, names: tools.tools.map((t) => t.name) });
+    log.info("meta MCP tools", {
+      count: tools.tools.length,
+      names: tools.tools.map((t) => t.name),
+    });
 
     const toolName =
       tools.tools.find((t) => /create.*campaign/i.test(t.name))?.name ??

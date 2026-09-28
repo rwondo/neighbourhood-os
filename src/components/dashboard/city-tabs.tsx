@@ -31,13 +31,13 @@ export function CityTabs({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/40",
               active
                 ? "bg-panel text-foreground shadow-[0_1px_0_var(--hairline-strong),0_1px_2px_-1px_oklch(0.18_0.01_250_/_0.06)]"
-                : "text-muted-foreground hover:bg-panel/70 hover:text-foreground"
+                : "text-muted-foreground hover:bg-panel/70 hover:text-foreground",
             )}
           >
             <span
               className={cn(
                 "text-[12px] font-semibold leading-none tracking-tight transition-colors",
-                active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
               )}
             >
               {c.label}
@@ -45,9 +45,7 @@ export function CityTabs({
             <span
               className={cn(
                 "font-mono text-[8.5px] font-medium uppercase leading-none tracking-[0.1em] transition-colors",
-                active
-                  ? "text-teal"
-                  : "text-muted-foreground/55 group-hover:text-muted-foreground"
+                active ? "text-teal" : "text-muted-foreground/55 group-hover:text-muted-foreground",
               )}
             >
               {c.shortLabel}
@@ -57,7 +55,7 @@ export function CityTabs({
               aria-hidden="true"
               className={cn(
                 "pointer-events-none absolute inset-x-2 -bottom-[2px] h-[2px] rounded-full bg-teal transition-opacity duration-150 ease-out",
-                active ? "opacity-100" : "opacity-0"
+                active ? "opacity-100" : "opacity-0",
               )}
             />
           </button>

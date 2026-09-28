@@ -27,10 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn("h-full", inter.variable, jetbrainsMono.variable)}
-    >
+    <html lang="en" className={cn("h-full", inter.variable, jetbrainsMono.variable)}>
       <body className="h-full overflow-hidden antialiased font-sans bg-canvas text-foreground">
         {children}
       </body>

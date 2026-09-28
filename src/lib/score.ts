@@ -22,9 +22,9 @@ const WEIGHTS = {
   pctLivingAlone: 0.25,
   pctElderly65: 0.15,
   pctSingleParent: 0.15,
-  lowIncomeIndex: 0.10,
-  amenityDistanceKm: 0.10,
-  populationTurnover: 0.10,
+  lowIncomeIndex: 0.1,
+  amenityDistanceKm: 0.1,
+  populationTurnover: 0.1,
   weatherIsolation: 0.08,
   socialParticipationDrop: 0.07,
 };
@@ -167,23 +167,43 @@ export function computeCityStats(buurten: CDIInputs[]): CityStats {
 export function computeCDIBreakdown(inputs: CDIInputs, stats: CityStats): CDIBreakdown {
   // Vulnerability V_i
   const E = minmaxNorm(num(inputs.pctElderly65), stats.pctElderly65.min, stats.pctElderly65.max);
-  const H = minmaxNorm(num(inputs.pctLivingAlone), stats.pctLivingAlone.min, stats.pctLivingAlone.max);
+  const H = minmaxNorm(
+    num(inputs.pctLivingAlone),
+    stats.pctLivingAlone.min,
+    stats.pctLivingAlone.max,
+  );
   const V = 0.55 * E + 0.45 * H;
 
   // Accessibility barrier A_i
   // Reverse-coded inputs (more stops / more intersections => lower barrier):
-  const PT = 100 - minmaxNorm(num(inputs.transitStops500m), stats.transitStops500m.min, stats.transitStops500m.max);
-  const W = 100 - minmaxNorm(num(inputs.poiIntersections), stats.poiIntersections.min, stats.poiIntersections.max);
-  const D = minmaxNorm(num(inputs.amenityDistanceKm), stats.amenityDistanceKm.min, stats.amenityDistanceKm.max);
+  const PT =
+    100 -
+    minmaxNorm(
+      num(inputs.transitStops500m),
+      stats.transitStops500m.min,
+      stats.transitStops500m.max,
+    );
+  const W =
+    100 -
+    minmaxNorm(
+      num(inputs.poiIntersections),
+      stats.poiIntersections.min,
+      stats.poiIntersections.max,
+    );
+  const D = minmaxNorm(
+    num(inputs.amenityDistanceKm),
+    stats.amenityDistanceKm.min,
+    stats.amenityDistanceKm.max,
+  );
   const R = Math.max(0, Math.min(100, num(inputs.weatherIsolation)));
-  const A = 0.30 * PT + 0.25 * W + 0.30 * D + 0.15 * R;
+  const A = 0.3 * PT + 0.25 * W + 0.3 * D + 0.15 * R;
 
   // Social infrastructure S_i
   const points = infraPoints(inputs);
   const S = minmaxNorm(points, stats.infraPoints.min, stats.infraPoints.max);
 
   // CDI: higher = worse
-  const cdi = 0.40 * V + 0.35 * A + 0.25 * (100 - S);
+  const cdi = 0.4 * V + 0.35 * A + 0.25 * (100 - S);
   const cdiClamped = Math.max(0, Math.min(100, cdi));
 
   return {

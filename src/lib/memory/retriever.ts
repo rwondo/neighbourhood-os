@@ -13,7 +13,12 @@ type SearchOptions = {
   graphExpand?: boolean;
 };
 
-export async function searchMemory({ containerTag, query, k = 4, graphExpand = true }: SearchOptions): Promise<RetrievalHit[]> {
+export async function searchMemory({
+  containerTag,
+  query,
+  k = 4,
+  graphExpand = true,
+}: SearchOptions): Promise<RetrievalHit[]> {
   const started = Date.now();
   log.info("search", { containerTag, query: query.slice(0, 80), k, graphExpand });
 
@@ -48,10 +53,22 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
 
   const hits: RetrievalHit[] = [];
   for (const r of vectorHits ?? []) {
-    hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: 1 - r.distance, source: "vector" });
+    hits.push({
+      content: r.content,
+      memoryId: r.memory_id,
+      containerTag: r.container_tag,
+      score: 1 - r.distance,
+      source: "vector",
+    });
   }
   for (const r of lexicalHits ?? []) {
-    hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: r.sim, source: "lexical" });
+    hits.push({
+      content: r.content,
+      memoryId: r.memory_id,
+      containerTag: r.container_tag,
+      score: r.sim,
+      source: "lexical",
+    });
   }
 
   if (graphExpand) {
@@ -69,7 +86,13 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
         LIMIT ${k}
       `)) as unknown as GraphRow[];
     for (const r of expansion ?? []) {
-      hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: 0.5, source: "graph" });
+      hits.push({
+        content: r.content,
+        memoryId: r.memory_id,
+        containerTag: r.container_tag,
+        score: 0.5,
+        source: "graph",
+      });
     }
   }
 

@@ -113,7 +113,9 @@ async function main() {
   const extractGraph = process.env.EXTRACT_GRAPH !== "0";
   const rows = await pickBuurten(args);
   if (rows.length === 0) {
-    console.warn("[seed-memory] no buurten matched — did you run `pnpm seed` first to populate the neighbourhoods table?");
+    console.warn(
+      "[seed-memory] no buurten matched — did you run `pnpm seed` first to populate the neighbourhoods table?",
+    );
     return;
   }
   console.log(
@@ -148,7 +150,10 @@ async function main() {
       const tag = borough ? `${name} → borough:${borough}` : name;
       console.log(`[seed-memory] ${buurtCode} (${tag}) ok in ${Date.now() - t0}ms`);
     } catch (err) {
-      console.error(`[seed-memory] ${buurtCode} (${name}) failed:`, err instanceof Error ? err.message : err);
+      console.error(
+        `[seed-memory] ${buurtCode} (${name}) failed:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
   console.log("[seed-memory] done");

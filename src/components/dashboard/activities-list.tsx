@@ -278,8 +278,7 @@ function DateAnchor({
 }) {
   // Calendar-tear visual: weekday banner over a large day number, with month
   // tucked underneath. Tinted but never loud.
-  const wrapBase =
-    "flex shrink-0 flex-col overflow-hidden rounded-md ring-1 ring-inset bg-panel";
+  const wrapBase = "flex shrink-0 flex-col overflow-hidden rounded-md ring-1 ring-inset bg-panel";
   const wrapSize = featured ? "w-11" : "w-9";
   const tone = approved
     ? "ring-risk-green/30"
@@ -350,9 +349,7 @@ function ClusterDotStack({ targets }: { targets: ResidentCluster[] }) {
         ))}
       </span>
       {extra > 0 ? (
-        <span className="ml-1 font-mono text-[9px] tabular text-muted-foreground/70">
-          +{extra}
-        </span>
+        <span className="ml-1 font-mono text-[9px] tabular text-muted-foreground/70">+{extra}</span>
       ) : null}
     </span>
   );
@@ -384,13 +381,7 @@ function SourceLink({ activity }: { activity: RecommendedActivity }) {
   return <span />;
 }
 
-function ActionPill({
-  approved,
-  prominent = false,
-}: {
-  approved: boolean;
-  prominent?: boolean;
-}) {
+function ActionPill({ approved, prominent = false }: { approved: boolean; prominent?: boolean }) {
   if (approved) {
     return (
       <span
@@ -455,8 +446,8 @@ function ActivitiesEmpty() {
         No URL-backed events surfaced yet
       </p>
       <p className="max-w-[34ch] text-[10.5px] leading-snug text-muted-foreground">
-        The web-search agent scopes to the selected borough and drops anything without a real
-        event listing. Approved events show here grouped by date and cluster fit.
+        The web-search agent scopes to the selected borough and drops anything without a real event
+        listing. Approved events show here grouped by date and cluster fit.
       </p>
     </div>
   );
@@ -575,12 +566,7 @@ function CheckIcon() {
 
 function SparkIcon() {
   return (
-    <svg
-      viewBox="0 0 10 10"
-      fill="currentColor"
-      className="size-2"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 10 10" fill="currentColor" className="size-2" aria-hidden="true">
       <path d="M5 0.6l1.05 2.6L8.6 4.2 6.05 5.2 5 7.8 3.95 5.2 1.4 4.2l2.55-1z" />
     </svg>
   );

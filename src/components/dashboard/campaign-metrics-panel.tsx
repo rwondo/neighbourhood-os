@@ -1,14 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 
 type Tone = "green" | "amber" | "red";
@@ -140,14 +133,27 @@ function formatPct(p: number): string {
 const BIJLMER: CampaignMetrics = {
   funnel: [
     { label: "Instagram + TikTok impressions", value: 38_400, tone: "green" },
-    { label: "Ad clicks to opt-in page", value: 1_124, vsPrevious: 0.082, trend: "up", tone: "green" },
+    {
+      label: "Ad clicks to opt-in page",
+      value: 1_124,
+      vsPrevious: 0.082,
+      trend: "up",
+      tone: "green",
+    },
     { label: "WhatsApp opt-ins", value: 612, vsPrevious: 0.31, trend: "up", tone: "green" },
     { label: "WhatsApp reads (EN/NL)", value: 558, vsPrevious: 0.91, trend: "up", tone: "green" },
     { label: "Event RSVPs", value: 188, vsPrevious: 0.52, trend: "up", tone: "amber" },
     { label: "Estimated attendance", value: 152, vsPrevious: 0.81, trend: "up", tone: "green" },
     { label: "Return visit (week 2)", value: 94, vsPrevious: 0.62, trend: "up", tone: "green" },
     { label: "Connections formed", value: 54, vsPrevious: 0.48, trend: "up", tone: "green" },
-    { label: "Cost per connection", value: 380, unit: "€", vsPrevious: -0.934, trend: "down", tone: "green" },
+    {
+      label: "Cost per connection",
+      value: 380,
+      unit: "€",
+      vsPrevious: -0.934,
+      trend: "down",
+      tone: "green",
+    },
   ],
   weeklyConnections: [
     { week: 1, connections: 5 },
@@ -173,11 +179,18 @@ const SCHILDERSWIJK: CampaignMetrics = {
     { label: "QR scans / SMS opt-ins", value: 742, vsPrevious: 0.118, trend: "up", tone: "green" },
     { label: "WhatsApp opt-ins", value: 426, vsPrevious: 0.49, trend: "up", tone: "green" },
     { label: "WhatsApp reads", value: 394, vsPrevious: 0.92, trend: "up", tone: "green" },
-    { label: "Event RSVPs", value: 168, vsPrevious: 0.40, trend: "up", tone: "amber" },
+    { label: "Event RSVPs", value: 168, vsPrevious: 0.4, trend: "up", tone: "amber" },
     { label: "Estimated attendance", value: 132, vsPrevious: 0.79, trend: "up", tone: "green" },
     { label: "Return visit (week 2)", value: 84, vsPrevious: 0.64, trend: "up", tone: "green" },
     { label: "Connections formed", value: 47, vsPrevious: 0.51, trend: "up", tone: "green" },
-    { label: "Cost per connection", value: 465, unit: "€", vsPrevious: -0.92, trend: "down", tone: "green" },
+    {
+      label: "Cost per connection",
+      value: 465,
+      unit: "€",
+      vsPrevious: -0.92,
+      trend: "down",
+      tone: "green",
+    },
   ],
   weeklyConnections: [
     { week: 1, connections: 4 },
@@ -202,7 +215,7 @@ const SCHILDERSWIJK: CampaignMetrics = {
 function syntheticMetrics(borough: string): CampaignMetrics {
   const seed = hashBorough(borough);
   const wobble = (n: number, range: number) =>
-    Math.max(1, Math.round(n * (1 + (((seed % 1000) / 1000 - 0.5) * range))));
+    Math.max(1, Math.round(n * (1 + ((seed % 1000) / 1000 - 0.5) * range)));
   const base = {
     leaflets: 3800,
     optIns: 540,
@@ -217,14 +230,63 @@ function syntheticMetrics(borough: string): CampaignMetrics {
   return {
     funnel: [
       { label: "Leaflets + ad impressions", value: wobble(base.leaflets, 0.35), tone: "green" },
-      { label: "QR scans / ad opt-ins", value: wobble(base.optIns, 0.22), vsPrevious: 0.13, trend: "up", tone: "green" },
-      { label: "WhatsApp opt-ins", value: wobble(base.waOpt, 0.22), vsPrevious: 0.46, trend: "up", tone: "green" },
-      { label: "WhatsApp reads", value: wobble(base.waReads, 0.22), vsPrevious: 0.91, trend: "up", tone: "green" },
-      { label: "Event RSVPs", value: wobble(base.rsvps, 0.22), vsPrevious: 0.42, trend: "up", tone: "amber" },
-      { label: "Estimated attendance", value: wobble(base.attend, 0.22), vsPrevious: 0.78, trend: "up", tone: "green" },
-      { label: "Return visit (week 2)", value: wobble(base.return, 0.22), vsPrevious: 0.61, trend: "up", tone: "green" },
-      { label: "Connections formed", value: wobble(base.conns, 0.22), vsPrevious: 0.5, trend: "up", tone: "green" },
-      { label: "Cost per connection", value: wobble(base.cost, 0.15), unit: "€", vsPrevious: -0.92, trend: "down", tone: "green" },
+      {
+        label: "QR scans / ad opt-ins",
+        value: wobble(base.optIns, 0.22),
+        vsPrevious: 0.13,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "WhatsApp opt-ins",
+        value: wobble(base.waOpt, 0.22),
+        vsPrevious: 0.46,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "WhatsApp reads",
+        value: wobble(base.waReads, 0.22),
+        vsPrevious: 0.91,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "Event RSVPs",
+        value: wobble(base.rsvps, 0.22),
+        vsPrevious: 0.42,
+        trend: "up",
+        tone: "amber",
+      },
+      {
+        label: "Estimated attendance",
+        value: wobble(base.attend, 0.22),
+        vsPrevious: 0.78,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "Return visit (week 2)",
+        value: wobble(base.return, 0.22),
+        vsPrevious: 0.61,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "Connections formed",
+        value: wobble(base.conns, 0.22),
+        vsPrevious: 0.5,
+        trend: "up",
+        tone: "green",
+      },
+      {
+        label: "Cost per connection",
+        value: wobble(base.cost, 0.15),
+        unit: "€",
+        vsPrevious: -0.92,
+        trend: "down",
+        tone: "green",
+      },
     ],
     weeklyConnections: [
       { week: 1, connections: wobble(4, 0.25) },
@@ -301,10 +363,7 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
   const conversion = data.funnel.slice(4, 8);
   const punchline = data.funnel[8];
 
-  const connectionsTotal = data.weeklyConnections.reduce(
-    (s, w) => s + w.connections,
-    0,
-  );
+  const connectionsTotal = data.weeklyConnections.reduce((s, w) => s + w.connections, 0);
   const maxOptIns = Math.max(...data.perChannel.map((c) => c.optIns));
 
   return (
@@ -340,9 +399,7 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
           <span className="truncate text-[11px] font-semibold tracking-tight text-foreground">
             Full funnel
           </span>
-          <span className="truncate text-[10.5px] text-muted-foreground/80">
-            {borough}
-          </span>
+          <span className="truncate text-[10.5px] text-muted-foreground/80">{borough}</span>
         </span>
         <span className="inline-flex shrink-0 items-baseline gap-1">
           <span className="font-mono text-[11px] tabular font-semibold text-risk-green">
@@ -357,11 +414,7 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
       {open ? (
         <div className="space-y-3">
           {/* STAGE 1 · DISTRIBUTION — single-line emphasis, no rhythm yet */}
-          <StageGroup
-            stage="distribution"
-            rows={distribution}
-            previousValue={null}
-          />
+          <StageGroup stage="distribution" rows={distribution} previousValue={null} />
 
           {/* STAGE 2 · ENGAGEMENT — opt-ins start to bloom */}
           <StageGroup
@@ -462,8 +515,7 @@ export function CampaignMetricsPanel({ borough }: { borough: string | null }) {
                 <ul className="mt-1.5 space-y-1">
                   {data.perChannel.map((row) => {
                     const pct = (row.optIns / maxOptIns) * 100;
-                    const color =
-                      CHANNEL_HEX[row.channel] ?? "oklch(0.55 0.105 186)";
+                    const color = CHANNEL_HEX[row.channel] ?? "oklch(0.55 0.105 186)";
                     return (
                       <li
                         key={row.channel}
@@ -510,10 +562,7 @@ function StageGroup({
   if (rows.length === 0) return null;
 
   // Survival rate: how many of the previous stage's last metric made it into this stage's first.
-  const survival =
-    previousValue && previousValue > 0
-      ? rows[0].value / previousValue
-      : null;
+  const survival = previousValue && previousValue > 0 ? rows[0].value / previousValue : null;
 
   // Conversion stage uses larger, denser rows; engagement is mid; distribution is minimal.
   const density: "tight" | "comfy" | "dense" =
@@ -553,26 +602,12 @@ function StageGroup({
   );
 }
 
-function FunnelLine({
-  row,
-  density,
-}: {
-  row: FunnelRow;
-  density: "tight" | "comfy" | "dense";
-}) {
+function FunnelLine({ row, density }: { row: FunnelRow; density: "tight" | "comfy" | "dense" }) {
   const valueSize =
-    density === "dense"
-      ? "text-[13px]"
-      : density === "comfy"
-        ? "text-[12.5px]"
-        : "text-[12px]";
+    density === "dense" ? "text-[13px]" : density === "comfy" ? "text-[12.5px]" : "text-[12px]";
 
   const padding =
-    density === "dense"
-      ? "px-2.5 py-2"
-      : density === "comfy"
-        ? "px-2.5 py-1.5"
-        : "px-2 py-1.5";
+    density === "dense" ? "px-2.5 py-2" : density === "comfy" ? "px-2.5 py-1.5" : "px-2 py-1.5";
 
   // Density also dictates ink: conversion rows get a denser ring, distribution stays flat.
   const ring =
@@ -593,12 +628,7 @@ function FunnelLine({
       <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-foreground/85">
         {row.label}
       </span>
-      <span
-        className={cn(
-          "shrink-0 font-mono tabular font-semibold text-foreground",
-          valueSize,
-        )}
-      >
+      <span className={cn("shrink-0 font-mono tabular font-semibold text-foreground", valueSize)}>
         {formatNumber(row.value, row.unit)}
       </span>
       <span className="inline-flex w-12 shrink-0 items-center justify-end font-mono text-[10px] tabular">
@@ -639,7 +669,6 @@ function CostPunchline({ value, connections }: { value: number; connections: num
           </p>
         </div>
       </div>
-
     </section>
   );
 }

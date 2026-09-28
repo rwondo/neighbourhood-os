@@ -46,9 +46,11 @@ const TRUSTED_EVENT_HOSTS: RegExp[] = [
 
 // URL path tokens that signal "this is an event page" rather than a venue
 // homepage / about page / contact page.
-const EVENT_PATH = /\/(events?|agenda|activiteit(en)?|programma(s)?|workshop(s)?|cursus(en)?|meetup|evenement(en)?|kalender|tickets?|e|act|gebeurtenis|festival|voorstelling|optreden|concert|exhibition|tentoonstelling|ontmoeting|borrel|matinee)(\/|$|\?)/i;
+const EVENT_PATH =
+  /\/(events?|agenda|activiteit(en)?|programma(s)?|workshop(s)?|cursus(en)?|meetup|evenement(en)?|kalender|tickets?|e|act|gebeurtenis|festival|voorstelling|optreden|concert|exhibition|tentoonstelling|ontmoeting|borrel|matinee)(\/|$|\?)/i;
 
-const VENUE_HOMEPAGE_PATH = /^\/?(en|nl)?\/?(contact|about|over-ons|over|info|home|index(\.html?)?|locatie|adres|openingstijden)?\/?$/i;
+const VENUE_HOMEPAGE_PATH =
+  /^\/?(en|nl)?\/?(contact|about|over-ons|over|info|home|index(\.html?)?|locatie|adres|openingstijden)?\/?$/i;
 
 function parseUrl(raw: unknown): URL | null {
   if (typeof raw !== "string" || !raw) return null;
@@ -96,7 +98,13 @@ type OpenAIResponse = {
     content?: Array<{
       type?: string;
       text?: string;
-      annotations?: Array<{ type?: string; url?: string; title?: string; start_index?: number; end_index?: number }>;
+      annotations?: Array<{
+        type?: string;
+        url?: string;
+        title?: string;
+        start_index?: number;
+        end_index?: number;
+      }>;
     }>;
   }>;
 };
@@ -197,8 +205,7 @@ Constraints:
     parsed.activities.slice(0, 20).forEach((raw, idx) => {
       const a = raw as Partial<RecommendedActivity>;
       // Take URL from `url` first, then `source` (some models put it there), then annotations.
-      const urlObj =
-        parseUrl(a.url) ?? parseUrl(a.source) ?? parseUrl(annotatedUrls[idx]);
+      const urlObj = parseUrl(a.url) ?? parseUrl(a.source) ?? parseUrl(annotatedUrls[idx]);
       if (!urlObj || !isRealEventUrl(urlObj)) {
         log.info("dropping activity without real event URL", {
           name: a.name,

@@ -53,11 +53,7 @@ async function runSmokeTest(): Promise<boolean> {
   }
 }
 
-async function updateBuurt(
-  sql: postgres.Sql,
-  buurtCode: string,
-  counts: POICounts,
-): Promise<void> {
+async function updateBuurt(sql: postgres.Sql, buurtCode: string, counts: POICounts): Promise<void> {
   await sql`
     UPDATE neighbourhoods
     SET

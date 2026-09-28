@@ -109,11 +109,15 @@ async function main() {
   console.log(`exported snapshot for ${borough} (${city}) →`);
   console.log(`  ${outPath}`);
   console.log(`  buurt: ${buurt.name} (${buurt.buurtCode})`);
-  console.log(`  strategy: ${(snapshot.strategy as { activities?: unknown[] })?.activities?.length ?? 0} activities`);
+  console.log(
+    `  strategy: ${(snapshot.strategy as { activities?: unknown[] })?.activities?.length ?? 0} activities`,
+  );
   console.log(`  messages: ${messages.length}`);
   console.log(`  traceSteps: ${Array.isArray(run?.steps) ? run.steps.length : 0}`);
   console.log("");
-  console.log("Next: hand-edit src/lib/demo-data/<borough>.ts to paste these values into the TS snapshot.");
+  console.log(
+    "Next: hand-edit src/lib/demo-data/<borough>.ts to paste these values into the TS snapshot.",
+  );
   process.exit(0);
 }
 

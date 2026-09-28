@@ -8,7 +8,15 @@ import { seedNeighbourhoodProfile } from "@/lib/memory";
 
 const CITY_KEYS = ["rotterdam", "amsterdam", "denhaag"] as const;
 
-function profileMarkdown(row: { name: string; buurtCode: string; score: number; pctLivingAlone: number; pctElderly65: number; pctSingleParent: number; lowIncomeIndex: number; }): string {
+function profileMarkdown(row: {
+  name: string;
+  buurtCode: string;
+  score: number;
+  pctLivingAlone: number;
+  pctElderly65: number;
+  pctSingleParent: number;
+  lowIncomeIndex: number;
+}): string {
   return [
     `# ${row.name} (${row.buurtCode})`,
     ``,
@@ -39,7 +47,9 @@ const MEMORY_TIMEOUT_MS = 20_000;
 function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   return Promise.race([
     p,
-    new Promise<T>((_, rj) => setTimeout(() => rj(new Error(`${label} timed out after ${ms}ms`)), ms)),
+    new Promise<T>((_, rj) =>
+      setTimeout(() => rj(new Error(`${label} timed out after ${ms}ms`)), ms),
+    ),
   ]);
 }
 
@@ -53,10 +63,14 @@ async function main() {
     console.log(`[seed] weather: fetching ${c}…`);
     const w = await fetchCityWeather(c);
     weatherByCity[c] = w.isolationPenalty;
-    console.log(`[seed] weather: ${c} penalty=${w.isolationPenalty} minT=${w.minTempC} rain=${w.rainMmNext24h.toFixed(1)}mm`);
+    console.log(
+      `[seed] weather: ${c} penalty=${w.isolationPenalty} minT=${w.minTempC} rain=${w.rainMmNext24h.toFixed(1)}mm`,
+    );
   }
 
-  console.log(`[seed] inserting ${rows.length} neighbourhoods (memory=${SEED_MEMORY ? "on" : "off"})…`);
+  console.log(
+    `[seed] inserting ${rows.length} neighbourhoods (memory=${SEED_MEMORY ? "on" : "off"})…`,
+  );
   let i = 0;
   for (const r of rows) {
     i++;
@@ -107,7 +121,10 @@ async function main() {
       try {
         const t0 = Date.now();
         await withTimeout(
-          seedNeighbourhoodProfile(r.buurtCode, profileMarkdown({ ...r, score }), { city, name: r.name }),
+          seedNeighbourhoodProfile(r.buurtCode, profileMarkdown({ ...r, score }), {
+            city,
+            name: r.name,
+          }),
           MEMORY_TIMEOUT_MS,
           `memory(${r.buurtCode})`,
         );

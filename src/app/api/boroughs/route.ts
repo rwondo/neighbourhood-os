@@ -11,13 +11,19 @@ export async function GET(req: NextRequest) {
   const city = parseCity(req.nextUrl.searchParams.get("city"));
   if (!city) {
     return NextResponse.json(
-      { error: "Missing or invalid 'city' query parameter. Must be one of: rotterdam, amsterdam, denhaag." },
+      {
+        error:
+          "Missing or invalid 'city' query parameter. Must be one of: rotterdam, amsterdam, denhaag.",
+      },
       { status: 400 },
     );
   }
 
   if (isStaticMode()) {
-    return NextResponse.json({ boroughs: snapshotBoroughs(city) }, { headers: SNAPSHOT_CACHE_HEADERS });
+    return NextResponse.json(
+      { boroughs: snapshotBoroughs(city) },
+      { headers: SNAPSHOT_CACHE_HEADERS },
+    );
   }
 
   try {

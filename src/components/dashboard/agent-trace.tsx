@@ -47,18 +47,12 @@ export function AgentTrace({ steps }: { steps: TraceStep[] }) {
   const railFillPct =
     steps.length <= 1
       ? 100
-      : Math.max(
-          0,
-          Math.min(100, ((filledThroughIdx + 0.5) / (steps.length - 0.5)) * 100),
-        );
+      : Math.max(0, Math.min(100, ((filledThroughIdx + 0.5) / (steps.length - 0.5)) * 100));
 
   return (
     <ol className="relative pl-1">
       {/* Connecting rail — base track */}
-      <span
-        aria-hidden="true"
-        className="absolute left-[8px] top-2 bottom-2 w-px bg-hairline"
-      />
+      <span aria-hidden="true" className="absolute left-[8px] top-2 bottom-2 w-px bg-hairline" />
       {/* Connecting rail — filled portion drawn from the top down */}
       <span
         aria-hidden="true"
@@ -193,8 +187,7 @@ export function AgentTrace({ steps }: { steps: TraceStep[] }) {
                 <span
                   className={cn(
                     "leading-tight transition-[color,font-size,font-weight] duration-300 ease-out",
-                    isActive &&
-                      "text-[12.5px] font-semibold tracking-tight text-foreground",
+                    isActive && "text-[12.5px] font-semibold tracking-tight text-foreground",
                     isCompleted && "text-[11px] text-foreground/65",
                     isError && "text-[11.5px] font-semibold text-risk-red",
                     isSkipped && "text-[11px] text-risk-amber/85",

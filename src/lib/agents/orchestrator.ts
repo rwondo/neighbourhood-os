@@ -42,7 +42,13 @@ const STRATEGY_SCHEMA = `{
   "weeks": [{"week":1,"score":number}, ... up to 6]
 }`;
 
-function emitStep(emit: Emit, id: string, label: string, status: StepStatus, detail?: string): void {
+function emitStep(
+  emit: Emit,
+  id: string,
+  label: string,
+  status: StepStatus,
+  detail?: string,
+): void {
   const evt: AgentTraceEvent = detail
     ? { type: "step", id, label, status, detail }
     : { type: "step", id, label, status };
@@ -301,7 +307,11 @@ export async function runOrchestrator(
 
   // ── Step 4: Generate strategy ─────────────────────────────────────────
   emitStep(emit, "s4", "Generating bespoke intervention strategy", "active");
-  const cityLabelMap = { rotterdam: "Rotterdam", amsterdam: "Amsterdam", denhaag: "Den Haag" } as const;
+  const cityLabelMap = {
+    rotterdam: "Rotterdam",
+    amsterdam: "Amsterdam",
+    denhaag: "Den Haag",
+  } as const;
   const city = cityLabelMap[neighbourhood.city] ?? neighbourhood.city;
   const today = new Date().toISOString().slice(0, 10);
   const candidateBlock = search.activities.length
@@ -358,7 +368,11 @@ Rules:
       user,
       label: "strategy-gen",
     });
-    if (!strategyCore || !Array.isArray(strategyCore.activities) || !Array.isArray(strategyCore.weeks)) {
+    if (
+      !strategyCore ||
+      !Array.isArray(strategyCore.activities) ||
+      !Array.isArray(strategyCore.weeks)
+    ) {
       throw new Error("orchestrator returned malformed strategy");
     }
     log.info("strategy generated", {
@@ -390,7 +404,10 @@ Rules:
       Array.isArray(strategyCore.activities) && strategyCore.activities.length > 0
         ? strategyCore.activities.slice(0, 8)
         : search.activities.slice(0, 8);
-    const safeActivities = ensureClusterCoverage(normaliseActivities(rawActivities, clusters), clusters);
+    const safeActivities = ensureClusterCoverage(
+      normaliseActivities(rawActivities, clusters),
+      clusters,
+    );
     const safeWeeks =
       Array.isArray(strategyCore.weeks) && strategyCore.weeks.length === 6
         ? strategyCore.weeks

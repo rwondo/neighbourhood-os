@@ -44,7 +44,7 @@ export const CITIES: CityProfile[] = [
 ];
 
 export const CITY_BY_KEY: Record<CityKey, CityProfile> = Object.fromEntries(
-  CITIES.map((c) => [c.key, c])
+  CITIES.map((c) => [c.key, c]),
 ) as Record<CityKey, CityProfile>;
 
 export const INDUSTRIAL_BOROUGH = "Haven";

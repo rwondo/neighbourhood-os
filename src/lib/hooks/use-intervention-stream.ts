@@ -32,9 +32,7 @@ const DEFAULT_STEPS: TraceStep[] = [
 // per-step timeouts combined.
 const STREAM_WALL_CLOCK_MS = 180_000;
 
-export type SimulateTarget =
-  | { neighbourhoodId: string }
-  | { borough: string; city: CityKey };
+export type SimulateTarget = { neighbourhoodId: string } | { borough: string; city: CityKey };
 
 type StepEvent = Extract<AgentTraceEvent, { type: "step" }>;
 
@@ -53,7 +51,12 @@ function applyEventToFrame(
     setters.setSteps((prev) =>
       prev.map((s) =>
         s.id === step.id
-          ? { ...s, status: step.status, detail: step.detail ?? s.detail, label: step.label ?? s.label }
+          ? {
+              ...s,
+              status: step.status,
+              detail: step.detail ?? s.detail,
+              label: step.label ?? s.label,
+            }
           : s,
       ),
     );
@@ -67,8 +70,7 @@ function applyEventToFrame(
         m.clusterId === event.clusterId && m.channel === event.channel
           ? {
               ...m,
-              creativeUrl:
-                event.creativeUrl !== undefined ? event.creativeUrl : m.creativeUrl,
+              creativeUrl: event.creativeUrl !== undefined ? event.creativeUrl : m.creativeUrl,
               creativeStatus: event.creativeStatus ?? m.creativeStatus,
               creativePrompt: event.creativePrompt ?? m.creativePrompt,
               qrCodeUrl: event.qrCodeUrl !== undefined ? event.qrCodeUrl : m.qrCodeUrl,

@@ -41,17 +41,37 @@ async function main() {
       });
     for (const cluster of clusters) {
       const activity = activities[0];
-      const msg = await personaliseCluster({ cluster, activity, neighbourhood: buurt as unknown as BuurtRecord }).catch(() => null);
+      const msg = await personaliseCluster({
+        cluster,
+        activity,
+        neighbourhood: buurt as unknown as BuurtRecord,
+      }).catch(() => null);
       if (!msg) continue;
       const id = `cmsg_demo_${buurt.buurtCode}_${cluster.id}`;
       await getDb()
         .insert(clusterMessages)
-        .values({ id, interventionId, clusterId: cluster.id, channel: msg.channel, language: msg.language, tone: msg.tone, message: msg.message, pdfUrl: msg.pdfUrl ?? null })
+        .values({
+          id,
+          interventionId,
+          clusterId: cluster.id,
+          channel: msg.channel,
+          language: msg.language,
+          tone: msg.tone,
+          message: msg.message,
+          pdfUrl: msg.pdfUrl ?? null,
+        })
         .onConflictDoUpdate({ target: clusterMessages.id, set: { message: msg.message } });
     }
     await getDb()
       .insert(agentRuns)
-      .values({ id: `run_demo_${buurt.buurtCode}`, interventionId, neighbourhoodId: buurt.id, steps: log, totalMs: 0, ok: true })
+      .values({
+        id: `run_demo_${buurt.buurtCode}`,
+        interventionId,
+        neighbourhoodId: buurt.id,
+        steps: log,
+        totalMs: 0,
+        ok: true,
+      })
       .onConflictDoUpdate({ target: agentRuns.id, set: { steps: log } });
     console.log(`[demo] stored ${buurt.name} → intervention ${interventionId}`);
   }

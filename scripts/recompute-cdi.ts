@@ -6,20 +6,10 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { eq } from "drizzle-orm";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
 import { point } from "@turf/helpers";
-import type {
-  Feature,
-  FeatureCollection,
-  Polygon,
-  MultiPolygon,
-} from "geojson";
+import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson";
 import * as schema from "@/lib/db/schema";
 import { neighbourhoods } from "@/lib/db/schema";
-import {
-  computeCDIBreakdown,
-  computeCityStats,
-  type CDIInputs,
-  type CityStats,
-} from "@/lib/score";
+import { computeCDIBreakdown, computeCityStats, type CDIInputs, type CityStats } from "@/lib/score";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -32,10 +22,7 @@ const BOROUGHS_PATH = path.resolve(process.cwd(), "public/boroughs.geojson");
 
 type BoroughProps = { city: string; borough: string };
 type BoroughFeature = Feature<Polygon | MultiPolygon, BoroughProps>;
-type BoroughsCollection = FeatureCollection<
-  Polygon | MultiPolygon,
-  BoroughProps
->;
+type BoroughsCollection = FeatureCollection<Polygon | MultiPolygon, BoroughProps>;
 
 type BuurtRow = typeof neighbourhoods.$inferSelect;
 
@@ -72,11 +59,7 @@ function loadBoroughs(): Map<CityKey, BoroughFeature[]> {
   return byCity;
 }
 
-function findBorough(
-  lng: number,
-  lat: number,
-  boroughs: BoroughFeature[],
-): string | null {
+function findBorough(lng: number, lat: number, boroughs: BoroughFeature[]): string | null {
   if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
   const pt = point([lng, lat]);
   for (const f of boroughs) {
@@ -246,11 +229,7 @@ async function main(): Promise<void> {
           breakdown = fullBreakdown as unknown as Record<string, unknown>;
         }
 
-        const borough = findBorough(
-          Number(row.centroidLng),
-          Number(row.centroidLat),
-          cityBoroughs,
-        );
+        const borough = findBorough(Number(row.centroidLng), Number(row.centroidLat), cityBoroughs);
 
         await db
           .update(neighbourhoods)
