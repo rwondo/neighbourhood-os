@@ -137,7 +137,10 @@ async function main() {
   console.log("[seed] done");
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Exit explicitly: the shared postgres pool would otherwise keep the process alive.
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
