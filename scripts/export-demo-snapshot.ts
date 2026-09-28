@@ -23,7 +23,7 @@ import "dotenv/config";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { agentRuns, clusterMessages, interventions, neighbourhoods } from "@/lib/db/schema";
 
 async function main() {
@@ -39,7 +39,7 @@ async function main() {
 
   // Find the worst-CDI buurt in the borough — same selector the simulate
   // route uses — then grab its most-recent intervention.
-  const buurtRows = await db
+  const buurtRows = await getDb()
     .select()
     .from(neighbourhoods)
     .where(and(eq(neighbourhoods.city, city), sql`${neighbourhoods.borough} = ${borough}`))
@@ -51,7 +51,7 @@ async function main() {
     process.exit(1);
   }
 
-  const [intervention] = await db
+  const [intervention] = await getDb()
     .select()
     .from(interventions)
     .where(eq(interventions.neighbourhoodId, buurt.id))
@@ -62,12 +62,12 @@ async function main() {
     process.exit(1);
   }
 
-  const messages = await db
+  const messages = await getDb()
     .select()
     .from(clusterMessages)
     .where(eq(clusterMessages.interventionId, intervention.id));
 
-  const [run] = await db
+  const [run] = await getDb()
     .select()
     .from(agentRuns)
     .where(eq(agentRuns.interventionId, intervention.id))

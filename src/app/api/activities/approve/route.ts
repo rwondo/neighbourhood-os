@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { makeLogger } from "@/lib/log";
+import { isStaticMode, staticModeResponse } from "@/lib/runtime-mode";
 import { channelNeedsCreative, generateCreative } from "@/lib/agents/creative";
 import { createMetaCampaign, createTikTokCampaign } from "@/lib/mcp/pipeboard";
 import type {
@@ -72,7 +73,7 @@ async function resolveBuurt(borough: string, city: CityKey | undefined): Promise
   const cityFilter = city ? eq(neighbourhoods.city, city) : undefined;
   const boroughFilter = sql`${neighbourhoods.borough} = ${borough}`;
   const where = cityFilter ? and(cityFilter, boroughFilter) : boroughFilter;
-  const rows = await db
+  const rows = await getDb()
     .select()
     .from(neighbourhoods)
     .where(where)
@@ -82,6 +83,7 @@ async function resolveBuurt(borough: string, city: CityKey | undefined): Promise
 }
 
 export async function POST(req: NextRequest) {
+  if (isStaticMode()) return staticModeResponse();
   let payload: ApprovePayload = {};
   try {
     payload = (await req.json()) as ApprovePayload;

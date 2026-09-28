@@ -17,7 +17,8 @@
     "populate:centroids": "tsx scripts/populate-centroids.ts",
     "populate:names": "tsx scripts/populate-names.ts",
     "refresh:demographics": "tsx scripts/refresh-demographics.ts",
-    "recompute:cdi": "tsx scripts/recompute-cdi.ts"
+    "recompute:cdi": "tsx scripts/recompute-cdi.ts",
+    "export:snapshot": "tsx scripts/export-static-snapshot.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

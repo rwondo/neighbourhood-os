@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods, interventions, clusterMessages, agentRuns } from "@/lib/db/schema";
 import { runOrchestrator, type Emit } from "@/lib/agents/orchestrator";
 import { personaliseCluster } from "@/lib/agents/personalisation";
 import { createSSEStream } from "@/lib/sse";
 import { makeLogger } from "@/lib/log";
+import { isStaticMode, staticModeResponse } from "@/lib/runtime-mode";
 import type { AgentTraceEvent, BuurtRecord, CityKey, ClusterMessage } from "@/lib/types";
 
 const log = makeLogger("api:simulate");
@@ -23,7 +24,7 @@ type SimulatePayload = {
 
 async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
   if (p.neighbourhoodId) {
-    const [row] = await db.select().from(neighbourhoods).where(eq(neighbourhoods.id, p.neighbourhoodId));
+    const [row] = await getDb().select().from(neighbourhoods).where(eq(neighbourhoods.id, p.neighbourhoodId));
     if (row) {
       log.info("resolved buurt by neighbourhoodId", {
         id: row.id,
@@ -38,7 +39,7 @@ async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
     const cityFilter = p.city ? eq(neighbourhoods.city, p.city) : undefined;
     const boroughFilter = sql`${neighbourhoods.borough} = ${p.borough}`;
     const where = cityFilter ? and(cityFilter, boroughFilter) : boroughFilter;
-    const rows = await db
+    const rows = await getDb()
       .select()
       .from(neighbourhoods)
       .where(where)
@@ -58,6 +59,7 @@ async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
 }
 
 export async function POST(req: NextRequest) {
+  if (isStaticMode()) return staticModeResponse();
   let payload: SimulatePayload;
   try {
     payload = (await req.json()) as SimulatePayload;
@@ -148,7 +150,7 @@ export async function POST(req: NextRequest) {
       // ── Step 6: persist strategy + messages ──────────────────────────
       emit({ type: "step", id: "s6", label: "Storing strategy and messages", status: "active" });
       try {
-        await db.insert(interventions).values({
+        await getDb().insert(interventions).values({
           id: interventionId,
           neighbourhoodId: buurt.id,
           rationale: plan.strategy.rationale,
@@ -161,7 +163,7 @@ export async function POST(req: NextRequest) {
 
         await Promise.all(
           messages.map((msg, i) =>
-            db.insert(clusterMessages).values({
+            getDb().insert(clusterMessages).values({
               id: `cmsg_${interventionId}_${msg.clusterId}_${i}`,
               interventionId: interventionId!,
               clusterId: msg.clusterId,
@@ -197,7 +199,7 @@ export async function POST(req: NextRequest) {
       });
 
       try {
-        await db.insert(agentRuns).values({
+        await getDb().insert(agentRuns).values({
           id: `run_${interventionId ?? Date.now()}`,
           interventionId: interventionId ?? null,
           neighbourhoodId: buurt.id,
@@ -221,7 +223,7 @@ export async function POST(req: NextRequest) {
       log.error("pipeline crashed", err);
       emit({ type: "error", message });
       try {
-        await db.insert(agentRuns).values({
+        await getDb().insert(agentRuns).values({
           id: `run_err_${Date.now()}`,
           interventionId: interventionId ?? null,
           neighbourhoodId: buurt.id,

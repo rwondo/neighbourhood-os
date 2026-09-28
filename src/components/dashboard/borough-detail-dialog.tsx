@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CityKey } from "@/lib/types";
-import type { BoroughDetailResponse } from "@/app/api/boroughs/[borough]/route";
+import type { BoroughDetailResponse, CityKey } from "@/lib/types";
 import {
   Dialog,
   DialogContent,

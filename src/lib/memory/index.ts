@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { memories, chunks, entities, edges } from "@/lib/db/schema";
 import { makeLogger } from "@/lib/log";
 import { chunkText } from "./chunker";
@@ -45,7 +45,7 @@ export async function ingestDocument({
   extractGraph?: boolean;
 }): Promise<{ memoryId: string }> {
   const memoryId = id ?? `mem_${containerTag}_${Date.now()}`;
-  await db.insert(memories).values({ id: memoryId, containerTag, kind, content, metadata: metadata ?? null }).onConflictDoUpdate({
+  await getDb().insert(memories).values({ id: memoryId, containerTag, kind, content, metadata: metadata ?? null }).onConflictDoUpdate({
     target: memories.id,
     set: { content, metadata: metadata ?? null },
   });
@@ -56,12 +56,12 @@ export async function ingestDocument({
     for (let i = 0; i < pieces.length; i++) {
       const c = pieces[i];
       const vec = vectors[i];
-      await db.insert(chunks).values({ id: c.id, memoryId, containerTag, position: c.position, content: c.content }).onConflictDoUpdate({
+      await getDb().insert(chunks).values({ id: c.id, memoryId, containerTag, position: c.position, content: c.content }).onConflictDoUpdate({
         target: chunks.id,
         set: { content: c.content },
       });
       if (vec && vec.length) {
-        await db.execute(sql`UPDATE chunks SET embedding = ${vectorLiteral(vec)}::vector WHERE id = ${c.id}`);
+        await getDb().execute(sql`UPDATE chunks SET embedding = ${vectorLiteral(vec)}::vector WHERE id = ${c.id}`);
       }
     }
   }
@@ -69,13 +69,13 @@ export async function ingestDocument({
   if (shouldExtractGraph) {
     const graph = await extractGraph({ containerTag, memoryId, content }).catch(() => ({ entities: [], edges: [] }));
     for (const e of graph.entities) {
-      await db
+      await getDb()
         .insert(entities)
         .values({ id: e.id, containerTag: e.containerTag, type: e.type, name: e.name, normalizedName: e.normalizedName, metadata: e.metadata ?? null })
         .onConflictDoNothing();
     }
     for (const edge of graph.edges) {
-      await db
+      await getDb()
         .insert(edges)
         .values({ id: edge.id, containerTag: edge.containerTag, sourceEntity: edge.sourceEntity, targetEntity: edge.targetEntity, relation: edge.relation, weight: edge.weight, sourceMemoryId: edge.sourceMemoryId ?? null, metadata: edge.metadata ?? null })
         .onConflictDoNothing();
@@ -120,7 +120,7 @@ export async function seedNeighbourhoodProfile(
 }
 
 async function probeContainer(containerTag: string, timeoutMs = 3000): Promise<"empty" | "populated" | "unknown"> {
-  const probe = db.execute<{ exists: boolean }>(
+  const probe = getDb().execute<{ exists: boolean }>(
     sql`SELECT EXISTS(SELECT 1 FROM memories WHERE container_tag = ${containerTag}) AS exists`,
   );
   try {

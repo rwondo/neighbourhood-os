@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "generatedAt": null,
+  "sources": [],
+  "cities": {
+    "rotterdam": { "boroughs": [], "details": {}, "recentInterventions": [] },
+    "amsterdam": { "boroughs": [], "details": {}, "recentInterventions": [] },
+    "denhaag": { "boroughs": [], "details": {}, "recentInterventions": [] }
+  }
+}

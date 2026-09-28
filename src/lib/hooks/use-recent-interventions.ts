@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CityKey } from "@/lib/types";
-import type { RecentInterventionRecord } from "@/app/api/interventions/recent/route";
+import type { CityKey, RecentInterventionRecord } from "@/lib/types";
 
 export function useRecentInterventions(city: CityKey, refreshKey: number = 0) {
   const [interventions, setInterventions] = useState<RecentInterventionRecord[]>([]);

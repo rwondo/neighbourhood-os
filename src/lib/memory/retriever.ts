@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { makeLogger } from "@/lib/log";
 import { embedTexts, vectorLiteral } from "./embedder";
 import type { RetrievalHit } from "./types";
@@ -29,7 +29,7 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
   type GraphRow = { content: string; memory_id: string; container_tag: string };
 
   const vectorHits: VectorRow[] = vec
-    ? ((await db.execute<VectorRow>(sql`
+    ? ((await getDb().execute<VectorRow>(sql`
         SELECT content, memory_id, container_tag, (embedding <=> ${vec}::vector) AS distance
         FROM chunks
         WHERE container_tag = ${containerTag} AND embedding IS NOT NULL
@@ -38,7 +38,7 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
       `)) as unknown as VectorRow[])
     : [];
 
-  const lexicalHits = (await db.execute<LexicalRow>(sql`
+  const lexicalHits = (await getDb().execute<LexicalRow>(sql`
       SELECT content, memory_id, container_tag, similarity(content, ${query}) AS sim
       FROM chunks
       WHERE container_tag = ${containerTag} AND content % ${query}
@@ -55,7 +55,7 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
   }
 
   if (graphExpand) {
-    const expansion = (await db.execute<GraphRow>(sql`
+    const expansion = (await getDb().execute<GraphRow>(sql`
         SELECT m.content, m.id AS memory_id, m.container_tag
         FROM edges e
         JOIN memories m ON m.id = e.source_memory_id

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
 import { fetchCbsBuurten, GEMEENTE_CODES } from "@/lib/cbs";
 import { fetchCityWeather } from "@/lib/weather";
@@ -73,7 +73,7 @@ async function main() {
       socialParticipationDrop: 0,
     });
 
-    await db
+    await getDb()
       .insert(neighbourhoods)
       .values({
         id: r.buurtCode,

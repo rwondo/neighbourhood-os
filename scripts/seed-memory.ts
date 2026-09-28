@@ -11,7 +11,7 @@
  */
 import "dotenv/config";
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
 import { seedNeighbourhoodProfile, writeOutcome } from "@/lib/memory";
 
@@ -80,7 +80,7 @@ const SYNTHETIC_OUTCOMES = [
 
 async function pickBuurten(codes: string[]): Promise<Row[]> {
   if (codes.length > 0) {
-    return db
+    return getDb()
       .select()
       .from(neighbourhoods)
       .where(sql`${neighbourhoods.buurtCode} = ANY(${codes})`);
@@ -88,7 +88,7 @@ async function pickBuurten(codes: string[]): Promise<Row[]> {
   // Default: worst-CDI buurt per borough across all 3 cities.
   // Fetch sorted by CDI desc then group by borough in JS — keeps the result
   // typed (camelCase) instead of raw db.execute() which returns snake_case keys.
-  const all = await db
+  const all = await getDb()
     .select()
     .from(neighbourhoods)
     .where(sql`${neighbourhoods.borough} IS NOT NULL AND ${neighbourhoods.borough} <> ''`)
