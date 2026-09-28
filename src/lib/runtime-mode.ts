@@ -1,4 +1,4 @@
-// Server-only: in the browser DATABASE_URL is always undefined.
+// isStaticMode() is server-only: in the browser DATABASE_URL is always undefined.
 
 /**
  * Static snapshot mode serves precomputed CDI data from

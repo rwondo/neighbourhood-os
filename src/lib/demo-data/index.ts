@@ -1,8 +1,9 @@
+import { CITY_BY_KEY } from "@/lib/mock-data";
+import { STATIC_MODE_MESSAGE } from "@/lib/runtime-mode";
 import { NOORD_SNAPSHOT } from "./noord";
 import type { DemoSnapshot } from "./types";
-import type { ApprovalResult } from "@/components/dashboard/activity-approval-dialog";
 
-// Registry of pre-canned boroughs. Each entry is keyed by `${city}::${borough}`
+// Registry of replayable runs. Each entry is keyed by `${city}::${borough}`
 // for unambiguous lookup (boroughs can repeat across cities — e.g. Noord exists
 // in multiple Dutch municipalities).
 const REGISTRY: DemoSnapshot[] = [NOORD_SNAPSHOT];
@@ -24,6 +25,16 @@ export function listDemoBoroughs(): { borough: string; city: string }[] {
   return REGISTRY.map((s) => ({ borough: s.borough, city: s.city }));
 }
 
+/** Message shown in static mode when a borough has no replayable run. */
+export function staticRunNotice(): string {
+  const available = REGISTRY.map(
+    (s) => `${CITY_BY_KEY[s.city]?.label ?? s.city} · ${s.borough}`,
+  ).join(", ");
+  return available
+    ? `${STATIC_MODE_MESSAGE} A sample run is available for ${available}.`
+    : STATIC_MODE_MESSAGE;
+}
+
 /**
  * Reads the active demo-mode flag from the browser URL (`?demo=1`, `?demo=noord`,
  * or `?demo=*`). Returns the raw value so callers can scope to a specific borough.
@@ -38,7 +49,7 @@ export function readDemoFlag(): string | null {
 }
 
 /**
- * Resolves whether to use a snapshot for the given target.
+ * Resolves whether to replay a snapshot for the given target in live mode.
  * - `?demo=1` or `?demo=on` → use snapshot if registered
  * - `?demo=<borough>` → only use snapshot when borough matches
  * - no flag → never use snapshot
@@ -52,9 +63,4 @@ export function resolveDemoSnapshot(borough: string | null, city: string | null)
   return flag === snapshot.borough.toLowerCase() ? snapshot : null;
 }
 
-/** Look up the preset ApprovalResult for an activity within a snapshot. */
-export function approvalForActivity(snapshot: DemoSnapshot, activityName: string): ApprovalResult {
-  return snapshot.approval.byActivityName[activityName] ?? snapshot.approval.default;
-}
-
-export type { DemoSnapshot };
+export type { DemoProvenance, DemoSnapshot } from "./types";

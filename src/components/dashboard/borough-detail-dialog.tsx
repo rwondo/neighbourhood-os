@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getDemoSnapshot, staticRunNotice } from "@/lib/demo-data";
 import type { BoroughDetailResponse, CityKey } from "@/lib/types";
 import {
   Dialog,
@@ -58,13 +59,18 @@ export function BoroughDetailDialog({
   borough,
   city,
   onGenerate,
+  staticMode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   borough: string | null;
   city: CityKey;
   onGenerate: () => void;
+  staticMode: boolean;
 }) {
+  // In static mode only boroughs with a sample run can "generate" (a replay).
+  const hasSample = getDemoSnapshot(borough, city) !== null;
+  const generateBlocked = staticMode && !hasSample;
   const [data, setData] = useState<BoroughDetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,9 +165,14 @@ export function BoroughDetailDialog({
             >
               Close
             </button>
+            {generateBlocked ? (
+              <span className="min-w-0 flex-1 text-right text-[10.5px] leading-snug text-muted-foreground">
+                {staticRunNotice()}
+              </span>
+            ) : null}
             <button
               type="button"
-              disabled={!data}
+              disabled={!data || generateBlocked}
               onClick={() => {
                 onGenerate();
                 onOpenChange(false);
@@ -171,7 +182,7 @@ export function BoroughDetailDialog({
               <svg viewBox="0 0 12 12" fill="currentColor" className="size-3 transition-transform group-hover:rotate-12" aria-hidden="true">
                 <path d="M6 1l1.5 3.5L11 6l-3.5 1.5L6 11l-1.5-3.5L1 6l3.5-1.5L6 1z" />
               </svg>
-              Generate Intervention
+              {staticMode ? "Replay sample run" : "Generate Intervention"}
               <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
                 <path d="M3 6h6" />
                 <path d="M6.5 3.5L9 6L6.5 8.5" />

@@ -11,6 +11,7 @@ import { ChannelPreviews } from "./channel-previews";
 import { CampaignMetricsPanel } from "./campaign-metrics-panel";
 import { cn } from "@/lib/utils";
 import type { TraceStep } from "@/lib/hooks/use-intervention-stream";
+import type { DemoProvenance } from "@/lib/demo-data";
 import type {
   Channel,
   CityKey,
@@ -47,6 +48,9 @@ export function RightPanel({
   messages,
   strategy,
   error,
+  notice,
+  replay,
+  staticMode,
 }: {
   city: CityKey;
   selectedName: string | null;
@@ -56,6 +60,9 @@ export function RightPanel({
   messages: ClusterMessage[];
   strategy: InterventionStrategy | null;
   error: string | null;
+  notice: string | null;
+  replay: DemoProvenance | null;
+  staticMode: boolean;
 }) {
   const completedSteps = steps.filter((s) => s.status === "completed").length;
   const activities = strategy?.activities ?? [];
@@ -148,6 +155,8 @@ export function RightPanel({
         showFocused={Boolean(showFocused)}
         running={running}
         error={error}
+        notice={notice}
+        replay={replay}
         strategy={strategy}
       />
 
@@ -275,6 +284,7 @@ export function RightPanel({
         city={city}
         alreadyApproved={selected ? approvedKeys.has(selected.key) : false}
         onApproved={handleApprovalResult}
+        staticMode={staticMode}
       />
     </aside>
   );
@@ -286,6 +296,8 @@ function ContextHeader({
   showFocused,
   running,
   error,
+  notice,
+  replay,
   strategy,
 }: {
   selectedName: string | null;
@@ -293,6 +305,8 @@ function ContextHeader({
   showFocused: boolean;
   running: boolean;
   error: string | null;
+  notice: string | null;
+  replay: DemoProvenance | null;
   strategy: InterventionStrategy | null;
 }) {
   if (!selectedName) {
@@ -338,13 +352,22 @@ function ContextHeader({
           : "bg-muted-foreground/40";
 
   const statusLabel =
-    statusTone === "live"
-      ? "Streaming"
-      : statusTone === "ready"
-        ? "Ready"
-        : statusTone === "error"
-          ? "Error"
-          : "Idle";
+    statusTone === "error"
+      ? "Error"
+      : replay
+        ? "Replay"
+        : statusTone === "live"
+          ? "Streaming"
+          : statusTone === "ready"
+            ? "Ready"
+            : "Idle";
+
+  const replayNote = !replay
+    ? null
+    : replay.kind === "illustrative"
+      ? `Sample run: ${replay.note}`
+      : `Recorded run from ${new Date(replay.capturedAt).toLocaleDateString("en-GB")} ` +
+        `(originally ${Math.round(replay.originalDurationMs / 1000)}s, replayed faster).`;
 
   return (
     <div className="shrink-0 border-b border-hairline bg-canvas/40 px-4 py-3">
@@ -397,6 +420,18 @@ function ContextHeader({
           </div>
         ) : null}
       </div>
+
+      {replayNote ? (
+        <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2 py-1 text-[10.5px] leading-snug text-muted-foreground">
+          {replayNote}
+        </p>
+      ) : null}
+
+      {notice ? (
+        <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2 py-1 text-[10.5px] leading-snug text-muted-foreground">
+          {notice}
+        </p>
+      ) : null}
 
       {error ? (
         <p className="mt-2 flex items-start gap-1.5 rounded-md border border-risk-red/25 bg-risk-red-soft/40 px-2 py-1 text-[10.5px] leading-snug text-risk-red">

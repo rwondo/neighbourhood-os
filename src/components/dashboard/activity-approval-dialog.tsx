@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { approvalForActivity, resolveDemoSnapshot } from "@/lib/demo-data";
 import type {
   Channel,
   CityKey,
@@ -138,6 +137,7 @@ export function ActivityApprovalDialog({
   city,
   onApproved,
   alreadyApproved,
+  staticMode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -148,6 +148,7 @@ export function ActivityApprovalDialog({
   city: CityKey | null;
   onApproved: (result: ApprovalResult) => void;
   alreadyApproved: boolean;
+  staticMode: boolean;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -171,22 +172,6 @@ export function ActivityApprovalDialog({
     if (!activity) return;
     setSubmitting(true);
     setError(null);
-
-    // Demo-mode fast path: bypass /api/activities/approve entirely and return
-    // a preset approval result so the live pitch never depends on Ideogram or
-    // Pipeboard MCP being reachable.
-    const demoSnapshot = resolveDemoSnapshot(borough, city);
-    if (demoSnapshot) {
-      try {
-        await new Promise((r) => setTimeout(r, 1400));
-        const approval = approvalForActivity(demoSnapshot, activity.name);
-        setResult(approval);
-        onApproved(approval);
-      } finally {
-        setSubmitting(false);
-      }
-      return;
-    }
 
     try {
       const includedMessages = messages
@@ -388,6 +373,12 @@ export function ActivityApprovalDialog({
                     Push Meta and TikTok campaigns to Ads Manager (status: PAUSED).
                   </li>
                 </ul>
+                {staticMode ? (
+                  <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2.5 py-1.5 text-[10.5px] leading-snug text-muted-foreground">
+                    Approval is disabled in this static demo: it calls Ideogram (via Together AI)
+                    and Pipeboard, which need API keys. See the README to run it locally.
+                  </p>
+                ) : null}
               </section>
 
               {error ? (
@@ -419,7 +410,7 @@ export function ActivityApprovalDialog({
               </button>
               <button
                 type="button"
-                disabled={!activity || submitting || alreadyApproved}
+                disabled={!activity || submitting || alreadyApproved || staticMode}
                 onClick={handleApprove}
                 className={cn(
                   "inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-3 text-[11.5px] font-medium transition-colors disabled:cursor-not-allowed",
