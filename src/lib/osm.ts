@@ -1,6 +1,11 @@
-const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
+const OVERPASS_ENDPOINT = process.env.OVERPASS_URL ?? "https://overpass-api.de/api/interpreter";
 const DEFAULT_RADIUS_M = 500;
 const REQUEST_TIMEOUT_MS = 60_000;
+// The public Overpass server regularly answers 429/504 under load. Retry with
+// backoff: a failed buurt would otherwise keep zero amenities and look like a
+// "connection desert".
+const MAX_ATTEMPTS = 5;
+const RETRY_BASE_MS = 2_000;
 
 export type POICounts = {
   libraries: number;
@@ -79,6 +84,24 @@ export async function fetchPOICountsForBuurt(
   centroidLng: number,
   radiusM = DEFAULT_RADIUS_M,
 ): Promise<POICounts> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetchOnce(centroidLat, centroidLng, radiusM);
+    } catch (err) {
+      const retryable = err instanceof RetryableError;
+      if (!retryable || attempt >= MAX_ATTEMPTS) throw err;
+      await new Promise((r) => setTimeout(r, RETRY_BASE_MS * 2 ** (attempt - 1)));
+    }
+  }
+}
+
+class RetryableError extends Error {}
+
+async function fetchOnce(
+  centroidLat: number,
+  centroidLng: number,
+  radiusM: number,
+): Promise<POICounts> {
   const query = buildQuery(centroidLat, centroidLng, radiusM);
   const body = `data=${encodeURIComponent(query)}`;
 
@@ -96,12 +119,17 @@ export async function fetchPOICountsForBuurt(
       body,
       signal: controller.signal,
     });
+  } catch (err) {
+    // Network error or our own timeout abort.
+    throw new RetryableError(`Overpass request failed: ${(err as Error).message}`);
   } finally {
     clearTimeout(timer);
   }
 
   if (!response.ok) {
-    throw new Error(`Overpass HTTP ${response.status} ${response.statusText}`);
+    const message = `Overpass HTTP ${response.status} ${response.statusText}`;
+    if (response.status === 429 || response.status >= 500) throw new RetryableError(message);
+    throw new Error(message);
   }
 
   const data = (await response.json()) as OverpassResponse;
