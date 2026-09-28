@@ -114,7 +114,10 @@ export async function createMetaCampaign(args: MetaCampaignArgs): Promise<MCPCam
     const conn = await withTimeout(connect(META_URL), TIMEOUT_MS, "meta.connect");
     close = conn.close;
     const tools = await withTimeout(conn.client.listTools(), TIMEOUT_MS, "meta.listTools");
-    log.info("meta MCP tools", { count: tools.tools.length, names: tools.tools.map((t) => t.name) });
+    log.info("meta MCP tools", {
+      count: tools.tools.length,
+      names: tools.tools.map((t) => t.name),
+    });
 
     const toolName =
       tools.tools.find((t) => /create.*campaign/i.test(t.name))?.name ??
@@ -156,8 +159,10 @@ export async function createMetaCampaign(args: MetaCampaignArgs): Promise<MCPCam
       throw new Error(`MCP returned error: ${JSON.stringify(raw.content)}`);
     }
     const json = extractJson(raw);
-    const campaignId =
-      pickString(json, "campaign_id", "id", "campaignId") ?? mockCampaignId("meta");
+    // Only report success when the MCP reply actually contains a campaign ID;
+    // anything else goes through the fallback path below.
+    const campaignId = pickString(json, "campaign_id", "id", "campaignId");
+    if (!campaignId) throw new Error("MCP reply contained no campaign ID");
     const adsManagerUrl =
       pickString(json, "ads_manager_url", "campaign_url", "url") ??
       `https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${encodeURIComponent(
@@ -247,8 +252,10 @@ export async function createTikTokCampaign(args: TikTokCampaignArgs): Promise<MC
       throw new Error(`MCP returned error: ${JSON.stringify(raw.content)}`);
     }
     const json = extractJson(raw);
-    const campaignId =
-      pickString(json, "campaign_id", "id", "campaignId") ?? mockCampaignId("tt");
+    // Only report success when the MCP reply actually contains a campaign ID;
+    // anything else goes through the fallback path below.
+    const campaignId = pickString(json, "campaign_id", "id", "campaignId");
+    if (!campaignId) throw new Error("MCP reply contained no campaign ID");
     const adsManagerUrl =
       pickString(json, "ads_manager_url", "campaign_url", "url") ??
       `https://ads.tiktok.com/i18n/perf/campaign?aadvid=${encodeURIComponent(

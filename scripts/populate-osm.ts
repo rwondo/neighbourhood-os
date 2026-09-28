@@ -1,134 +1,127 @@
+/**
+ * Fills the poi_* columns with OpenStreetMap counts within 500 m of each buurt
+ * centroid (libraries, community centres, parks, benches, cafes, sports
+ * centres, pedestrian crossings).
+ *
+ *   pnpm populate:osm
+ *
+ * One Overpass request per category per city (21 in total). If any request
+ * fails after retries, the script aborts without writing, so a network hiccup
+ * can never leave buurten with fake zero counts.
+ */
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import postgres from "postgres";
-import { fetchPOICountsForBuurt, type POICounts } from "@/lib/osm";
+import {
+  POI_CATEGORIES,
+  countPOIsWithin,
+  fetchCategoryPoints,
+  type BBox,
+  type CityPOIs,
+  type POICounts,
+} from "@/lib/osm";
 
 const MIGRATION_PATH = path.resolve(process.cwd(), "drizzle/0003_poi_counts.sql");
-const SLEEP_BETWEEN_BUURTEN_MS = 1_000;
-const LOG_EVERY = 25;
+// ~1 km of padding so buurten on the city edge still see everything within 500 m.
+const BBOX_PADDING_DEG = 0.01;
+const PAUSE_BETWEEN_REQUESTS_MS = 2_000;
 
-// Rotterdam-Centrum smoke-test centroid.
-const SMOKE_LAT = 51.9225;
-const SMOKE_LNG = 4.4792;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// Rotterdam-Centrum: a sanity check that the counts are not all zero.
+const SMOKE = { city: "rotterdam", lat: 51.9225, lng: 4.4792 };
 
 type BuurtRow = {
   buurt_code: string;
+  city: string;
   centroid_lng: number;
   centroid_lat: number;
 };
 
-async function applyMigration(sql: postgres.Sql): Promise<void> {
-  const ddl = readFileSync(MIGRATION_PATH, "utf8");
-  console.log("[osm] applying migration drizzle/0003_poi_counts.sql");
-  await sql.unsafe(ddl);
-  console.log("[osm] migration applied");
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function bboxFor(rows: BuurtRow[]): BBox {
+  const lats = rows.map((r) => r.centroid_lat);
+  const lngs = rows.map((r) => r.centroid_lng);
+  return {
+    south: Math.min(...lats) - BBOX_PADDING_DEG,
+    west: Math.min(...lngs) - BBOX_PADDING_DEG,
+    north: Math.max(...lats) + BBOX_PADDING_DEG,
+    east: Math.max(...lngs) + BBOX_PADDING_DEG,
+  };
 }
 
-async function runSmokeTest(): Promise<boolean> {
-  console.log(`[osm] smoke test: Rotterdam-Centrum (lat=${SMOKE_LAT}, lng=${SMOKE_LNG})`);
-  try {
-    const counts = await fetchPOICountsForBuurt(SMOKE_LAT, SMOKE_LNG);
-    console.log("[osm] smoke result:", JSON.stringify(counts));
-    const total =
-      counts.libraries +
-      counts.community_centres +
-      counts.parks +
-      counts.benches +
-      counts.cafes +
-      counts.sports +
-      counts.intersections;
-    if (total === 0) {
-      console.error("[osm] smoke test returned all zeros — aborting (likely client bug)");
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.error(`[osm] smoke test failed: ${(err as Error).message}`);
-    return false;
+async function fetchCity(city: string, bbox: BBox): Promise<CityPOIs> {
+  const pois = {} as CityPOIs;
+  for (const category of POI_CATEGORIES) {
+    pois[category] = await fetchCategoryPoints(category, bbox);
+    console.log(`[osm] ${city}: ${pois[category].length} ${category}`);
+    await sleep(PAUSE_BETWEEN_REQUESTS_MS);
   }
+  return pois;
 }
 
-async function updateBuurt(
-  sql: postgres.Sql,
-  buurtCode: string,
-  counts: POICounts,
-): Promise<void> {
+async function updateBuurt(sql: postgres.Sql, buurtCode: string, c: POICounts): Promise<void> {
   await sql`
     UPDATE neighbourhoods
     SET
-      poi_libraries = ${counts.libraries},
-      poi_community_centres = ${counts.community_centres},
-      poi_parks = ${counts.parks},
-      poi_benches = ${counts.benches},
-      poi_cafes = ${counts.cafes},
-      poi_sports = ${counts.sports},
-      poi_intersections = ${counts.intersections}
+      poi_libraries = ${c.libraries},
+      poi_community_centres = ${c.community_centres},
+      poi_parks = ${c.parks},
+      poi_benches = ${c.benches},
+      poi_cafes = ${c.cafes},
+      poi_sports = ${c.sports},
+      poi_intersections = ${c.intersections}
     WHERE buurt_code = ${buurtCode}
   `;
 }
 
 async function main(): Promise<void> {
   const url = process.env.DATABASE_URL;
-  if (!url) {
-    throw new Error("DATABASE_URL is not set");
-  }
+  if (!url) throw new Error("DATABASE_URL is not set");
   const sql = postgres(url, { prepare: false, max: 3 });
 
   try {
-    await applyMigration(sql);
-
-    const smokeOk = await runSmokeTest();
-    if (!smokeOk) {
-      console.error("[osm] aborting before full run due to smoke-test failure");
-      process.exit(1);
-    }
+    await sql.unsafe(readFileSync(MIGRATION_PATH, "utf8"));
 
     const rows = (await sql<BuurtRow[]>`
-      SELECT buurt_code, centroid_lng, centroid_lat
+      SELECT buurt_code, city, centroid_lng, centroid_lat
       FROM neighbourhoods
       WHERE centroid_lng <> 0 AND centroid_lat <> 0
     `) as unknown as BuurtRow[];
-
     if (rows.length === 0) {
-      console.warn(
-        "[osm] centroids not populated yet; run `pnpm populate:centroids` first. Migration applied; exiting cleanly.",
-      );
+      console.warn("[osm] no centroids yet; run `pnpm populate:centroids` first.");
       return;
     }
 
-    console.log(`[osm] populating POI counts for ${rows.length} buurten`);
-    let i = 0;
-    let errors = 0;
-    for (const row of rows) {
-      i++;
-      try {
-        const counts = await fetchPOICountsForBuurt(row.centroid_lat, row.centroid_lng);
-        await updateBuurt(sql, row.buurt_code, counts);
-        if (i % LOG_EVERY === 0 || i === rows.length) {
-          console.log(
-            `[osm] ${i}/${rows.length} latest=${row.buurt_code} libraries=${counts.libraries} cafes=${counts.cafes} parks=${counts.parks} benches=${counts.benches} sports=${counts.sports} community=${counts.community_centres} crossings=${counts.intersections}`,
-          );
+    const cities = [...new Set(rows.map((r) => r.city))].sort(
+      (a, b) => Number(b === SMOKE.city) - Number(a === SMOKE.city),
+    );
+    const poisByCity = new Map<string, CityPOIs>();
+    for (const city of cities) {
+      const cityRows = rows.filter((r) => r.city === city);
+      poisByCity.set(city, await fetchCity(city, bboxFor(cityRows)));
+
+      if (city === SMOKE.city) {
+        const smoke = countPOIsWithin(poisByCity.get(city)!, SMOKE.lat, SMOKE.lng);
+        console.log("[osm] smoke test (Rotterdam-Centrum):", JSON.stringify(smoke));
+        if (Object.values(smoke).every((v) => v === 0)) {
+          throw new Error("smoke test returned all zeros; refusing to write counts");
         }
-      } catch (err) {
-        errors++;
-        console.warn(`[osm] ${row.buurt_code} failed: ${(err as Error).message}`);
-      }
-      if (i < rows.length) {
-        await sleep(SLEEP_BETWEEN_BUURTEN_MS);
       }
     }
-    console.log(`[osm] done — ${i - errors}/${rows.length} populated, ${errors} errors`);
+
+    // All fetches succeeded; only now write anything.
+    for (const row of rows) {
+      const counts = countPOIsWithin(poisByCity.get(row.city)!, row.centroid_lat, row.centroid_lng);
+      await updateBuurt(sql, row.buurt_code, counts);
+    }
+    console.log(`[osm] done: updated ${rows.length} buurten`);
   } finally {
     await sql.end({ timeout: 5 });
   }
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error("[osm] fatal:", e);
   process.exit(1);
 });

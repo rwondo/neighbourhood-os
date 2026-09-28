@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { approvalForActivity, resolveDemoSnapshot } from "@/lib/demo-data";
 import type {
   Channel,
   CityKey,
@@ -138,6 +137,7 @@ export function ActivityApprovalDialog({
   city,
   onApproved,
   alreadyApproved,
+  staticMode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -148,6 +148,7 @@ export function ActivityApprovalDialog({
   city: CityKey | null;
   onApproved: (result: ApprovalResult) => void;
   alreadyApproved: boolean;
+  staticMode: boolean;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -171,22 +172,6 @@ export function ActivityApprovalDialog({
     if (!activity) return;
     setSubmitting(true);
     setError(null);
-
-    // Demo-mode fast path: bypass /api/activities/approve entirely and return
-    // a preset approval result so the live pitch never depends on Ideogram or
-    // Pipeboard MCP being reachable.
-    const demoSnapshot = resolveDemoSnapshot(borough, city);
-    if (demoSnapshot) {
-      try {
-        await new Promise((r) => setTimeout(r, 1400));
-        const approval = approvalForActivity(demoSnapshot, activity.name);
-        setResult(approval);
-        onApproved(approval);
-      } finally {
-        setSubmitting(false);
-      }
-      return;
-    }
 
     try {
       const includedMessages = messages
@@ -251,7 +236,16 @@ export function ActivityApprovalDialog({
               {showPreview ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-flex size-5 items-center justify-center rounded-full bg-risk-green text-white">
-                    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-2.5" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="size-2.5"
+                      aria-hidden="true"
+                    >
                       <path d="M2 5l2 2 4-4.5" />
                     </svg>
                   </span>
@@ -269,9 +263,9 @@ export function ActivityApprovalDialog({
                   </span>{" "}
                   creatives ·{" "}
                   <span className="font-mono tabular text-foreground/70">
-                    {result?.mcpResults.length ?? 0}
+                    {result?.mcpResults.filter((m) => m.status === "live").length ?? 0}
                   </span>{" "}
-                  campaigns live in Ads Manager (paused)
+                  campaigns created in Ads Manager (paused)
                 </span>
               ) : activity ? (
                 <>
@@ -388,6 +382,12 @@ export function ActivityApprovalDialog({
                     Push Meta and TikTok campaigns to Ads Manager (status: PAUSED).
                   </li>
                 </ul>
+                {staticMode ? (
+                  <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2.5 py-1.5 text-[10.5px] leading-snug text-muted-foreground">
+                    Approval is disabled in this static demo: it calls Ideogram (via Together AI)
+                    and Pipeboard, which need API keys. See the README to run it locally.
+                  </p>
+                ) : null}
               </section>
 
               {error ? (
@@ -419,7 +419,7 @@ export function ActivityApprovalDialog({
               </button>
               <button
                 type="button"
-                disabled={!activity || submitting || alreadyApproved}
+                disabled={!activity || submitting || alreadyApproved || staticMode}
                 onClick={handleApprove}
                 className={cn(
                   "inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-3 text-[11.5px] font-medium transition-colors disabled:cursor-not-allowed",
@@ -454,9 +454,7 @@ export function ActivityApprovalDialog({
 }
 
 function CreativePreviewPane({ result }: { result: ApprovalResult }) {
-  const mcpByKey = new Map(
-    result.mcpResults.map((m) => [`${m.clusterId}::${m.channel}`, m]),
-  );
+  const mcpByKey = new Map(result.mcpResults.map((m) => [`${m.clusterId}::${m.channel}`, m]));
   const visible = result.creatives.filter(
     (c) =>
       c.channel === "facebook" ||
@@ -501,12 +499,7 @@ function CreativePreviewPane({ result }: { result: ApprovalResult }) {
               </span>
             </div>
 
-            <div
-              className={cn(
-                "relative w-full overflow-hidden bg-canvas/40",
-                aspect,
-              )}
-            >
+            <div className={cn("relative w-full overflow-hidden bg-canvas/40", aspect)}>
               {hasImage && c.creativeUrl ? (
                 <Image
                   src={c.creativeUrl}
@@ -543,7 +536,7 @@ function CreativePreviewPane({ result }: { result: ApprovalResult }) {
                     Join QR
                   </div>
                   <div className="truncate font-mono text-[10px] text-foreground/70">
-                    {c.joinUrl ?? "neighbourhoodos.nl/join/…"}
+                    {c.joinUrl ?? "example.org/join/…"}
                   </div>
                 </div>
                 <button
@@ -625,9 +618,7 @@ function FactRow({ label, value }: { label: string; value: string }) {
 }
 
 function Bullet() {
-  return (
-    <span className="mt-[5px] size-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />
-  );
+  return <span className="mt-[5px] size-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />;
 }
 
 function CheckIcon() {

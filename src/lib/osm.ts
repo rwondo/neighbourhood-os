@@ -1,6 +1,19 @@
-const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
-const DEFAULT_RADIUS_M = 500;
-const REQUEST_TIMEOUT_MS = 60_000;
+import { countStopsWithin, type StopPoint } from "@/lib/gtfs";
+
+// OpenStreetMap social-infrastructure counts via the Overpass API.
+//
+// Instead of one radius query per buurt (hundreds of heavy requests), we fetch
+// every point of each category once per city bounding box and count the ones
+// within 500 m of each buurt centroid locally, with the same haversine helper
+// the GTFS transit counts use. Area features (parks, larger venues mapped as
+// ways) are represented by their centre point.
+
+const OVERPASS_ENDPOINT = process.env.OVERPASS_URL ?? "https://overpass-api.de/api/interpreter";
+export const DEFAULT_RADIUS_M = 500;
+const REQUEST_TIMEOUT_MS = 180_000;
+// The public Overpass server regularly answers 429/504 under load.
+const MAX_ATTEMPTS = 5;
+const RETRY_BASE_MS = 5_000;
 
 export type POICounts = {
   libraries: number;
@@ -12,103 +25,102 @@ export type POICounts = {
   intersections: number;
 };
 
-type OverpassTags = Record<string, string | undefined>;
+export type POICategory = keyof POICounts;
+
+/** Overpass selectors per category. Benches and crossings are node-only by tagging convention. */
+const SELECTORS: Record<POICategory, string[]> = {
+  libraries: ['node["amenity"="library"]', 'way["amenity"="library"]'],
+  community_centres: ['node["amenity"="community_centre"]', 'way["amenity"="community_centre"]'],
+  parks: ['node["leisure"="park"]', 'way["leisure"="park"]'],
+  benches: ['node["amenity"="bench"]'],
+  cafes: ['node["amenity"="cafe"]', 'way["amenity"="cafe"]'],
+  sports: ['node["leisure"="sports_centre"]', 'way["leisure"="sports_centre"]'],
+  // highway=crossing is the walkability proxy (pedestrian crossings).
+  intersections: ['node["highway"="crossing"]'],
+};
+
+export const POI_CATEGORIES = Object.keys(SELECTORS) as POICategory[];
+
+export type BBox = { south: number; west: number; north: number; east: number };
+
+export type CityPOIs = Record<POICategory, StopPoint[]>;
 
 type OverpassElement = {
   type: "node" | "way" | "relation";
-  id: number;
-  tags?: OverpassTags;
+  lat?: number;
+  lon?: number;
+  center?: { lat: number; lon: number };
 };
 
-type OverpassResponse = {
-  elements?: OverpassElement[];
-};
+class RetryableError extends Error {}
 
-function emptyCounts(): POICounts {
-  return {
-    libraries: 0,
-    community_centres: 0,
-    parks: 0,
-    benches: 0,
-    cafes: 0,
-    sports: 0,
-    intersections: 0,
-  };
-}
-
-function buildQuery(lat: number, lng: number, radiusM: number): string {
-  // Single Overpass query — all 7 categories around the centroid.
-  // benches and intersections (highway=crossing) are node-only by tagging convention.
-  // For the rest we include both nodes and ways.
-  return `[out:json][timeout:30];
-(
-  node["amenity"="library"](around:${radiusM},${lat},${lng});
-  way["amenity"="library"](around:${radiusM},${lat},${lng});
-  node["amenity"="community_centre"](around:${radiusM},${lat},${lng});
-  way["amenity"="community_centre"](around:${radiusM},${lat},${lng});
-  node["leisure"="park"](around:${radiusM},${lat},${lng});
-  way["leisure"="park"](around:${radiusM},${lat},${lng});
-  node["amenity"="bench"](around:${radiusM},${lat},${lng});
-  node["amenity"="cafe"](around:${radiusM},${lat},${lng});
-  way["amenity"="cafe"](around:${radiusM},${lat},${lng});
-  node["leisure"="sports_centre"](around:${radiusM},${lat},${lng});
-  way["leisure"="sports_centre"](around:${radiusM},${lat},${lng});
-  node["highway"="crossing"](around:${radiusM},${lat},${lng});
-);
-out tags;`;
-}
-
-function countCategory(el: OverpassElement, counts: POICounts): void {
-  const tags = el.tags;
-  if (!tags) return;
-  const amenity = tags.amenity;
-  const leisure = tags.leisure;
-  const highway = tags.highway;
-
-  if (amenity === "library") counts.libraries += 1;
-  else if (amenity === "community_centre") counts.community_centres += 1;
-  else if (amenity === "bench") counts.benches += 1;
-  else if (amenity === "cafe") counts.cafes += 1;
-  else if (leisure === "park") counts.parks += 1;
-  else if (leisure === "sports_centre") counts.sports += 1;
-  else if (highway === "crossing") counts.intersections += 1;
-}
-
-export async function fetchPOICountsForBuurt(
-  centroidLat: number,
-  centroidLng: number,
-  radiusM = DEFAULT_RADIUS_M,
-): Promise<POICounts> {
-  const query = buildQuery(centroidLat, centroidLng, radiusM);
-  const body = `data=${encodeURIComponent(query)}`;
-
+async function overpass(query: string): Promise<OverpassElement[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
   let response: Response;
   try {
     response = await fetch(OVERPASS_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "neighbourhood-os/0.1 (hackathon demo)",
+        "User-Agent": "neighbourhood-os/0.1 (hackathon prototype)",
       },
-      body,
+      body: `data=${encodeURIComponent(query)}`,
       signal: controller.signal,
     });
+  } catch (err) {
+    // Network error or our own timeout abort.
+    throw new RetryableError(`Overpass request failed: ${(err as Error).message}`);
   } finally {
     clearTimeout(timer);
   }
-
   if (!response.ok) {
-    throw new Error(`Overpass HTTP ${response.status} ${response.statusText}`);
+    const message = `Overpass HTTP ${response.status} ${response.statusText}`;
+    if (response.status === 429 || response.status >= 500) throw new RetryableError(message);
+    throw new Error(message);
   }
+  const data = (await response.json()) as { elements?: OverpassElement[] };
+  return data.elements ?? [];
+}
 
-  const data = (await response.json()) as OverpassResponse;
-  const counts = emptyCounts();
-  const elements = data.elements ?? [];
-  for (const el of elements) {
-    countCategory(el, counts);
+async function overpassWithRetry(query: string): Promise<OverpassElement[]> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await overpass(query);
+    } catch (err) {
+      if (!(err instanceof RetryableError) || attempt >= MAX_ATTEMPTS) throw err;
+      await new Promise((r) => setTimeout(r, RETRY_BASE_MS * 2 ** (attempt - 1)));
+    }
+  }
+}
+
+/** All points of one category inside a bounding box (ways reduced to their centre). */
+export async function fetchCategoryPoints(category: POICategory, bbox: BBox): Promise<StopPoint[]> {
+  const box = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
+  const query = `[out:json][timeout:170];
+(
+${SELECTORS[category].map((s) => `  ${s}(${box});`).join("\n")}
+);
+out center qt;`;
+  const points: StopPoint[] = [];
+  for (const el of await overpassWithRetry(query)) {
+    const lat = el.lat ?? el.center?.lat;
+    const lng = el.lon ?? el.center?.lon;
+    if (typeof lat === "number" && typeof lng === "number") points.push({ lat, lng });
+  }
+  return points;
+}
+
+/** Counts each category's points within `radiusM` of a centroid. */
+export function countPOIsWithin(
+  pois: CityPOIs,
+  lat: number,
+  lng: number,
+  radiusM = DEFAULT_RADIUS_M,
+): POICounts {
+  const counts = {} as POICounts;
+  for (const category of POI_CATEGORIES) {
+    counts[category] = countStopsWithin(pois[category], lat, lng, radiusM);
   }
   return counts;
 }

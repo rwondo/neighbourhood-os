@@ -9,7 +9,7 @@ import { fetchCbsBuurten, GEMEENTE_CODES } from "@/lib/cbs";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
-  console.error("[demo] DATABASE_URL missing in env");
+  console.error("[refresh] DATABASE_URL missing in env");
   process.exit(1);
 }
 const sql = postgres(DATABASE_URL, { prepare: false, max: 4 });
@@ -25,9 +25,9 @@ function safeNum(v: number): number {
 async function main() {
   const t0 = Date.now();
 
-  console.log("[demo] fetching CBS rows…");
+  console.log("[refresh] fetching CBS rows…");
   const rows = await fetchCbsBuurten(Object.values(GEMEENTE_CODES));
-  console.log(`[demo] CBS returned ${rows.length} buurten`);
+  console.log(`[refresh] CBS returned ${rows.length} buurten`);
 
   // Snapshot DB so we can detect codes that exist in CBS but not the DB and
   // vice versa (mostly water buurten omitted by populate-centroids).
@@ -35,7 +35,7 @@ async function main() {
     SELECT buurt_code FROM neighbourhoods
   `;
   const dbCodes = new Set(dbRows.map((r) => r.buurt_code));
-  console.log(`[demo] DB has ${dbCodes.size} neighbourhoods`);
+  console.log(`[refresh] DB has ${dbCodes.size} neighbourhoods`);
 
   let updated = 0;
   let skippedNotInDb = 0;
@@ -94,28 +94,28 @@ async function main() {
     if (result.count > 0) updated++;
 
     if (updated > 0 && updated % 100 === 0) {
-      console.log(`[demo] progress ${updated}/${rows.length} (latest ${r.buurtCode})`);
+      console.log(`[refresh] progress ${updated}/${rows.length} (latest ${r.buurtCode})`);
     }
   }
 
   const dt = ((Date.now() - t0) / 1000).toFixed(1);
-  console.log("[demo] -------- summary --------");
-  console.log(`[demo] rows updated: ${updated}`);
-  console.log(`[demo] CBS codes not in DB: ${skippedNotInDb}`);
-  console.log(`[demo] low-signal buurten flagged: ${lowSignal}`);
+  console.log("[refresh] -------- summary --------");
+  console.log(`[refresh] rows updated: ${updated}`);
+  console.log(`[refresh] CBS codes not in DB: ${skippedNotInDb}`);
+  console.log(`[refresh] low-signal buurten flagged: ${lowSignal}`);
   if (lowSignalSamples.length > 0) {
-    console.log("[demo] sample low-signal:");
+    console.log("[refresh] sample low-signal:");
     for (const s of lowSignalSamples) {
-      console.log(`[demo]   ${s.code} residents=${s.res} households=${s.hh}`);
+      console.log(`[refresh]   ${s.code} residents=${s.res} households=${s.hh}`);
     }
   }
-  console.log(`[demo] runtime: ${dt}s`);
+  console.log(`[refresh] runtime: ${dt}s`);
 
   await sql.end({ timeout: 5 });
 }
 
 main().catch(async (e) => {
-  console.error("[demo] FATAL", e);
+  console.error("[refresh] FATAL", e);
   try {
     await sql.end({ timeout: 5 });
   } catch {

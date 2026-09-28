@@ -163,7 +163,8 @@ export function LeftSidebar({
                         tone.surface,
                         tone.surfaceHover,
                         tone.ring,
-                        isTop && "shadow-[0_1px_0_oklch(0.93_0.004_250_/_0.8),0_4px_12px_-6px_oklch(0.18_0.01_250_/_0.08)]"
+                        isTop &&
+                          "shadow-[0_1px_0_oklch(0.93_0.004_250_/_0.8),0_4px_12px_-6px_oklch(0.18_0.01_250_/_0.08)]",
                       )}
                     >
                       <div className="flex items-start gap-2.5">
@@ -172,7 +173,7 @@ export function LeftSidebar({
                           <span
                             className={cn(
                               "font-mono tabular text-[10px] font-semibold leading-none",
-                              isTop ? tone.rank : "text-muted-foreground/55"
+                              isTop ? tone.rank : "text-muted-foreground/55",
                             )}
                           >
                             {String(rank).padStart(2, "0")}
@@ -183,16 +184,11 @@ export function LeftSidebar({
                                 aria-hidden="true"
                                 className={cn(
                                   "absolute inset-0 -m-[3px] animate-blink-soft rounded-full",
-                                  tone.pulse
+                                  tone.pulse,
                                 )}
                               />
                             ) : null}
-                            <span
-                              className={cn(
-                                "relative size-1.5 rounded-full",
-                                tone.dot
-                              )}
-                            />
+                            <span className={cn("relative size-1.5 rounded-full", tone.dot)} />
                           </span>
                         </div>
 
@@ -201,7 +197,7 @@ export function LeftSidebar({
                             <span
                               className={cn(
                                 "truncate tracking-tight text-foreground",
-                                isTop ? "text-[13.5px] font-semibold" : "text-[12.5px] font-medium"
+                                isTop ? "text-[13.5px] font-semibold" : "text-[12.5px] font-medium",
                               )}
                             >
                               {a.borough}
@@ -213,7 +209,7 @@ export function LeftSidebar({
                             <span
                               className={cn(
                                 "inline-flex h-[14px] items-center rounded px-1 font-mono tabular text-[9.5px] font-semibold uppercase tracking-[0.05em] ring-1 ring-inset",
-                                tone.chip
+                                tone.chip,
                               )}
                             >
                               CDI {a.avgCdi.toFixed(0)}
@@ -299,7 +295,7 @@ export function LeftSidebar({
                 <span className="inline-flex items-center gap-1 font-mono tabular text-[10px] text-muted-foreground/75">
                   <span className="size-1 rounded-full bg-risk-green" />
                   {interventions.length}
-                  <span className="text-muted-foreground/55">approved</span>
+                  <span className="text-muted-foreground/55">generated</span>
                 </span>
               ) : null
             }
@@ -326,7 +322,7 @@ export function LeftSidebar({
                   </svg>
                 }
                 title="No interventions yet"
-                body="Approved activities for this city will appear here as receipts."
+                body="Generated intervention plans for this city will appear here."
               />
             ) : (
               <ul className="space-y-0.5">
@@ -407,7 +403,7 @@ function SidebarSectionHeader({
         "sticky top-0 z-[1] flex items-center justify-between gap-2 px-4 py-2",
         subtle
           ? "border-b border-hairline bg-canvas/40"
-          : "border-b border-hairline bg-panel/85 backdrop-blur-[1px]"
+          : "border-b border-hairline bg-panel/85 backdrop-blur-[1px]",
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -443,7 +439,7 @@ function BoroughListSkeleton() {
           key={i}
           className={cn(
             "h-[68px] animate-pulse rounded-lg ring-1 ring-inset ring-hairline",
-            i === 0 ? "bg-risk-red-soft/30" : "bg-muted/30"
+            i === 0 ? "bg-risk-red-soft/30" : "bg-muted/30",
           )}
         />
       ))}
@@ -476,16 +472,14 @@ function EmptyState({
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-hairline-strong bg-canvas/40 text-center",
-        compact ? "px-3 py-4" : "px-3 py-6"
+        compact ? "px-3 py-4" : "px-3 py-6",
       )}
     >
       <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted/60 text-muted-foreground/80 ring-1 ring-inset ring-hairline">
         {icon}
       </span>
       <p className="text-[11px] font-medium tracking-tight text-foreground">{title}</p>
-      <p className="max-w-[200px] text-[10px] leading-snug text-muted-foreground">
-        {body}
-      </p>
+      <p className="max-w-[200px] text-[10px] leading-snug text-muted-foreground">{body}</p>
     </div>
   );
 }

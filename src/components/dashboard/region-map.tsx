@@ -164,7 +164,7 @@ export function RegionMap({
       score: number,
       clientX: number,
       clientY: number,
-      riskLevel?: BoroughScore["riskLevel"]
+      riskLevel?: BoroughScore["riskLevel"],
     ) => {
       const rect = containerRef.current?.getBoundingClientRect();
       setHover({
@@ -175,7 +175,7 @@ export function RegionMap({
         riskLevel,
       });
     },
-    []
+    [],
   );
 
   const onHoverMove = useCallback((clientX: number, clientY: number) => {
@@ -187,19 +187,16 @@ export function RegionMap({
             x: rect ? clientX - rect.left : prev.x,
             y: rect ? clientY - rect.top : prev.y,
           }
-        : prev
+        : prev,
     );
   }, []);
 
   const onHoverLeave = useCallback(() => setHover(null), []);
 
-  const onMoveEnd = useCallback(
-    (pos: { coordinates: [number, number]; zoom: number }) => {
-      setZoom(pos.zoom);
-      setCenter(pos.coordinates);
-    },
-    []
-  );
+  const onMoveEnd = useCallback((pos: { coordinates: [number, number]; zoom: number }) => {
+    setZoom(pos.zoom);
+    setCenter(pos.coordinates);
+  }, []);
 
   const ready = !!projection && !!gemeenteCollection && !!cityWater && !!cityBoroughs;
 
@@ -231,7 +228,6 @@ export function RegionMap({
             <GemeenteLayer collection={gemeenteCollection!} />
             <BoroughLayer
               collection={cityBoroughs!}
-              city={city}
               boroughScores={boroughScores}
               onHoverEnter={onHoverEnter}
               onHoverMove={onHoverMove}
@@ -255,7 +251,15 @@ export function RegionMap({
       {mapError ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="inline-flex max-w-[280px] flex-col items-center gap-1.5 rounded-md border border-risk-red/40 bg-risk-red-soft/60 px-3 py-2 text-center text-[11px] text-foreground backdrop-blur">
-            <svg viewBox="0 0 14 14" className="size-3.5 text-risk-red" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+            <svg
+              viewBox="0 0 14 14"
+              className="size-3.5 text-risk-red"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
               <path d="M7 1.5L13 12.5H1L7 1.5Z" />
               <path d="M7 6v2.5" />
               <path d="M7 10.5v.01" />
@@ -343,7 +347,7 @@ type BoroughCallbacks = {
     score: number,
     clientX: number,
     clientY: number,
-    riskLevel?: BoroughScore["riskLevel"]
+    riskLevel?: BoroughScore["riskLevel"],
   ) => void;
   onHoverMove: (clientX: number, clientY: number) => void;
   onHoverLeave: () => void;
@@ -352,7 +356,6 @@ type BoroughCallbacks = {
 
 const BoroughLayer = memo(function BoroughLayer({
   collection,
-  city,
   boroughScores,
   onHoverEnter,
   onHoverMove,
@@ -360,7 +363,6 @@ const BoroughLayer = memo(function BoroughLayer({
   onClick,
 }: {
   collection: FeatureCollection<Geometry, BoroughProps>;
-  city: CityKey;
   boroughScores: Map<string, BoroughScore>;
 } & BoroughCallbacks) {
   return (
@@ -370,7 +372,6 @@ const BoroughLayer = memo(function BoroughLayer({
           <BoroughPath
             key={geo.rsmKey}
             geography={geo as unknown as Feature<Geometry, BoroughProps>}
-            city={city}
             boroughScores={boroughScores}
             onHoverEnter={onHoverEnter}
             onHoverMove={onHoverMove}
@@ -385,7 +386,6 @@ const BoroughLayer = memo(function BoroughLayer({
 
 const BoroughPath = memo(function BoroughPath({
   geography,
-  city,
   boroughScores,
   onHoverEnter,
   onHoverMove,
@@ -393,7 +393,6 @@ const BoroughPath = memo(function BoroughPath({
   onClick,
 }: {
   geography: Feature<Geometry, BoroughProps>;
-  city: CityKey;
   boroughScores: Map<string, BoroughScore>;
   onHoverEnter: BoroughCallbacks["onHoverEnter"];
   onHoverMove: BoroughCallbacks["onHoverMove"];
@@ -403,7 +402,7 @@ const BoroughPath = memo(function BoroughPath({
   const { borough } = geography.properties;
   const live = boroughScores.get(borough);
   const liveScore = live?.avgScore;
-  const score = liveScore ?? scoreForBorough(borough, city); // fallback during loading
+  const score = liveScore ?? scoreForBorough(borough); // -1 = no data yet
   const liveRiskLevel = live?.riskLevel;
   const isIndustrial = score === -2;
   // Prefer the live CDI-band color from the API; fall back to legacy
@@ -428,7 +427,7 @@ const BoroughPath = memo(function BoroughPath({
       },
       pressed: { outline: "none" },
     }),
-    [hoverFill, baseFill, isIndustrial]
+    [hoverFill, baseFill, isIndustrial],
   );
 
   const handleEnter = useCallback(
@@ -436,7 +435,7 @@ const BoroughPath = memo(function BoroughPath({
       if (isIndustrial) return;
       onHoverEnter(borough, score, e.clientX, e.clientY, liveRiskLevel);
     },
-    [onHoverEnter, borough, score, isIndustrial, liveRiskLevel]
+    [onHoverEnter, borough, score, isIndustrial, liveRiskLevel],
   );
 
   const handleMove = useCallback(
@@ -444,7 +443,7 @@ const BoroughPath = memo(function BoroughPath({
       if (isIndustrial) return;
       onHoverMove(e.clientX, e.clientY);
     },
-    [onHoverMove, isIndustrial]
+    [onHoverMove, isIndustrial],
   );
 
   const handleClick = useCallback(() => {
@@ -488,20 +487,23 @@ function MapTooltip({
 }) {
   // Prefer CDI-derived risk band (matches polygon fill); fall back to legacy
   // score thresholds only when the API hasn't resolved the borough yet.
-  const tone = riskLevel
-    ? riskLevel === "severe"
-      ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
-      : riskLevel === "high"
-        ? "border-risk-amber/40 bg-risk-amber-soft/80 text-foreground"
-        : riskLevel === "moderate"
-          ? "border-risk-amber/40 bg-risk-amber-soft/45 text-foreground"
-          : "border-risk-green/40 bg-risk-green-soft/70 text-foreground"
-    : score < 60
-      ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
-      : score < 80
-        ? "border-risk-amber/40 bg-risk-amber-soft/70 text-foreground"
-        : "border-risk-green/40 bg-risk-green-soft/70 text-foreground";
-  const label = riskLevel ? RISK_LEVEL_LABEL[riskLevel] : riskLabel(score);
+  const noData = !riskLevel && score < 0;
+  const tone = noData
+    ? "border-hairline bg-panel/95 text-foreground"
+    : riskLevel
+      ? riskLevel === "severe"
+        ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
+        : riskLevel === "high"
+          ? "border-risk-amber/40 bg-risk-amber-soft/80 text-foreground"
+          : riskLevel === "moderate"
+            ? "border-risk-amber/40 bg-risk-amber-soft/45 text-foreground"
+            : "border-risk-green/40 bg-risk-green-soft/70 text-foreground"
+      : score < 60
+        ? "border-risk-red/40 bg-risk-red-soft/70 text-foreground"
+        : score < 80
+          ? "border-risk-amber/40 bg-risk-amber-soft/70 text-foreground"
+          : "border-risk-green/40 bg-risk-green-soft/70 text-foreground";
+  const label = noData ? "No data" : riskLevel ? RISK_LEVEL_LABEL[riskLevel] : riskLabel(score);
 
   // Clamp the tooltip position to the container so it doesn't clip at edges.
   // We read the parent (the .relative map container) at render time.
@@ -539,12 +541,14 @@ function MapTooltip({
       <div
         className={cn(
           "min-w-[150px] rounded-md border bg-panel/95 px-2.5 py-1.5 shadow-[0_10px_28px_-8px_rgb(0_0_0_/_0.14)] backdrop-blur",
-          tone
+          tone,
         )}
       >
         <div className="text-[12px] font-semibold tracking-tight">{name}</div>
         <div className="mt-0.5 flex items-baseline gap-1.5">
-          <span className="font-mono tabular text-[15px] font-medium leading-none">{Math.round(score)}</span>
+          <span className="font-mono tabular text-[15px] font-medium leading-none">
+            {noData ? "–" : Math.round(score)}
+          </span>
           <span className="text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground">
             {label}
           </span>
@@ -583,7 +587,12 @@ function NeighborLegend() {
 function CompassBadge({ city, buurten }: { city: string; buurten: number }) {
   return (
     <div className="pointer-events-none absolute right-3 top-3 flex items-center gap-1.5 rounded-md border border-hairline bg-panel/85 px-2 py-1 text-[10px] uppercase tracking-[0.08em] text-muted-foreground backdrop-blur">
-      <svg viewBox="0 0 12 12" className="size-2.5 text-teal" fill="currentColor" aria-hidden="true">
+      <svg
+        viewBox="0 0 12 12"
+        className="size-2.5 text-teal"
+        fill="currentColor"
+        aria-hidden="true"
+      >
         <path d="M6 0L7 5L12 6L7 7L6 12L5 7L0 6L5 5L6 0Z" />
       </svg>
       <span className="font-mono tabular">{city}</span>
@@ -612,7 +621,15 @@ function ZoomControls({
         onClick={onZoomIn}
         className="flex size-7 items-center justify-center text-foreground/80 transition-colors hover:bg-muted/40 hover:text-foreground"
       >
-        <svg viewBox="0 0 14 14" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 14 14"
+          className="size-3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
           <path d="M7 3v8M3 7h8" />
         </svg>
       </button>
@@ -625,7 +642,15 @@ function ZoomControls({
         onClick={onZoomOut}
         className="flex size-7 items-center justify-center border-t border-hairline text-foreground/80 transition-colors hover:bg-muted/40 hover:text-foreground"
       >
-        <svg viewBox="0 0 14 14" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 14 14"
+          className="size-3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
           <path d="M3 7h8" />
         </svg>
       </button>
@@ -635,7 +660,16 @@ function ZoomControls({
         onClick={onReset}
         className="flex size-7 items-center justify-center border-t border-hairline text-foreground/70 transition-colors hover:bg-muted/40 hover:text-foreground"
       >
-        <svg viewBox="0 0 14 14" className="size-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 14 14"
+          className="size-3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d="M2 7a5 5 0 1 0 1.5-3.5M2 3v3h3" />
         </svg>
       </button>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CityKey } from "@/lib/types";
-import type { BoroughDetailResponse } from "@/app/api/boroughs/[borough]/route";
+import { getDemoSnapshot, staticRunNotice } from "@/lib/demo-data";
+import type { BoroughDetailResponse, CityKey } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -59,13 +59,18 @@ export function BoroughDetailDialog({
   borough,
   city,
   onGenerate,
+  staticMode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   borough: string | null;
   city: CityKey;
   onGenerate: () => void;
+  staticMode: boolean;
 }) {
+  // In static mode only boroughs with a sample run can "generate" (a replay).
+  const hasSample = getDemoSnapshot(borough, city) !== null;
+  const generateBlocked = staticMode && !hasSample;
   const [data, setData] = useState<BoroughDetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,12 +145,22 @@ export function BoroughDetailDialog({
           ) : null}
           {!loading && !data && error ? (
             <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-risk-red/30 bg-risk-red-soft/20 px-4 py-8 text-center">
-              <svg viewBox="0 0 14 14" className="size-4 text-risk-red" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+              <svg
+                viewBox="0 0 14 14"
+                className="size-4 text-risk-red"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
                 <path d="M7 1.5L13 12.5H1L7 1.5Z" />
                 <path d="M7 6v2.5" />
                 <path d="M7 10.5v.01" />
               </svg>
-              <p className="text-[12px] font-medium text-foreground">Couldn&apos;t load borough breakdown</p>
+              <p className="text-[12px] font-medium text-foreground">
+                Couldn&apos;t load borough breakdown
+              </p>
               <p className="text-[11px] text-muted-foreground">{error}</p>
             </div>
           ) : null}
@@ -160,20 +175,39 @@ export function BoroughDetailDialog({
             >
               Close
             </button>
+            {generateBlocked ? (
+              <span className="min-w-0 flex-1 text-right text-[10.5px] leading-snug text-muted-foreground">
+                {staticRunNotice()}
+              </span>
+            ) : null}
             <button
               type="button"
-              disabled={!data}
+              disabled={!data || generateBlocked}
               onClick={() => {
                 onGenerate();
                 onOpenChange(false);
               }}
               className="group inline-flex h-8 items-center justify-center gap-2 rounded-md bg-teal px-4 text-[12px] font-semibold tracking-tight text-primary-foreground shadow-[0_1px_0_oklch(0.4_0.08_186)] transition-all hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              <svg viewBox="0 0 12 12" fill="currentColor" className="size-3 transition-transform group-hover:rotate-12" aria-hidden="true">
+              <svg
+                viewBox="0 0 12 12"
+                fill="currentColor"
+                className="size-3 transition-transform group-hover:rotate-12"
+                aria-hidden="true"
+              >
                 <path d="M6 1l1.5 3.5L11 6l-3.5 1.5L6 11l-1.5-3.5L1 6l3.5-1.5L6 1z" />
               </svg>
-              Generate Intervention
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+              {staticMode ? "Replay sample run" : "Generate Intervention"}
+              <svg
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-3 transition-transform group-hover:translate-x-0.5"
+                aria-hidden="true"
+              >
                 <path d="M3 6h6" />
                 <path d="M6.5 3.5L9 6L6.5 8.5" />
               </svg>
@@ -347,9 +381,7 @@ function ComponentTileSmall({
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-foreground">
           {name}
         </span>
-        <span className="font-mono text-[9.5px] uppercase text-muted-foreground/80">
-          {weight}
-        </span>
+        <span className="font-mono text-[9.5px] uppercase text-muted-foreground/80">{weight}</span>
       </div>
       <div className="mt-1.5 font-mono tabular text-[22px] font-semibold leading-none text-foreground">
         {value.toFixed(1)}
@@ -390,8 +422,8 @@ function ComponentBarS({ value, weight }: { value: number; weight: string }) {
         />
       </div>
       <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
-        Weighted POI density across libraries, community centres, parks, cafés, sports, benches,
-        transit. Higher = denser amenity network.
+        Weighted count of libraries, community centres, parks, sports centres, cafés and benches
+        within 500 m. Higher = denser amenity network.
       </p>
     </div>
   );
@@ -423,6 +455,8 @@ function MicroStat({ label, value }: { label: string; value: number }) {
   );
 }
 
+const NOT_PUBLISHED = "Not published by CBS at buurt level";
+
 function DemographicsBlock({
   demographics,
 }: {
@@ -434,10 +468,11 @@ function DemographicsBlock({
       <div className="grid grid-cols-3 gap-2">
         <FactCell label="Living alone" value={`${demographics.pctLivingAlone}%`} />
         <FactCell label="Age 65+" value={`${demographics.pctElderly65}%`} />
-        <FactCell label="Single parent" value={`${demographics.pctSingleParent}%`} />
+        {/* CBS no longer publishes these two at buurt level; the pipeline stores 0. */}
+        <FactCell label="Single parent" value="n/a" title={NOT_PUBLISHED} />
         <FactCell label="Low-income idx" value={demographics.lowIncomeIndex} />
-        <FactCell label="Pop. turnover" value={`${demographics.populationTurnover}%`} />
-        <FactCell label="Amenity dist." value={`${demographics.amenityDistanceKm} km`} />
+        <FactCell label="Pop. turnover" value="n/a" title={NOT_PUBLISHED} />
+        <FactCell label="GP distance" value={`${demographics.amenityDistanceKm} km`} />
       </div>
     </section>
   );
@@ -501,9 +536,17 @@ function TopBuurtenBlock({ buurten }: { buurten: BoroughDetailResponse["topBuurt
   );
 }
 
-function FactCell({ label, value }: { label: string; value: string | number }) {
+function FactCell({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: string | number;
+  title?: string;
+}) {
   return (
-    <div className="rounded-md border border-hairline bg-panel px-2.5 py-1.5">
+    <div className="rounded-md border border-hairline bg-panel px-2.5 py-1.5" title={title}>
       <div className="text-[10px] uppercase tracking-[0.06em] text-muted-foreground">{label}</div>
       <div className="mt-0.5 font-mono tabular text-[14px] font-medium leading-none text-foreground">
         {value}
@@ -535,7 +578,10 @@ function Skeleton() {
       </div>
       <div className="grid grid-cols-3 gap-2">
         {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-12 animate-pulse rounded-md border border-hairline bg-muted/30" />
+          <div
+            key={i}
+            className="h-12 animate-pulse rounded-md border border-hairline bg-muted/30"
+          />
         ))}
       </div>
       <div className="h-32 animate-pulse rounded-md border border-hairline bg-muted/30" />

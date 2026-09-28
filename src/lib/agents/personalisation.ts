@@ -2,7 +2,12 @@ import { jsonAgentCall } from "@/lib/together";
 import { renderLeafletPdf } from "@/lib/channels/leaflet";
 import { makeLogger } from "@/lib/log";
 import { PERSONALISATION_SYSTEM } from "./prompts";
-import type { BuurtRecord, ClusterMessage, RecommendedActivity, ResidentCluster } from "@/lib/types";
+import type {
+  BuurtRecord,
+  ClusterMessage,
+  RecommendedActivity,
+  ResidentCluster,
+} from "@/lib/types";
 
 const log = makeLogger("agent:personalisation");
 
@@ -118,7 +123,10 @@ Return JSON: { message, tone, language, pdf? }`;
       language: out.language,
     });
   } catch (err) {
-    log.warn("personalisation failed — using template", { cluster: cluster.id, err: err instanceof Error ? err.message : err });
+    log.warn("personalisation failed — using template", {
+      cluster: cluster.id,
+      err: err instanceof Error ? err.message : err,
+    });
     out = fallbackMessage(cluster, activity);
   }
 
@@ -137,7 +145,10 @@ Return JSON: { message, tone, language, pdf? }`;
         pdfUrl = `data:application/pdf;base64,${buf.toString("base64")}`;
         log.info("leaflet PDF rendered", { cluster: cluster.id, bytes: buf.length });
       } catch (err) {
-        log.warn("leaflet PDF render failed", { cluster: cluster.id, err: err instanceof Error ? err.message : err });
+        log.warn("leaflet PDF render failed", {
+          cluster: cluster.id,
+          err: err instanceof Error ? err.message : err,
+        });
       }
     }
   }

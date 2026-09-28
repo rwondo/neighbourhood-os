@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
-import { resolveDemoSnapshot } from "@/lib/demo-data";
-import type { DemoSnapshot } from "@/lib/demo-data";
+import { getDemoSnapshot, resolveDemoSnapshot, staticRunNotice } from "@/lib/demo-data";
+import type { DemoProvenance, DemoSnapshot } from "@/lib/demo-data";
 import type {
   AgentTraceEvent,
   CityKey,
@@ -18,7 +18,7 @@ export type TraceStep = {
 };
 
 const DEFAULT_STEPS: TraceStep[] = [
-  { id: "s1", label: "Retrieving Supermemory context", status: "pending" },
+  { id: "s1", label: "Retrieving neighbourhood memory", status: "pending" },
   { id: "s2", label: "Searching local activities on the web", status: "pending" },
   { id: "s3", label: "Identifying resident clusters", status: "pending" },
   { id: "s4", label: "Generating bespoke intervention strategy", status: "pending" },
@@ -32,9 +32,7 @@ const DEFAULT_STEPS: TraceStep[] = [
 // per-step timeouts combined.
 const STREAM_WALL_CLOCK_MS = 180_000;
 
-export type SimulateTarget =
-  | { neighbourhoodId: string }
-  | { borough: string; city: CityKey };
+export type SimulateTarget = { neighbourhoodId: string } | { borough: string; city: CityKey };
 
 type StepEvent = Extract<AgentTraceEvent, { type: "step" }>;
 
@@ -53,7 +51,12 @@ function applyEventToFrame(
     setters.setSteps((prev) =>
       prev.map((s) =>
         s.id === step.id
-          ? { ...s, status: step.status, detail: step.detail ?? s.detail, label: step.label ?? s.label }
+          ? {
+              ...s,
+              status: step.status,
+              detail: step.detail ?? s.detail,
+              label: step.label ?? s.label,
+            }
           : s,
       ),
     );
@@ -67,8 +70,7 @@ function applyEventToFrame(
         m.clusterId === event.clusterId && m.channel === event.channel
           ? {
               ...m,
-              creativeUrl:
-                event.creativeUrl !== undefined ? event.creativeUrl : m.creativeUrl,
+              creativeUrl: event.creativeUrl !== undefined ? event.creativeUrl : m.creativeUrl,
               creativeStatus: event.creativeStatus ?? m.creativeStatus,
               creativePrompt: event.creativePrompt ?? m.creativePrompt,
               qrCodeUrl: event.qrCodeUrl !== undefined ? event.qrCodeUrl : m.qrCodeUrl,
@@ -84,13 +86,17 @@ function applyEventToFrame(
   }
 }
 
-export function useInterventionStream() {
+export function useInterventionStream({ staticMode }: { staticMode: boolean }) {
   const [steps, setSteps] = useState<TraceStep[]>(DEFAULT_STEPS);
   const [messages, setMessages] = useState<ClusterMessage[]>([]);
   const [strategy, setStrategy] = useState<InterventionStrategy | null>(null);
   const [info, setInfo] = useState<Record<string, string | number>>({});
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+  // Informational message (not an error), e.g. "live runs need a database".
+  const [notice, setNotice] = useState<string | null>(null);
+  // Set while showing a replayed run instead of a live one.
+  const [replay, setReplay] = useState<DemoProvenance | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const runIdRef = useRef(0);
 
@@ -100,6 +106,8 @@ export function useInterventionStream() {
     setStrategy(null);
     setInfo({});
     setError(null);
+    setNotice(null);
+    setReplay(null);
   }, []);
 
   const start = useCallback(
@@ -120,20 +128,30 @@ export function useInterventionStream() {
 
       const setters = { setSteps, setStrategy, setMessages, setInfo, setError };
 
-      // Demo-mode fast path: if `?demo=1` (or `?demo=<borough>`) is in the URL
-      // and the target borough has a registered snapshot, replay it with
-      // realistic per-step delays instead of hitting /api/simulate. This makes
-      // the whole pipeline deterministic and offline-able for the live pitch.
+      // Replay path: in static mode (no database / API keys) any borough with a
+      // registered sample run is replayed; in live mode only with `?demo=1` or
+      // `?demo=<borough>` in the URL. Replays use per-step delays instead of
+      // hitting /api/simulate, and the UI labels them via `replay`.
       const demoBorough = "borough" in target ? target.borough : null;
       const demoCity = "city" in target ? target.city : null;
-      const snapshot: DemoSnapshot | null = resolveDemoSnapshot(demoBorough, demoCity);
+      const snapshot: DemoSnapshot | null = staticMode
+        ? getDemoSnapshot(demoBorough, demoCity)
+        : resolveDemoSnapshot(demoBorough, demoCity);
       if (snapshot) {
+        setReplay(snapshot.provenance);
         try {
           await replaySnapshot(snapshot, controller.signal, runIdRef, myRunId, setters);
         } finally {
           clearTimeout(wallClock);
           if (runIdRef.current === myRunId) setRunning(false);
         }
+        return;
+      }
+
+      if (staticMode) {
+        clearTimeout(wallClock);
+        setNotice(staticRunNotice());
+        setRunning(false);
         return;
       }
 
@@ -144,6 +162,12 @@ export function useInterventionStream() {
           body: JSON.stringify(target),
           signal: controller.signal,
         });
+        if (res.status === 503) {
+          // Server is in static mode (e.g. deployed without DATABASE_URL).
+          const body = (await res.json().catch(() => null)) as { message?: string } | null;
+          if (runIdRef.current === myRunId) setNotice(body?.message ?? staticRunNotice());
+          return;
+        }
         if (!res.ok || !res.body) {
           if (runIdRef.current === myRunId) setError(`Simulate failed (${res.status})`);
           return;
@@ -201,10 +225,10 @@ export function useInterventionStream() {
         if (runIdRef.current === myRunId) setRunning(false);
       }
     },
-    [reset],
+    [reset, staticMode],
   );
 
-  return { steps, messages, strategy, info, error, running, start, reset };
+  return { steps, messages, strategy, info, error, notice, replay, running, start, reset };
 }
 
 async function replaySnapshot(

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { makeLogger } from "@/lib/log";
+import { isStaticMode, staticModeResponse } from "@/lib/runtime-mode";
 import { channelNeedsCreative, generateCreative } from "@/lib/agents/creative";
 import { createMetaCampaign, createTikTokCampaign } from "@/lib/mcp/pipeboard";
 import type {
@@ -68,11 +69,14 @@ function slugify(s: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-async function resolveBuurt(borough: string, city: CityKey | undefined): Promise<BuurtRecord | null> {
+async function resolveBuurt(
+  borough: string,
+  city: CityKey | undefined,
+): Promise<BuurtRecord | null> {
   const cityFilter = city ? eq(neighbourhoods.city, city) : undefined;
   const boroughFilter = sql`${neighbourhoods.borough} = ${borough}`;
   const where = cityFilter ? and(cityFilter, boroughFilter) : boroughFilter;
-  const rows = await db
+  const rows = await getDb()
     .select()
     .from(neighbourhoods)
     .where(where)
@@ -82,6 +86,7 @@ async function resolveBuurt(borough: string, city: CityKey | undefined): Promise
 }
 
 export async function POST(req: NextRequest) {
+  if (isStaticMode()) return staticModeResponse();
   let payload: ApprovePayload = {};
   try {
     payload = (await req.json()) as ApprovePayload;
@@ -104,12 +109,13 @@ export async function POST(req: NextRequest) {
 
   const buurt = borough ? await resolveBuurt(borough, city).catch(() => null) : null;
   if (!buurt) {
-    log.warn("approve: borough not resolved — creatives will use synthetic record", { borough, city });
+    log.warn("approve: borough not resolved — creatives will use synthetic record", {
+      borough,
+      city,
+    });
   }
 
-  const clustersById = new Map(
-    (payload.clusters ?? []).map((c) => [c.id, c]),
-  );
+  const clustersById = new Map((payload.clusters ?? []).map((c) => [c.id, c]));
   const messages = payload.messages ?? [];
 
   const fallbackNeighbourhood: BuurtRecord =
@@ -173,7 +179,8 @@ export async function POST(req: NextRequest) {
     let qrCodeUrl: string | null = null;
     let joinUrl: string | null = null;
     if (m.channel === "leaflet") {
-      joinUrl = `https://neighbourhoodos.nl/join/${slug}-${m.clusterId.replace(/^cluster_/, "")}`;
+      // Placeholder target: the prototype has no opt-in page yet.
+      joinUrl = `https://example.org/join/${slug}-${m.clusterId.replace(/^cluster_/, "")}`;
       try {
         qrCodeUrl = await QRCode.toDataURL(joinUrl, {
           errorCorrectionLevel: "M",
@@ -208,15 +215,10 @@ export async function POST(req: NextRequest) {
   });
 
   // ── Fire MCP campaigns for Meta / TikTok clusters ──────────────────────
-  const creativeByKey = new Map(
-    creatives.map((c) => [`${c.clusterId}::${c.channel}`, c]),
-  );
+  const creativeByKey = new Map(creatives.map((c) => [`${c.clusterId}::${c.channel}`, c]));
 
   const mcpJobs = messages
-    .filter(
-      (m) =>
-        m.channel === "facebook" || m.channel === "instagram" || m.channel === "tiktok",
-    )
+    .filter((m) => m.channel === "facebook" || m.channel === "instagram" || m.channel === "tiktok")
     .map(async (m): Promise<MCPDispatchResult> => {
       const cluster = clustersById.get(m.clusterId);
       const cr = creativeByKey.get(`${m.clusterId}::${m.channel}`);

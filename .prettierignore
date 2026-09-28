@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+public/
+drizzle/
+src/lib/data/static-snapshot.json
+.next/
+.cache/

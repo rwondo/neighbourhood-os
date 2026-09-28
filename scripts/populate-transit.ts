@@ -62,7 +62,9 @@ async function main(): Promise<void> {
       `;
       i++;
       if (i % 100 === 0 || i === rows.length) {
-        console.log(`[transit] ${i}/${rows.length} (latest ${row.buurt_code}=${count}, non-zero so far=${nonZero})`);
+        console.log(
+          `[transit] ${i}/${rows.length} (latest ${row.buurt_code}=${count}, non-zero so far=${nonZero})`,
+        );
       }
     }
     console.log(`[transit] done. updated=${i}, with stops=${nonZero}`);

@@ -1,19 +1,19 @@
 /**
- * Seed Supermemory for the buurten the demo will actually touch.
+ * Seed neighbourhood memory for the buurten the demo will actually touch.
  *
  * Usage:
  *   pnpm tsx scripts/seed-memory.ts                       # seed worst-CDI buurt per borough across all 3 cities
  *   pnpm tsx scripts/seed-memory.ts BU05991703 BU03630000 # seed specific buurt codes
  *
  * The full `pnpm seed` script also writes memory rows, but only when
- * SEED_SUPERMEMORY=1 is exported AND it does so for all ~10k buurten, which
+ * SEED_MEMORY=1 is exported AND it does so for all ~10k buurten, which
  * takes a long time. This script seeds only the ones the demo flow lands on.
  */
 import "dotenv/config";
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods } from "@/lib/db/schema";
-import { seedNeighbourhoodProfile, writeOutcome } from "@/lib/supermemory";
+import { seedNeighbourhoodProfile, writeOutcome } from "@/lib/memory";
 
 type Row = typeof neighbourhoods.$inferSelect;
 
@@ -80,7 +80,7 @@ const SYNTHETIC_OUTCOMES = [
 
 async function pickBuurten(codes: string[]): Promise<Row[]> {
   if (codes.length > 0) {
-    return db
+    return getDb()
       .select()
       .from(neighbourhoods)
       .where(sql`${neighbourhoods.buurtCode} = ANY(${codes})`);
@@ -88,7 +88,7 @@ async function pickBuurten(codes: string[]): Promise<Row[]> {
   // Default: worst-CDI buurt per borough across all 3 cities.
   // Fetch sorted by CDI desc then group by borough in JS — keeps the result
   // typed (camelCase) instead of raw db.execute() which returns snake_case keys.
-  const all = await db
+  const all = await getDb()
     .select()
     .from(neighbourhoods)
     .where(sql`${neighbourhoods.borough} IS NOT NULL AND ${neighbourhoods.borough} <> ''`)
@@ -113,7 +113,9 @@ async function main() {
   const extractGraph = process.env.EXTRACT_GRAPH !== "0";
   const rows = await pickBuurten(args);
   if (rows.length === 0) {
-    console.warn("[seed-memory] no buurten matched — did you run `pnpm seed` first to populate the neighbourhoods table?");
+    console.warn(
+      "[seed-memory] no buurten matched — did you run `pnpm seed` first to populate the neighbourhoods table?",
+    );
     return;
   }
   console.log(
@@ -148,7 +150,10 @@ async function main() {
       const tag = borough ? `${name} → borough:${borough}` : name;
       console.log(`[seed-memory] ${buurtCode} (${tag}) ok in ${Date.now() - t0}ms`);
     } catch (err) {
-      console.error(`[seed-memory] ${buurtCode} (${name}) failed:`, err instanceof Error ? err.message : err);
+      console.error(
+        `[seed-memory] ${buurtCode} (${name}) failed:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
   console.log("[seed-memory] done");

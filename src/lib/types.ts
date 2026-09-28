@@ -113,3 +113,77 @@ export type BoroughAggregate = {
   avgA?: number;
   avgS?: number;
 };
+
+export type BoroughTopBuurt = {
+  buurtCode: string;
+  name: string;
+  cdi: number;
+  score: number;
+  pctLivingAlone: number;
+  pctElderly65: number;
+  pctSingleParent: number;
+};
+
+export type BoroughDetailResponse = {
+  borough: string;
+  city: CityKey;
+  buurtCount: number;
+  avgScore: number;
+  avgCdi: number;
+  riskLevel: BoroughAggregate["riskLevel"];
+  color: BoroughAggregate["color"];
+  rankInCity: number;
+  totalBoroughs: number;
+  components: {
+    V: number;
+    A: number;
+    S: number;
+    E: number;
+    H: number;
+    PT: number;
+    W: number;
+    D: number;
+    R: number;
+  };
+  demographics: {
+    pctLivingAlone: number;
+    pctElderly65: number;
+    pctSingleParent: number;
+    lowIncomeIndex: number;
+    populationTurnover: number;
+    amenityDistanceKm: number;
+  };
+  infrastructure: {
+    transitStops500m: number;
+    poiLibraries: number;
+    poiCommunityCentres: number;
+    poiParks: number;
+    poiBenches: number;
+    poiCafes: number;
+    poiSports: number;
+  };
+  topBuurten: BoroughTopBuurt[];
+};
+
+export type RecentInterventionRecord = {
+  id: string;
+  borough: string;
+  buurtName: string;
+  predictedScoreGain: number;
+  predictedConnections: number;
+  createdAt: string;
+};
+
+/** Precomputed API responses for one city, served in static snapshot mode. */
+export type CitySnapshot = {
+  boroughs: BoroughAggregate[];
+  details: Record<string, BoroughDetailResponse>;
+  recentInterventions: RecentInterventionRecord[];
+};
+
+export type StaticSnapshot = {
+  version: 1;
+  generatedAt: string | null;
+  sources: string[];
+  cities: Record<CityKey, CitySnapshot>;
+};

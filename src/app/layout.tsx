@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Neighbourhood OS — Municipal Intelligence Platform",
+  title: "Neighbourhood OS",
   description:
-    "AI-powered municipal social cohesion platform. Identify socially isolated neighbourhoods and engineer hyper-personalised connection opportunities.",
+    "Hackathon prototype: ranks Dutch neighbourhoods by a Connection Desert Index and drafts local outreach plans with an LLM pipeline.",
 };
 
 export default function RootLayout({
@@ -27,10 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn("h-full", inter.variable, jetbrainsMono.variable)}
-    >
+    <html lang="en" className={cn("h-full", inter.variable, jetbrainsMono.variable)}>
       <body className="h-full overflow-hidden antialiased font-sans bg-canvas text-foreground">
         {children}
       </body>

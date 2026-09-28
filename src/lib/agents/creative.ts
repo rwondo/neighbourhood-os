@@ -58,14 +58,7 @@ const CITY_LABEL: Record<string, string> = {
 };
 
 type ActivityKind =
-  | "chess"
-  | "walk"
-  | "cook"
-  | "coffee"
-  | "garden"
-  | "music"
-  | "language"
-  | "general";
+  "chess" | "walk" | "cook" | "coffee" | "garden" | "music" | "language" | "general";
 
 function classifyActivity(activity: RecommendedActivity): ActivityKind {
   const n = activity.name.toLowerCase();
@@ -121,7 +114,9 @@ function shortHeadline(activity: RecommendedActivity, language: string): string 
 function subline(_activity: RecommendedActivity, neighbourhood: string, language: string): string {
   // Keep subline ultra short and ASCII-safe — single neighbourhood word
   // renders far more reliably than venue + comma + city.
-  return language === "en" ? `IN ${neighbourhood.toUpperCase()}` : `IN ${neighbourhood.toUpperCase()}`;
+  return language === "en"
+    ? `IN ${neighbourhood.toUpperCase()}`
+    : `IN ${neighbourhood.toUpperCase()}`;
 }
 
 export function buildIdeogramPrompt({
@@ -217,7 +212,12 @@ export async function generateCreative({
 
     const first = raw.data?.[0];
     const url = first?.url ?? (first?.b64_json ? `data:image/png;base64,${first.b64_json}` : null);
-    log.info("creative ok", { cluster: cluster.id, channel, ms: Date.now() - started, hasUrl: !!url });
+    log.info("creative ok", {
+      cluster: cluster.id,
+      channel,
+      ms: Date.now() - started,
+      hasUrl: !!url,
+    });
     if (!url) return { url: null, status: "failed", prompt };
     return { url, status: "ready", prompt };
   } catch (err) {

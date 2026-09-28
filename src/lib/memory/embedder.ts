@@ -4,7 +4,9 @@ import { makeLogger } from "@/lib/log";
 const log = makeLogger("memory:embedder");
 
 if (!process.env.OPENAI_API_KEY) {
-  log.warn("OPENAI_API_KEY is not set — embeddings will fail and Supermemory vector search will be empty");
+  log.warn(
+    "OPENAI_API_KEY is not set — embeddings will fail and memory vector search will be empty",
+  );
 }
 
 const client = new OpenAI({
@@ -22,10 +24,18 @@ export async function embedTexts(inputs: string[]): Promise<number[][]> {
   try {
     for (let i = 0; i < inputs.length; i += BATCH) {
       const slice = inputs.slice(i, i + BATCH);
-      const res = await client.embeddings.create({ model: MODEL, input: slice, dimensions: DIMENSIONS });
+      const res = await client.embeddings.create({
+        model: MODEL,
+        input: slice,
+        dimensions: DIMENSIONS,
+      });
       for (const d of res.data) out.push(d.embedding as number[]);
     }
-    log.debug("embed ok", { count: out.length, dims: out[0]?.length ?? 0, ms: Date.now() - started });
+    log.debug("embed ok", {
+      count: out.length,
+      dims: out[0]?.length ?? 0,
+      ms: Date.now() - started,
+    });
     return out;
   } catch (err) {
     if (err instanceof APIError) {
@@ -44,5 +54,5 @@ export async function embedTexts(inputs: string[]): Promise<number[][]> {
 }
 
 export function vectorLiteral(vec: number[]): string {
-  return `[${vec.map((n) => Number.isFinite(n) ? n.toFixed(6) : "0").join(",")}]`;
+  return `[${vec.map((n) => (Number.isFinite(n) ? n.toFixed(6) : "0")).join(",")}]`;
 }

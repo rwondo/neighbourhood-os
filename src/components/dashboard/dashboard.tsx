@@ -9,11 +9,17 @@ import { BoroughDetailDialog } from "./borough-detail-dialog";
 import { DemoModeBadge } from "./demo-mode-badge";
 import { useInterventionStream } from "@/lib/hooks/use-intervention-stream";
 
-export function Dashboard() {
+export function Dashboard({
+  staticMode,
+  snapshotGeneratedAt,
+}: {
+  staticMode: boolean;
+  snapshotGeneratedAt: string | null;
+}) {
   const [city, setCity] = useState<CityKey>("rotterdam");
   const [selected, setSelected] = useState<{ borough: string; city: CityKey } | null>(null);
   const [detailBorough, setDetailBorough] = useState<string | null>(null);
-  const stream = useInterventionStream();
+  const stream = useInterventionStream({ staticMode });
 
   const runForBorough = (borough: string, cityKey: CityKey) => {
     setSelected({ borough, city: cityKey });
@@ -33,7 +39,7 @@ export function Dashboard() {
         gridTemplateRows: "minmax(0, 1fr)",
       }}
     >
-      <DemoModeBadge />
+      {staticMode ? null : <DemoModeBadge />}
       <LeftSidebar
         city={city}
         onCityChange={(c) => {
@@ -51,6 +57,8 @@ export function Dashboard() {
           stream.reset();
         }}
         onBoroughClick={(b) => setDetailBorough(b)}
+        staticMode={staticMode}
+        snapshotGeneratedAt={snapshotGeneratedAt}
       />
       <RightPanel
         city={city}
@@ -61,6 +69,9 @@ export function Dashboard() {
         messages={stream.messages}
         strategy={stream.strategy}
         error={stream.error}
+        notice={stream.notice}
+        replay={stream.replay}
+        staticMode={staticMode}
       />
       <BoroughDetailDialog
         open={detailBorough !== null}
@@ -72,6 +83,7 @@ export function Dashboard() {
         onGenerate={() => {
           if (detailBorough) runForBorough(detailBorough, city);
         }}
+        staticMode={staticMode}
       />
     </div>
   );

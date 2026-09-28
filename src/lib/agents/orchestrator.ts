@@ -1,5 +1,5 @@
 import { jsonOrchestratorCall } from "@/lib/together";
-import { queryNeighbourhood } from "@/lib/supermemory";
+import { queryNeighbourhood } from "@/lib/memory";
 import { makeLogger } from "@/lib/log";
 import { ORCHESTRATOR_SYSTEM } from "./prompts";
 import { searchLocalActivities } from "./web-search";
@@ -42,14 +42,20 @@ const STRATEGY_SCHEMA = `{
   "weeks": [{"week":1,"score":number}, ... up to 6]
 }`;
 
-function emitStep(emit: Emit, id: string, label: string, status: StepStatus, detail?: string): void {
+function emitStep(
+  emit: Emit,
+  id: string,
+  label: string,
+  status: StepStatus,
+  detail?: string,
+): void {
   const evt: AgentTraceEvent = detail
     ? { type: "step", id, label, status, detail }
     : { type: "step", id, label, status };
   emit(evt);
 }
 
-// Steps 1 and 3 finish near-instantly on the happy path (cold Supermemory,
+// Steps 1 and 3 finish near-instantly on the happy path (cold memory,
 // deterministic cluster identification). Add a small floor so the agent trace
 // reads as a sequence of work rather than a flicker.
 async function withMinDuration<T>(minMs: number, fn: () => Promise<T> | T): Promise<T> {
@@ -190,8 +196,8 @@ export async function runOrchestrator(
     score: neighbourhood.score,
   });
 
-  // ── Step 1: Supermemory context ────────────────────────────────────────
-  emitStep(emit, "s1", "Retrieving Supermemory context", "active");
+  // ── Step 1: neighbourhood memory ────────────────────────────────────────
+  emitStep(emit, "s1", "Retrieving neighbourhood memory", "active");
   let profileHits: RetrievalHit[] = [];
   let outcomeHits: RetrievalHit[] = [];
   const t1 = Date.now();
@@ -219,7 +225,7 @@ export async function runOrchestrator(
     );
     profileHits = p;
     outcomeHits = o;
-    log.info("supermemory hits", {
+    log.info("memory hits", {
       buurtCode: neighbourhood.buurtCode,
       profileHits: profileHits.length,
       outcomeHits: outcomeHits.length,
@@ -233,7 +239,7 @@ export async function runOrchestrator(
       emitStep(
         emit,
         "s1",
-        "Retrieving Supermemory context",
+        "Retrieving neighbourhood memory",
         "skipped",
         `no memory found (${probedTags}) — run \`pnpm seed:memory\``,
       );
@@ -241,14 +247,14 @@ export async function runOrchestrator(
       emitStep(
         emit,
         "s1",
-        "Retrieving Supermemory context",
+        "Retrieving neighbourhood memory",
         "completed",
         `${profileHits.length + outcomeHits.length} memory hits`,
       );
     }
   } catch (err) {
-    log.error("supermemory unavailable", err);
-    emitStep(emit, "s1", "Retrieving Supermemory context", "skipped", "memory unavailable");
+    log.error("memory unavailable", err);
+    emitStep(emit, "s1", "Retrieving neighbourhood memory", "skipped", "memory unavailable");
   }
 
   // ── Step 2: Web search for local activities ───────────────────────────
@@ -301,7 +307,11 @@ export async function runOrchestrator(
 
   // ── Step 4: Generate strategy ─────────────────────────────────────────
   emitStep(emit, "s4", "Generating bespoke intervention strategy", "active");
-  const cityLabelMap = { rotterdam: "Rotterdam", amsterdam: "Amsterdam", denhaag: "Den Haag" } as const;
+  const cityLabelMap = {
+    rotterdam: "Rotterdam",
+    amsterdam: "Amsterdam",
+    denhaag: "Den Haag",
+  } as const;
   const city = cityLabelMap[neighbourhood.city] ?? neighbourhood.city;
   const today = new Date().toISOString().slice(0, 10);
   const candidateBlock = search.activities.length
@@ -358,7 +368,11 @@ Rules:
       user,
       label: "strategy-gen",
     });
-    if (!strategyCore || !Array.isArray(strategyCore.activities) || !Array.isArray(strategyCore.weeks)) {
+    if (
+      !strategyCore ||
+      !Array.isArray(strategyCore.activities) ||
+      !Array.isArray(strategyCore.weeks)
+    ) {
       throw new Error("orchestrator returned malformed strategy");
     }
     log.info("strategy generated", {
@@ -390,7 +404,10 @@ Rules:
       Array.isArray(strategyCore.activities) && strategyCore.activities.length > 0
         ? strategyCore.activities.slice(0, 8)
         : search.activities.slice(0, 8);
-    const safeActivities = ensureClusterCoverage(normaliseActivities(rawActivities, clusters), clusters);
+    const safeActivities = ensureClusterCoverage(
+      normaliseActivities(rawActivities, clusters),
+      clusters,
+    );
     const safeWeeks =
       Array.isArray(strategyCore.weeks) && strategyCore.weeks.length === 6
         ? strategyCore.weeks

@@ -1,12 +1,4 @@
-import type {
-  AgentTraceEvent,
-  CityKey,
-  ClusterMessage,
-  CreativeStatus,
-  InterventionStrategy,
-  MCPCampaignStatus,
-} from "@/lib/types";
-import type { ApprovalResult } from "@/components/dashboard/activity-approval-dialog";
+import type { AgentTraceEvent, CityKey } from "@/lib/types";
 
 export type DemoStreamStep = {
   /** Wall-clock delay before this event is dispatched, ms from the previous step. */
@@ -14,21 +6,16 @@ export type DemoStreamStep = {
   event: AgentTraceEvent;
 };
 
-export type DemoApprovalPreset = {
-  /** Match key: `${activityName}` → preset ApprovalResult for that activity. Falls back to default. */
-  byActivityName: Record<string, ApprovalResult>;
-  /** Used when the approved activity has no specific preset. */
-  default: ApprovalResult;
-};
+/** Where a replayed run came from, shown in the UI so a replay is never mistaken for a live run. */
+export type DemoProvenance =
+  | { kind: "recorded"; capturedAt: string; originalDurationMs: number; buurt: string }
+  | { kind: "illustrative"; note: string };
 
 export type DemoSnapshot = {
   /** Borough name as it appears in the boroughs.geojson + DB. Case-sensitive. */
   borough: string;
   city: CityKey;
+  provenance: DemoProvenance;
   /** Full sequence of SSE events to replay, with inter-event delays. */
   stream: DemoStreamStep[];
-  /** Preset approval responses keyed by activity name. */
-  approval: DemoApprovalPreset;
 };
-
-export type { AgentTraceEvent, ClusterMessage, InterventionStrategy, CreativeStatus, MCPCampaignStatus };

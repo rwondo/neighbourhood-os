@@ -1,3 +1,13 @@
+# Dependency build scripts are not needed: all native binaries ship as
+# prebuilt optional packages. pnpm 11 reads `allowBuilds`; pnpm 10 reads
+# `ignoredBuiltDependencies`.
+allowBuilds:
+  esbuild: false
+  msw: false
+  sharp: false
+  unrs-resolver: false
 ignoredBuiltDependencies:
+  - esbuild
+  - msw
   - sharp
   - unrs-resolver

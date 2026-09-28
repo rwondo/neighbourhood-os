@@ -77,7 +77,12 @@ function GlyphLeaflet() {
         strokeLinejoin="round"
       />
       <path d="M9.6 2.5V5h2.8" stroke="currentColor" strokeWidth="1.05" strokeLinejoin="round" />
-      <path d="M5.4 8h5.2M5.4 10h5.2M5.4 12h3" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" />
+      <path
+        d="M5.4 8h5.2M5.4 10h5.2M5.4 12h3"
+        stroke="currentColor"
+        strokeWidth="1.05"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -98,15 +103,7 @@ function GlyphFacebook() {
 function GlyphInstagram() {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="size-full">
-      <rect
-        x="2.4"
-        y="2.4"
-        width="11.2"
-        height="11.2"
-        rx="3"
-        fill="currentColor"
-        opacity="0.16"
-      />
+      <rect x="2.4" y="2.4" width="11.2" height="11.2" rx="3" fill="currentColor" opacity="0.16" />
       <rect
         x="2.4"
         y="2.4"
@@ -207,10 +204,7 @@ export function ChannelBadge({
         : { box: "size-5", glyph: "size-[15px]" };
   return (
     <span
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1.5",
-        withLabel ? "pr-1" : null,
-      )}
+      className={cn("inline-flex shrink-0 items-center gap-1.5", withLabel ? "pr-1" : null)}
       title={m.label}
     >
       <span

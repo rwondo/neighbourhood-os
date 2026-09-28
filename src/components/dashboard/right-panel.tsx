@@ -3,14 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { AgentTrace } from "./agent-trace";
 import { ActivitiesList } from "./activities-list";
-import {
-  ActivityApprovalDialog,
-  type ApprovalResult,
-} from "./activity-approval-dialog";
+import { ActivityApprovalDialog, type ApprovalResult } from "./activity-approval-dialog";
 import { ChannelPreviews } from "./channel-previews";
 import { CampaignMetricsPanel } from "./campaign-metrics-panel";
 import { cn } from "@/lib/utils";
 import type { TraceStep } from "@/lib/hooks/use-intervention-stream";
+import type { DemoProvenance } from "@/lib/demo-data";
 import type {
   Channel,
   CityKey,
@@ -47,6 +45,9 @@ export function RightPanel({
   messages,
   strategy,
   error,
+  notice,
+  replay,
+  staticMode,
 }: {
   city: CityKey;
   selectedName: string | null;
@@ -56,6 +57,9 @@ export function RightPanel({
   messages: ClusterMessage[];
   strategy: InterventionStrategy | null;
   error: string | null;
+  notice: string | null;
+  replay: DemoProvenance | null;
+  staticMode: boolean;
 }) {
   const completedSteps = steps.filter((s) => s.status === "completed").length;
   const activities = strategy?.activities ?? [];
@@ -148,6 +152,8 @@ export function RightPanel({
         showFocused={Boolean(showFocused)}
         running={running}
         error={error}
+        notice={notice}
+        replay={replay}
         strategy={strategy}
       />
 
@@ -239,21 +245,17 @@ export function RightPanel({
             previewsAreStar ? "bg-canvas/40 py-4" : "py-3",
           )}
         >
-          <ChannelPreviews
-            messages={messages}
-            running={running}
-            enrichments={enrichments}
-          />
+          <ChannelPreviews messages={messages} running={running} enrichments={enrichments} />
         </div>
 
         {/* CAMPAIGN METRICS — peer weight, distinct treatment */}
         <SectionHeader
-          title="Campaign Metrics"
+          title="Campaign Funnel"
           tone="default"
           meta={
             selectedName ? (
               <span className="font-mono text-[10px] tabular text-muted-foreground/70">
-                projected · 6w
+                simulated example
               </span>
             ) : null
           }
@@ -275,6 +277,7 @@ export function RightPanel({
         city={city}
         alreadyApproved={selected ? approvedKeys.has(selected.key) : false}
         onApproved={handleApprovalResult}
+        staticMode={staticMode}
       />
     </aside>
   );
@@ -286,6 +289,8 @@ function ContextHeader({
   showFocused,
   running,
   error,
+  notice,
+  replay,
   strategy,
 }: {
   selectedName: string | null;
@@ -293,6 +298,8 @@ function ContextHeader({
   showFocused: boolean;
   running: boolean;
   error: string | null;
+  notice: string | null;
+  replay: DemoProvenance | null;
   strategy: InterventionStrategy | null;
 }) {
   if (!selectedName) {
@@ -300,7 +307,16 @@ function ContextHeader({
       <div className="shrink-0 border-b border-hairline bg-canvas/30 px-4 py-3">
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border border-hairline bg-panel text-muted-foreground/70">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="size-3" aria-hidden="true">
+            <svg
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-3"
+              aria-hidden="true"
+            >
               <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 3 4.5 6.5 4.5 6.5s4.5-3.5 4.5-6.5c0-2.5-2-4.5-4.5-4.5z" />
               <circle cx="7" cy="6" r="1.5" />
             </svg>
@@ -338,13 +354,22 @@ function ContextHeader({
           : "bg-muted-foreground/40";
 
   const statusLabel =
-    statusTone === "live"
-      ? "Streaming"
-      : statusTone === "ready"
-        ? "Ready"
-        : statusTone === "error"
-          ? "Error"
-          : "Idle";
+    statusTone === "error"
+      ? "Error"
+      : replay
+        ? "Replay"
+        : statusTone === "live"
+          ? "Streaming"
+          : statusTone === "ready"
+            ? "Ready"
+            : "Idle";
+
+  const replayNote = !replay
+    ? null
+    : replay.kind === "illustrative"
+      ? `Sample run: ${replay.note}`
+      : `Recorded run from ${new Date(replay.capturedAt).toLocaleDateString("en-GB")} ` +
+        `(originally ${Math.round(replay.originalDurationMs / 1000)}s, replayed faster).`;
 
   return (
     <div className="shrink-0 border-b border-hairline bg-canvas/40 px-4 py-3">
@@ -372,32 +397,55 @@ function ContextHeader({
           </h2>
           {showFocused && focusedBuurt ? (
             <p className="mt-0.5 truncate text-[10.5px] leading-snug text-muted-foreground">
-              Worst-CDI buurt: <span className="text-foreground/80">{focusedBuurt}</span>
+              {replay?.kind === "illustrative" ? "Sample buurt" : "Worst-CDI buurt"}:{" "}
+              <span className="text-foreground/80">{focusedBuurt}</span>
             </p>
           ) : null}
         </div>
 
         {strategy ? (
-          <div className="flex shrink-0 items-stretch gap-0 overflow-hidden rounded-md border border-hairline bg-panel">
+          <div
+            className="flex shrink-0 items-stretch gap-0 overflow-hidden rounded-md border border-hairline bg-panel"
+            title="Estimated by the LLM within ranges set in the prompt. Not a measured outcome."
+          >
             <Stat
               value={`+${strategy.predictedScoreGain}`}
               unit="pts"
-              label="CDI 6w"
+              label="est. gain"
               accent="green"
             />
             <span className="w-px self-stretch bg-hairline" aria-hidden="true" />
             <Stat
               value={`€${Math.round(strategy.costPerConnectionEUR)}`}
-              label="per conn."
+              label="est. / conn."
               accent="default"
             />
           </div>
         ) : null}
       </div>
 
+      {replayNote ? (
+        <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2 py-1 text-[10.5px] leading-snug text-muted-foreground">
+          {replayNote}
+        </p>
+      ) : null}
+
+      {notice ? (
+        <p className="mt-2 rounded-md border border-hairline bg-muted/30 px-2 py-1 text-[10.5px] leading-snug text-muted-foreground">
+          {notice}
+        </p>
+      ) : null}
+
       {error ? (
         <p className="mt-2 flex items-start gap-1.5 rounded-md border border-risk-red/25 bg-risk-red-soft/40 px-2 py-1 text-[10.5px] leading-snug text-risk-red">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" className="mt-0.5 size-2.5 shrink-0" aria-hidden="true">
+          <svg
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            className="mt-0.5 size-2.5 shrink-0"
+            aria-hidden="true"
+          >
             <circle cx="6" cy="6" r="4.5" />
             <path d="M6 4v2.5" />
             <path d="M6 8v.01" />
@@ -432,9 +480,7 @@ function Stat({
           {value}
         </span>
         {unit ? (
-          <span className="font-mono text-[9px] tabular text-muted-foreground/80">
-            {unit}
-          </span>
+          <span className="font-mono text-[9px] tabular text-muted-foreground/80">{unit}</span>
         ) : null}
       </div>
       <span className="text-[9px] uppercase tracking-[0.07em] text-muted-foreground/70">

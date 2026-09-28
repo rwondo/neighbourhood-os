@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods, interventions, clusterMessages, agentRuns } from "@/lib/db/schema";
 import { runOrchestrator } from "@/lib/agents/orchestrator";
 import { personaliseCluster } from "@/lib/agents/personalisation";
@@ -9,7 +9,7 @@ const DEMO_NAMES = ["Crooswijk", "Bijlmer", "Schilderswijk"] as const;
 
 async function main() {
   for (const name of DEMO_NAMES) {
-    const rows = await db.select().from(neighbourhoods);
+    const rows = await getDb().select().from(neighbourhoods);
     const buurt = rows.find((r) => r.name.toLowerCase().includes(name.toLowerCase()));
     if (!buurt) {
       console.warn(`[demo] no buurt matched ${name}`);
@@ -23,7 +23,7 @@ async function main() {
       emit,
     );
     const interventionId = `int_demo_${buurt.buurtCode}`;
-    await db
+    await getDb()
       .insert(interventions)
       .values({
         id: interventionId,
@@ -41,23 +41,46 @@ async function main() {
       });
     for (const cluster of clusters) {
       const activity = activities[0];
-      const msg = await personaliseCluster({ cluster, activity, neighbourhood: buurt as unknown as BuurtRecord }).catch(() => null);
+      const msg = await personaliseCluster({
+        cluster,
+        activity,
+        neighbourhood: buurt as unknown as BuurtRecord,
+      }).catch(() => null);
       if (!msg) continue;
       const id = `cmsg_demo_${buurt.buurtCode}_${cluster.id}`;
-      await db
+      await getDb()
         .insert(clusterMessages)
-        .values({ id, interventionId, clusterId: cluster.id, channel: msg.channel, language: msg.language, tone: msg.tone, message: msg.message, pdfUrl: msg.pdfUrl ?? null })
+        .values({
+          id,
+          interventionId,
+          clusterId: cluster.id,
+          channel: msg.channel,
+          language: msg.language,
+          tone: msg.tone,
+          message: msg.message,
+          pdfUrl: msg.pdfUrl ?? null,
+        })
         .onConflictDoUpdate({ target: clusterMessages.id, set: { message: msg.message } });
     }
-    await db
+    await getDb()
       .insert(agentRuns)
-      .values({ id: `run_demo_${buurt.buurtCode}`, interventionId, neighbourhoodId: buurt.id, steps: log, totalMs: 0, ok: true })
+      .values({
+        id: `run_demo_${buurt.buurtCode}`,
+        interventionId,
+        neighbourhoodId: buurt.id,
+        steps: log,
+        totalMs: 0,
+        ok: true,
+      })
       .onConflictDoUpdate({ target: agentRuns.id, set: { steps: log } });
     console.log(`[demo] stored ${buurt.name} → intervention ${interventionId}`);
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Exit explicitly: the shared postgres pool would otherwise keep the process alive.
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

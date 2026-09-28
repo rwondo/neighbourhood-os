@@ -11,13 +11,7 @@ import { riskLevel } from "@/lib/mock-data";
  * the badge sits comfortably next to a TrendIndicator or StatCard label without
  * overpowering its neighbours.
  */
-export function ScoreBadge({
-  score,
-  size = "md",
-}: {
-  score: number;
-  size?: "sm" | "md" | "lg";
-}) {
+export function ScoreBadge({ score, size = "md" }: { score: number; size?: "sm" | "md" | "lg" }) {
   const level = riskLevel(score);
   const tone =
     level === "high-isolation"
@@ -39,7 +33,7 @@ export function ScoreBadge({
         "inline-flex items-center justify-center rounded-md font-mono tabular leading-none ring-1 ring-inset",
         "transition-colors duration-200 ease-out",
         tone,
-        sizing
+        sizing,
       )}
     >
       {score}

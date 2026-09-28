@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { neighbourhoods, interventions, clusterMessages, agentRuns } from "@/lib/db/schema";
 import { runOrchestrator, type Emit } from "@/lib/agents/orchestrator";
 import { personaliseCluster } from "@/lib/agents/personalisation";
 import { createSSEStream } from "@/lib/sse";
 import { makeLogger } from "@/lib/log";
+import { isStaticMode, staticModeResponse } from "@/lib/runtime-mode";
 import type { AgentTraceEvent, BuurtRecord, CityKey, ClusterMessage } from "@/lib/types";
 
 const log = makeLogger("api:simulate");
@@ -23,7 +24,10 @@ type SimulatePayload = {
 
 async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
   if (p.neighbourhoodId) {
-    const [row] = await db.select().from(neighbourhoods).where(eq(neighbourhoods.id, p.neighbourhoodId));
+    const [row] = await getDb()
+      .select()
+      .from(neighbourhoods)
+      .where(eq(neighbourhoods.id, p.neighbourhoodId));
     if (row) {
       log.info("resolved buurt by neighbourhoodId", {
         id: row.id,
@@ -38,7 +42,7 @@ async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
     const cityFilter = p.city ? eq(neighbourhoods.city, p.city) : undefined;
     const boroughFilter = sql`${neighbourhoods.borough} = ${p.borough}`;
     const where = cityFilter ? and(cityFilter, boroughFilter) : boroughFilter;
-    const rows = await db
+    const rows = await getDb()
       .select()
       .from(neighbourhoods)
       .where(where)
@@ -48,7 +52,12 @@ async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
       log.info("resolved buurt by borough (worst CDI)", {
         borough: p.borough,
         city: p.city,
-        chosen: { id: rows[0].id, name: rows[0].name, buurtCode: rows[0].buurtCode, cdi: rows[0].cdi },
+        chosen: {
+          id: rows[0].id,
+          name: rows[0].name,
+          buurtCode: rows[0].buurtCode,
+          cdi: rows[0].cdi,
+        },
       });
       return rows[0] as unknown as BuurtRecord;
     }
@@ -58,6 +67,7 @@ async function resolveBuurt(p: SimulatePayload): Promise<BuurtRecord | null> {
 }
 
 export async function POST(req: NextRequest) {
+  if (isStaticMode()) return staticModeResponse();
   let payload: SimulatePayload;
   try {
     payload = (await req.json()) as SimulatePayload;
@@ -81,7 +91,10 @@ export async function POST(req: NextRequest) {
   const emit: Emit = (event) => {
     traceLog.push(event);
     if (event.type === "step") {
-      log.info(`SSE step ${event.id} ${event.status}`, { label: event.label, detail: event.detail });
+      log.info(`SSE step ${event.id} ${event.status}`, {
+        label: event.label,
+        detail: event.detail,
+      });
     } else if (event.type === "error") {
       log.error("SSE error event", { message: event.message });
     }
@@ -97,7 +110,7 @@ export async function POST(req: NextRequest) {
       emit({ type: "info", key: "buurt", value: buurt.name });
       emit({ type: "info", key: "buurtCode", value: buurt.buurtCode });
 
-      // ── Steps 1-4 (Supermemory → web search → clusters → strategy) ─────
+      // ── Steps 1-4 (memory → web search → clusters → strategy) ─────
       const plan = await runOrchestrator(buurt, emit);
 
       // ── Step 5: parallel personalisation, stream each as it lands ─────
@@ -112,12 +125,20 @@ export async function POST(req: NextRequest) {
           detail: "no real events found — nothing to personalise",
         });
       } else {
-        emit({ type: "step", id: "s5", label: "Personalising messages per cluster", status: "active" });
+        emit({
+          type: "step",
+          id: "s5",
+          label: "Personalising messages per cluster",
+          status: "active",
+        });
         const primaryActivity = plan.activities[0];
         messages = await Promise.all(
           plan.clusters.map(async (cluster, idx) => {
-            const matched = plan.activities.find((a) => (a.targetClusters ?? []).includes(cluster.id));
-            const activity = matched ?? plan.activities[idx % plan.activities.length] ?? primaryActivity;
+            const matched = plan.activities.find((a) =>
+              (a.targetClusters ?? []).includes(cluster.id),
+            );
+            const activity =
+              matched ?? plan.activities[idx % plan.activities.length] ?? primaryActivity;
             try {
               const msg = await personaliseCluster({ cluster, activity, neighbourhood: buurt });
               emit({ type: "cluster_message", message: msg });
@@ -148,7 +169,7 @@ export async function POST(req: NextRequest) {
       // ── Step 6: persist strategy + messages ──────────────────────────
       emit({ type: "step", id: "s6", label: "Storing strategy and messages", status: "active" });
       try {
-        await db.insert(interventions).values({
+        await getDb().insert(interventions).values({
           id: interventionId,
           neighbourhoodId: buurt.id,
           rationale: plan.strategy.rationale,
@@ -161,16 +182,18 @@ export async function POST(req: NextRequest) {
 
         await Promise.all(
           messages.map((msg, i) =>
-            db.insert(clusterMessages).values({
-              id: `cmsg_${interventionId}_${msg.clusterId}_${i}`,
-              interventionId: interventionId!,
-              clusterId: msg.clusterId,
-              channel: msg.channel,
-              language: msg.language,
-              tone: msg.tone,
-              message: msg.message,
-              pdfUrl: msg.pdfUrl ?? null,
-            }),
+            getDb()
+              .insert(clusterMessages)
+              .values({
+                id: `cmsg_${interventionId}_${msg.clusterId}_${i}`,
+                interventionId: interventionId!,
+                clusterId: msg.clusterId,
+                channel: msg.channel,
+                language: msg.language,
+                tone: msg.tone,
+                message: msg.message,
+                pdfUrl: msg.pdfUrl ?? null,
+              }),
           ),
         );
         emit({
@@ -183,7 +206,13 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         pipelineOk = false;
         const note = err instanceof Error ? err.message : "db error";
-        emit({ type: "step", id: "s6", label: "Storing strategy and messages", status: "error", detail: note });
+        emit({
+          type: "step",
+          id: "s6",
+          label: "Storing strategy and messages",
+          status: "error",
+          detail: note,
+        });
       }
 
       // ── Step 7: stream final ready signal ─────────────────────────────
@@ -197,14 +226,16 @@ export async function POST(req: NextRequest) {
       });
 
       try {
-        await db.insert(agentRuns).values({
-          id: `run_${interventionId ?? Date.now()}`,
-          interventionId: interventionId ?? null,
-          neighbourhoodId: buurt.id,
-          steps: traceLog,
-          totalMs: Date.now() - startedAt,
-          ok: pipelineOk,
-        });
+        await getDb()
+          .insert(agentRuns)
+          .values({
+            id: `run_${interventionId ?? Date.now()}`,
+            interventionId: interventionId ?? null,
+            neighbourhoodId: buurt.id,
+            steps: traceLog,
+            totalMs: Date.now() - startedAt,
+            ok: pipelineOk,
+          });
       } catch {
         /* never let agent_runs failure crash the demo */
       }
@@ -221,14 +252,16 @@ export async function POST(req: NextRequest) {
       log.error("pipeline crashed", err);
       emit({ type: "error", message });
       try {
-        await db.insert(agentRuns).values({
-          id: `run_err_${Date.now()}`,
-          interventionId: interventionId ?? null,
-          neighbourhoodId: buurt.id,
-          steps: traceLog,
-          totalMs: Date.now() - startedAt,
-          ok: false,
-        });
+        await getDb()
+          .insert(agentRuns)
+          .values({
+            id: `run_err_${Date.now()}`,
+            interventionId: interventionId ?? null,
+            neighbourhoodId: buurt.id,
+            steps: traceLog,
+            totalMs: Date.now() - startedAt,
+            ok: false,
+          });
       } catch {
         /* swallow */
       }

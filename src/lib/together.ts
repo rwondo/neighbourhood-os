@@ -10,8 +10,7 @@ const log = makeLogger("together");
 // output budget isn't spent on hidden reasoning.
 // Slugs from https://www.together.ai/models/kimi-k26 and
 // https://www.together.ai/models/deepseek-v4-pro.
-export const ORCHESTRATOR_MODEL =
-  process.env.TOGETHER_ORCHESTRATOR_MODEL ?? "moonshotai/Kimi-K2.6";
+export const ORCHESTRATOR_MODEL = process.env.TOGETHER_ORCHESTRATOR_MODEL ?? "moonshotai/Kimi-K2.6";
 export const AGENT_MODEL = process.env.TOGETHER_AGENT_MODEL ?? "moonshotai/Kimi-K2.6";
 
 log.info("Together AI client init", {
@@ -35,9 +34,15 @@ function detectReasoningStyle(model: string): ReasoningStyle {
   if (lc.includes("v4-pro") || lc.includes("r1") || lc.includes("deepseek-r")) return "deepseek";
   // Kimi K2.5 / K2.6 / K2-Thinking on Together accept `reasoning: { enabled }`
   // plus `temperature: 1.0` (thinking) or `0.6` (instant). The Moonshot-native
-  // `thinking: { type: ... }` is silently ignored by Together (logs.txt:20).
+  // `thinking: { type: ... }` is silently ignored by Together (observed during development).
   // K2 / K2-Instruct are non-thinking; treat as "none".
-  if (lc.includes("kimi-k2.6") || lc.includes("kimi-k2-6") || lc.includes("kimi-k2.5") || lc.includes("kimi-k2-5") || lc.includes("kimi-k2-thinking")) {
+  if (
+    lc.includes("kimi-k2.6") ||
+    lc.includes("kimi-k2-6") ||
+    lc.includes("kimi-k2.5") ||
+    lc.includes("kimi-k2-5") ||
+    lc.includes("kimi-k2-thinking")
+  ) {
     return "kimi";
   }
   return "none";
@@ -113,7 +118,7 @@ export async function jsonAgentCall<T>({
   } else if (style === "kimi") {
     // Together's Kimi accepts `reasoning: { enabled: bool }`. Sending
     // `enabled: false` actually suppresses thinking; the Moonshot-native
-    // `thinking: { type: ... }` is silently ignored (logs.txt:20).
+    // `thinking: { type: ... }` is silently ignored.
     body.reasoning = { enabled: thinkingEnabled };
     body.top_p = 0.95; // per Together's Kimi quickstart
   }

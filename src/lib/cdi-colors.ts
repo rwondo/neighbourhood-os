@@ -4,7 +4,7 @@
  * Maps the API's `riskLevelCDI` color tokens to hex values that match the
  * saturation of the legacy `colorForScore` palette in `src/lib/mock-data.ts`.
  *
- * Bands (CDI per prompt.txt):
+ * Absolute CDI bands (see riskLevelCDI in src/lib/score.ts):
  *   - low      0-30   -> green
  *   - moderate 30-50  -> yellow
  *   - high     50-70  -> orange

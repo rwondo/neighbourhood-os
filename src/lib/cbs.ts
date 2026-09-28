@@ -90,9 +90,7 @@ function mapCbsRow(r: Record<string, unknown>): CBSBuurtRow | null {
 
   // Low-signal rows emit NaN so downstream consumers know to skip them in
   // city-wide normalisation (NaN-aware filters work uniformly).
-  const pctLivingAlone = lowSignal
-    ? Number.NaN
-    : Math.min(rawLivingAlone, PCT_LIVING_ALONE_CAP);
+  const pctLivingAlone = lowSignal ? Number.NaN : Math.min(rawLivingAlone, PCT_LIVING_ALONE_CAP);
   const pctElderly65 = lowSignal ? Number.NaN : rawElderly;
 
   return {

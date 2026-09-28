@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { makeLogger } from "@/lib/log";
 import { embedTexts, vectorLiteral } from "./embedder";
 import type { RetrievalHit } from "./types";
@@ -13,7 +13,12 @@ type SearchOptions = {
   graphExpand?: boolean;
 };
 
-export async function searchMemory({ containerTag, query, k = 4, graphExpand = true }: SearchOptions): Promise<RetrievalHit[]> {
+export async function searchMemory({
+  containerTag,
+  query,
+  k = 4,
+  graphExpand = true,
+}: SearchOptions): Promise<RetrievalHit[]> {
   const started = Date.now();
   log.info("search", { containerTag, query: query.slice(0, 80), k, graphExpand });
 
@@ -29,7 +34,7 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
   type GraphRow = { content: string; memory_id: string; container_tag: string };
 
   const vectorHits: VectorRow[] = vec
-    ? ((await db.execute<VectorRow>(sql`
+    ? ((await getDb().execute<VectorRow>(sql`
         SELECT content, memory_id, container_tag, (embedding <=> ${vec}::vector) AS distance
         FROM chunks
         WHERE container_tag = ${containerTag} AND embedding IS NOT NULL
@@ -38,7 +43,7 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
       `)) as unknown as VectorRow[])
     : [];
 
-  const lexicalHits = (await db.execute<LexicalRow>(sql`
+  const lexicalHits = (await getDb().execute<LexicalRow>(sql`
       SELECT content, memory_id, container_tag, similarity(content, ${query}) AS sim
       FROM chunks
       WHERE container_tag = ${containerTag} AND content % ${query}
@@ -48,14 +53,26 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
 
   const hits: RetrievalHit[] = [];
   for (const r of vectorHits ?? []) {
-    hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: 1 - r.distance, source: "vector" });
+    hits.push({
+      content: r.content,
+      memoryId: r.memory_id,
+      containerTag: r.container_tag,
+      score: 1 - r.distance,
+      source: "vector",
+    });
   }
   for (const r of lexicalHits ?? []) {
-    hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: r.sim, source: "lexical" });
+    hits.push({
+      content: r.content,
+      memoryId: r.memory_id,
+      containerTag: r.container_tag,
+      score: r.sim,
+      source: "lexical",
+    });
   }
 
   if (graphExpand) {
-    const expansion = (await db.execute<GraphRow>(sql`
+    const expansion = (await getDb().execute<GraphRow>(sql`
         SELECT m.content, m.id AS memory_id, m.container_tag
         FROM edges e
         JOIN memories m ON m.id = e.source_memory_id
@@ -69,7 +86,13 @@ export async function searchMemory({ containerTag, query, k = 4, graphExpand = t
         LIMIT ${k}
       `)) as unknown as GraphRow[];
     for (const r of expansion ?? []) {
-      hits.push({ content: r.content, memoryId: r.memory_id, containerTag: r.container_tag, score: 0.5, source: "graph" });
+      hits.push({
+        content: r.content,
+        memoryId: r.memory_id,
+        containerTag: r.container_tag,
+        score: 0.5,
+        source: "graph",
+      });
     }
   }
 

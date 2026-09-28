@@ -36,23 +36,19 @@ function aspectClassFor(channel: TypesChannel): string {
 
 type StatusTone = "pending" | "active" | "ready" | "manual";
 
-function statusForCard(
-  enrichment: ChannelEnrichment | undefined,
-): { label: string; tone: StatusTone } {
+function statusForCard(enrichment: ChannelEnrichment | undefined): {
+  label: string;
+  tone: StatusTone;
+} {
   if (!enrichment) return { label: "Awaiting approval", tone: "pending" };
-  if (enrichment.mcpStatus === "creating")
-    return { label: "Creating campaign", tone: "active" };
-  if (enrichment.mcpStatus === "live")
-    return { label: "Live (paused)", tone: "ready" };
-  if (enrichment.mcpStatus === "manual_fallback")
-    return { label: "Manual upload", tone: "manual" };
+  if (enrichment.mcpStatus === "creating") return { label: "Creating campaign", tone: "active" };
+  if (enrichment.mcpStatus === "live") return { label: "Live (paused)", tone: "ready" };
+  if (enrichment.mcpStatus === "manual_fallback") return { label: "Manual upload", tone: "manual" };
   if (enrichment.creativeStatus === "pending")
     return { label: "Generating creative", tone: "active" };
   if (enrichment.creativeStatus === "ready") return { label: "Creative ready", tone: "ready" };
-  if (enrichment.creativeStatus === "fallback")
-    return { label: "Placeholder", tone: "manual" };
-  if (enrichment.creativeStatus === "failed")
-    return { label: "Creative failed", tone: "manual" };
+  if (enrichment.creativeStatus === "fallback") return { label: "Placeholder", tone: "manual" };
+  if (enrichment.creativeStatus === "failed") return { label: "Creative failed", tone: "manual" };
   return { label: "Awaiting approval", tone: "pending" };
 }
 
@@ -109,7 +105,16 @@ export function ChannelPreviews({
     }
     return (
       <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-hairline-strong bg-canvas/30 px-3 py-6 text-center">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="size-4 text-muted-foreground/60" aria-hidden="true">
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-4 text-muted-foreground/60"
+          aria-hidden="true"
+        >
           <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
           <path d="M2 6.5h12" />
           <path d="M5 9h4" />
@@ -125,8 +130,7 @@ export function ChannelPreviews({
     <ul className="space-y-2.5">
       {messages.map((m, i) => {
         const channel: SupportedChannel = isSupportedChannel(m.channel) ? m.channel : "whatsapp";
-        const cluster =
-          CLUSTER_LABEL[m.clusterId] ?? m.tone?.split("·")[0]?.trim() ?? m.clusterId;
+        const cluster = CLUSTER_LABEL[m.clusterId] ?? m.tone?.split("·")[0]?.trim() ?? m.clusterId;
         const enrichment = enrichments?.[enrichmentKey(m.clusterId, m.channel)];
         const status = statusForCard(enrichment);
         const group = groupForChannel(channel);
@@ -202,12 +206,7 @@ function MessagingCard({
           </div>
           <StatusPill status={status} />
         </div>
-        <div
-          className={cn(
-            "px-2.5 py-2.5",
-            isWa ? "bg-channel-whatsapp/[0.04]" : "bg-canvas/30",
-          )}
-        >
+        <div className={cn("px-2.5 py-2.5", isWa ? "bg-channel-whatsapp/[0.04]" : "bg-canvas/30")}>
           {/* Chat bubble */}
           <div className="flex items-start gap-1.5">
             <span
@@ -233,9 +232,7 @@ function MessagingCard({
             </div>
           </div>
         </div>
-        {enrichment?.campaignId ? (
-          <CampaignFooter enrichment={enrichment} />
-        ) : null}
+        {enrichment?.campaignId ? <CampaignFooter enrichment={enrichment} /> : null}
       </div>
     </li>
   );
@@ -294,7 +291,15 @@ function SocialCard({
               </div>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-                <svg viewBox="0 0 16 16" className="size-4 text-muted-foreground/50" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" aria-hidden="true">
+                <svg
+                  viewBox="0 0 16 16"
+                  className="size-4 text-muted-foreground/50"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
                   <rect x="2" y="2" width="12" height="12" rx="1.5" />
                   <circle cx="5.5" cy="6" r="1" />
                   <path d="M3 11l3-3 3 2 4-4" />
@@ -370,7 +375,14 @@ function LeafletCard({
               </div>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-white/70 p-3 text-center">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" className="size-5 text-channel-leaflet/70" aria-hidden="true">
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  className="size-5 text-channel-leaflet/70"
+                  aria-hidden="true"
+                >
                   <path d="M3.5 1.5h6L13 5v9.5H3.5z" />
                   <path d="M9.5 1.5V5H13" />
                   <path d="M5.5 8h5" />
@@ -385,9 +397,7 @@ function LeafletCard({
           </div>
 
           <div className="flex w-[120px] flex-col justify-between">
-            <p className="line-clamp-5 text-[10.5px] leading-snug text-foreground/80">
-              {message}
-            </p>
+            <p className="line-clamp-5 text-[10.5px] leading-snug text-foreground/80">{message}</p>
             {enrichment?.qrCodeUrl ? (
               <div className="mt-1.5 flex flex-col items-center gap-1 rounded-md border border-hairline bg-panel p-1.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -405,7 +415,15 @@ function LeafletCard({
                   }
                   className="inline-flex h-5 items-center gap-1 rounded-sm px-1 font-mono text-[9px] uppercase tracking-wider text-channel-leaflet hover:bg-channel-leaflet/10"
                 >
-                  <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" className="size-2.5" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    className="size-2.5"
+                    aria-hidden="true"
+                  >
                     <path d="M5 1.5v5" />
                     <path d="M2.5 4.5L5 7l2.5-2.5" />
                     <path d="M1.5 8.5h7" />
@@ -482,7 +500,15 @@ function CampaignFooter({
           className="inline-flex h-6 shrink-0 items-center gap-1 rounded-md bg-teal px-2 text-[10px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
           Ads Manager
-          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="size-2" aria-hidden="true">
+          <svg
+            viewBox="0 0 10 10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            className="size-2"
+            aria-hidden="true"
+          >
             <path d="M3.5 2H8v4.5" />
             <path d="M8 2L3.5 6.5" />
           </svg>
