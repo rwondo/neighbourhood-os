@@ -397,7 +397,8 @@ function ContextHeader({
           </h2>
           {showFocused && focusedBuurt ? (
             <p className="mt-0.5 truncate text-[10.5px] leading-snug text-muted-foreground">
-              Worst-CDI buurt: <span className="text-foreground/80">{focusedBuurt}</span>
+              {replay?.kind === "illustrative" ? "Sample buurt" : "Worst-CDI buurt"}:{" "}
+              <span className="text-foreground/80">{focusedBuurt}</span>
             </p>
           ) : null}
         </div>

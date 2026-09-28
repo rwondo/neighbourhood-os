@@ -422,8 +422,8 @@ function ComponentBarS({ value, weight }: { value: number; weight: string }) {
         />
       </div>
       <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
-        Weighted POI density across libraries, community centres, parks, cafés, sports, benches,
-        transit. Higher = denser amenity network.
+        Weighted count of libraries, community centres, parks, sports centres, cafés and benches
+        within 500 m. Higher = denser amenity network.
       </p>
     </div>
   );

@@ -11,10 +11,14 @@ export function CenterPanel({
   city,
   onCityChange,
   onBoroughClick,
+  staticMode,
+  snapshotGeneratedAt,
 }: {
   city: CityKey;
   onCityChange: (c: CityKey) => void;
   onBoroughClick?: (borough: string) => void;
+  staticMode: boolean;
+  snapshotGeneratedAt: string | null;
 }) {
   const profile = CITY_BY_KEY[city];
   const { ordered: boroughs, loading } = useBoroughs(city);
@@ -49,13 +53,22 @@ export function CenterPanel({
           </h1>
         </div>
         <div className="flex items-center gap-3 text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-          <span className="font-mono normal-case tracking-normal">
+          {staticMode ? (
+            <span
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-teal/30 bg-teal-soft/40 px-2 py-0.5 font-semibold text-teal"
+              title="No database or API keys: precomputed data, live AI runs disabled (see README)"
+            >
+              <span className="size-1.5 rounded-full bg-teal" />
+              Static snapshot
+              {snapshotGeneratedAt ? (
+                <span className="font-mono font-normal normal-case tracking-normal text-foreground/70">
+                  {new Date(snapshotGeneratedAt).toLocaleDateString("en-GB")}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
+          <span className="whitespace-nowrap font-mono normal-case tracking-normal">
             Data: <span className="text-foreground/70">CBS 2023 · OSM · GTFS</span>
-          </span>
-          <span className="text-muted-foreground/40">·</span>
-          <span className="font-mono normal-case tracking-normal">
-            <span className="text-foreground/70 tabular">{loading ? "…" : stats.total}</span>{" "}
-            <span>boroughs scored</span>
           </span>
         </div>
       </header>

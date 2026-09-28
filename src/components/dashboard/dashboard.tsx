@@ -39,7 +39,7 @@ export function Dashboard({
         gridTemplateRows: "minmax(0, 1fr)",
       }}
     >
-      <DemoModeBadge staticMode={staticMode} snapshotGeneratedAt={snapshotGeneratedAt} />
+      {staticMode ? null : <DemoModeBadge />}
       <LeftSidebar
         city={city}
         onCityChange={(c) => {
@@ -57,6 +57,8 @@ export function Dashboard({
           stream.reset();
         }}
         onBoroughClick={(b) => setDetailBorough(b)}
+        staticMode={staticMode}
+        snapshotGeneratedAt={snapshotGeneratedAt}
       />
       <RightPanel
         city={city}
